@@ -1,3 +1,9 @@
+CREATE DATABASE IF NOT EXISTS `myfooddata` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+DROP TABLE IF EXISTS `myfooddata`.`myfooddata`;
+DROP TABLE IF EXISTS `myfooddata`.`country`;
+DROP TABLE IF EXISTS `myfooddata`.`city`;
+DROP TABLE IF EXISTS `myfooddata`.`user`;
+
 CREATE TABLE `myfooddata` (
   `ID` int DEFAULT NULL,
   `Name` text,
@@ -116,4 +122,37 @@ CREATE TABLE `myfooddata` (
   `Serving Weight 9 (g)` text,
   `Serving Description 9 (g)` text,
   `200 Calorie Weight (g)` double DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB DEFALT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+CREATE TABLE `country`
+(
+    `ID`        INT          NOT NULL AUTO_INCREMENT,
+    `name`      VARCHAR(255) NOT NULL,
+    `continent` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`ID`)
+);
+
+CREATE TABLE `city`
+(
+    `ID`         INT          NOT NULL AUTO_INCREMENT,
+    `name`       VARCHAR(255) NOT NULL,
+    `country_id` INT          NOT NULL,
+    PRIMARY KEY (`ID`),
+    FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE
+);
+
+CREATE TABLE `user`
+(
+    `ID`         INT                              NOT NULL AUTO_INCREMENT,
+    `height`     DECIMAL(5, 2)                    NOT NULL,
+    `weight`     DECIMAL(5, 2)                    NOT NULL,
+    `gender`     ENUM ('Male', 'Female', 'Other') NOT NULL,
+    `age`        INT                              NOT NULL,
+    `country_id` INT                              NOT NULL,
+    `city_id`    INT                              NOT NULL,
+    `start_date` DATE                             NOT NULL,
+    `end_date`   DATE                             NOT NULL,
+    PRIMARY KEY (`ID`),
+    FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE,
+    FOREIGN KEY (`city_id`) REFERENCES `city` (`ID`) ON DELETE CASCADE
+);
