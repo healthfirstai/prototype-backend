@@ -1,3 +1,4 @@
+USE healthfirstai;
 -- First, we create a meal plan
 INSERT INTO `meal_plan` (`name`)
 VALUES ('Default Meal Plan');
@@ -27,7 +28,7 @@ SET @mealId3 = (SELECT `ID`
                 WHERE `name` = 'Bibb Lettuce Burger'
                   AND `meal_plan_id` = @mealPlanId);
 SET @mealId4 = (SELECT `ID`
-                FROM `meal`
+                FROM `meal
                 WHERE `name` = 'Post-Workout Nutrition'
                   AND `meal_plan_id` = @mealPlanId);
 SET @mealId5 = (SELECT `ID`

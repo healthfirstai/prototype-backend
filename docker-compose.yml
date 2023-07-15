@@ -14,26 +14,24 @@ services:
   #   volumes:
   #     - .:/demo
 
-  mysqldb:
-    container_name: mysqldb-2
-    image: mysql:latest
-    restart: always
-    ports:
-      - 3306:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: root
+  # mysqldb:
+  #   container_name: mysqldb-2
+  #   image: mysql:latest
+  #   restart: always
+  #   ports:
+  #     - 3306:3306
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
 
-  mysqldb:
-    container_name: mysqldb-2
-    image: mysql:latest
+  postgres:
+    container_name: postgres-1
+    image: postgres:latest
     restart: always
     ports:
-      - 3306:3306
+      - 5432:5432
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      # MYSQL_DATABASE: lens
-  # volumes:
-  #   - ./knn3_nl_to_sql/init_db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
   # redisdb:
   #   container_name: redisdb-2

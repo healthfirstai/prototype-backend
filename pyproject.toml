@@ -18,6 +18,9 @@ python-dotenv = "^1.0.0"
 faiss-cpu = "^1.7.4"
 pymysql = "^1.1.0"
 fastapi = "^0.100.0"
+redis = "^4.6.0"
+sqlalchemy = "^2.0.18"
+cryptography = "^41.0.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -27,3 +30,6 @@ selenium = "^4.10.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+cli = 'healthfirstai_prototype.cli:cli'

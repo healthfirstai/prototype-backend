@@ -1,11 +1,19 @@
-CREATE DATABASE IF NOT EXISTS `myfooddata` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-DROP TABLE IF EXISTS `myfooddata`.`myfooddata`;
-DROP TABLE IF EXISTS `myfooddata`.`country`;
-DROP TABLE IF EXISTS `myfooddata`.`city`;
-DROP TABLE IF EXISTS `myfooddata`.`user`;
+CREATE DATABASE IF NOT EXISTS `healthfirstai`;
+USE healthfirstai;
 
-CREATE TABLE `myfooddata` (
-  `ID` int DEFAULT NULL,
+DROP TABLE IF EXISTS `food`;
+DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `city`;
+DROP TABLE IF EXISTS `country`;
+DROP TABLE IF EXISTS `meal_plan`;
+DROP TABLE IF EXISTS `meal`;
+DROP TABLE IF EXISTS `meal_ingredient`;
+DROP TABLE IF EXISTS `measurement`;
+DROP TABLE IF EXISTS `country`;
+
+
+CREATE TABLE `food` (
+  `ID` int NOT NULL,
   `Name` text,
   `Food Group` text,
   `Calories` int DEFAULT NULL,
@@ -121,8 +129,9 @@ CREATE TABLE `myfooddata` (
   `Serving Description 8 (g)` text,
   `Serving Weight 9 (g)` text,
   `Serving Description 9 (g)` text,
-  `200 Calorie Weight (g)` double DEFAULT NULL
-) ENGINE=InnoDB DEFALT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+  `200 Calorie Weight (g)` double DEFAULT NULL,
+  PRIMARY KEY(`ID`)
+);
 
 CREATE TABLE `country`
 (
@@ -155,4 +164,35 @@ CREATE TABLE `user`
     PRIMARY KEY (`ID`),
     FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE,
     FOREIGN KEY (`city_id`) REFERENCES `city` (`ID`) ON DELETE CASCADE
+);
+
+CREATE TABLE `meal_plan` (
+    `ID` INT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`ID`)
+);
+
+CREATE TABLE `meal` (
+    `ID` INT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `meal_plan_id` INT NOT NULL,
+    PRIMARY KEY (`ID`),
+    FOREIGN KEY (`meal_plan_id`) REFERENCES `meal_plan` (`ID`) ON DELETE CASCADE
+);
+
+CREATE TABLE `measurement` (
+    `ID` INT NOT NULL AUTO_INCREMENT,
+    `unit` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`ID`)
+);
+
+CREATE TABLE `meal_ingredient` (
+    `meal_id` INT NOT NULL,
+    `ingredient_id` INT NOT NULL,
+    `measurement_id` INT NOT NULL,
+    `quantity` DECIMAL(5,2) NOT NULL,
+    PRIMARY KEY (`meal_id`, `ingredient_id`),
+    FOREIGN KEY (`meal_id`) REFERENCES `meal` (`ID`) ON DELETE CASCADE,
+    FOREIGN KEY (`ingredient_id`) REFERENCES `food` (`ID`) ON DELETE CASCADE,
+    FOREIGN KEY (`measurement_id`) REFERENCES `measurement` (`ID`) ON DELETE CASCADE
 );

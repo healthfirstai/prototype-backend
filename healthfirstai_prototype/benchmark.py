@@ -5,7 +5,7 @@ from typing import List, Tuple
 from collections import Counter
 
 # Import from Python file
-from knn3_nl_to_sql.application import (
+from healthfirstai_prototype.application import (
     start_std_chain,
     start_std_chain_async,
     start_seq_chain_async,
