@@ -21,6 +21,8 @@ fastapi = "^0.100.0"
 redis = "^4.6.0"
 sqlalchemy = "^2.0.18"
 cryptography = "^41.0.2"
+pgvector = "^0.1.8"
+psycopg2-binary = "^2.9.6"
 
 
 [tool.poetry.group.dev.dependencies]
