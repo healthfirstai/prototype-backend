@@ -1,17 +1,12 @@
+# NOTE: This is an example of a FastAPI server.
 from enum import Enum
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
-from healthfirstai_prototype.application import (
-    start_std_chain_async,
-    start_sql_chain_interactive_async,
-    start_sql_agent,
-    start_seq_chain_async,
-    start_sql_chain_async,
-)
 
 app = FastAPI()
 
 
+# NOTE: Example of a Enum class
 class ExecName(str, Enum):
     sql_chain = "sql_chain"
     standard_chain = "std_chain"
@@ -19,11 +14,7 @@ class ExecName(str, Enum):
     sql_agent = "sql_agent"
 
 
-class ModelName(str, Enum):
-    gpt_3_5_turbo = "gpt-3.5-turbo"
-    davinci003 = "text-davinci-003"
-
-
+# NOTE: Example of a Pydantic Data Model
 class UserInput(BaseModel):
     user_input: str = ""
     exec_type: ExecName = ExecName.sql_chain
@@ -34,17 +25,17 @@ class UserInputInteractive(BaseModel):
     user_input: str = ""
     sql_input: str = ""
     included_tables: list[str] | None = []
-    model_name: ModelName = ModelName.davinci003
     verbose: bool = True
 
 
 @app.get("/")
 async def root():
-    return {"status": "Web server working"}
+    return {"status": "Hello world!"}
 
 
+# NOTE: Example of a POST endpoint and its corresponding documentation
 @app.post("/chat_to_sql_interactive/")
-async def chat_to_sql_interactive(user_input: UserInputInteractive):
+async def chat_to_sql_interactive(user_input: UserInput):
     """
     This is the main endpoint for interactive chat to SQL conversion.
 
@@ -68,54 +59,5 @@ async def chat_to_sql_interactive(user_input: UserInputInteractive):
     """
     if not user_input.user_input:
         raise HTTPException(status_code=404, detail="User input not provided")
-    if user_input.sql_input and not user_input.included_tables:
-        raise HTTPException(status_code=404, detail="Included tables not found")
 
-    if user_input.sql_input:
-        return await start_sql_chain_interactive_async(
-            user_input.sql_input,
-            user_input.user_input,
-            user_input.included_tables,
-            user_input.verbose,
-            user_input.model_name,
-        )
-    else:
-        return await start_sql_chain_async(
-            user_input.user_input,
-            user_input.verbose,
-            user_input.model_name,
-        )
-
-
-@app.post("/chat_to_sql/")
-async def chat_to_sql(user_input: UserInput):
-    """
-    This is the main endpoint for the chatbot. It takes in a user input
-    Returns a JSON object with the following keys:
-    - "sql": The SQL query
-    - "ok": Whether the query was successful
-    - "error": The error message if the query was unsuccessful
-    - "record_id": The record ID of the query
-    """
-    return await start_sql_chain_async(
-        user_input.user_input,
-        user_input.verbose,
-        "text-davinci-003",
-    )
-
-
-@app.post("/chat_to_sql_test/")
-async def chat_to_sql_test(user_input: UserInput):
-    """
-    This is an endpoint to test the chatbot. It takes in a user input, and the name of the execution method.
-    """
-    if user_input.exec_type is ExecName.standard_chain:
-        return await start_std_chain_async(user_input.user_input, user_input.verbose, 3)
-
-    elif user_input.exec_type is ExecName.sequential_chain:
-        return await start_seq_chain_async(user_input.user_input, user_input.verbose, 3)
-
-    elif user_input.exec_type is ExecName.sql_agent:
-        return start_sql_agent(user_input.user_input, user_input.verbose, 3)
-
-    raise HTTPException(status_code=404, detail="ExecName not found")
+    # NOTE: Return awaited value

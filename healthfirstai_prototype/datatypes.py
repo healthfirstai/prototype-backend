@@ -1,14 +1,20 @@
 from sqlalchemy import Column, Integer, Float, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.declarative import declarative_base
+from pgvector.sqlalchemy import Vector
 
 Base = declarative_base()
+
+
+class Nutrition_Vector(Base):
+    __tablename__ = "nutrition_vector"
+    food_id = Column("food_id", Integer, primary_key=True)
+    embedding = Column("embedding", Vector(94))
 
 
 class Food(Base):
     __tablename__ = "food"
 
-    ID = Column(Integer, primary_key=True)
+    id = Column("id", Integer, primary_key=True)
     Name = Column(String)
     Food_Group = Column("Food Group", String)
     Calories = Column(Integer)

@@ -1,41 +1,15 @@
-# NOTE: Hello world
-# from healthfirstai_prototype.application import (
-#     start_std_chain,
-#     start_sql_chain,
-#     start_seq_chain,
-#     start_sql_agent,
-# )
+# NOTE: This is an example of how to interact with our application code with the command line
 
 from healthfirstai_prototype.redis_db import (
-    create_nutrition_index,
-    flush_all,
-    insert_foods,
     search_similar_food,
 )
 
-from healthfirstai_prototype.query import get_food_vector, get_vector_from_id
 import click
 
 
 @click.group()
 def cli():
     pass
-
-
-@cli.command()
-def init_redis():
-    """
-    Initialize Redis
-    """
-    click.echo("Initializing Redis")
-    flush_all()
-    click.echo("Flushing all documents")
-    create_nutrition_index()
-    click.echo("Creating nutrition index")
-    food = get_food_vector()
-    insert_foods(food)
-    click.echo("Food inserted")
-    click.echo("Finished initializing Redis")
 
 
 @cli.command()
@@ -46,19 +20,6 @@ def get_similar_food():
     click.echo("Searching by ID...")
     output = search_similar_food(167755, "get_similar_foods", 10)
     click.echo(output)
-    click.echo("Finished search")
-
-
-@cli.command()
-def get_food():
-    """
-    Test get_similar_food
-    """
-    click.echo("Searching by ID...")
-    output = get_vector_from_id(167755)
-    click.echo(output)
-    click.echo(type(output))
-    click.echo(len(output))
     click.echo("Finished search")
 
 

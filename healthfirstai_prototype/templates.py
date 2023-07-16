@@ -1,3 +1,4 @@
+# NOTE: This is an example of prompt templates for our langchain agents
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from langchain.prompts.prompt import PromptTemplate
 

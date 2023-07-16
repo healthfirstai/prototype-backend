@@ -1,3 +1,4 @@
+# NOTE: Any functions that are used in multiple files should be placed here
 from openai.error import RateLimitError
 from langchain.chat_models import ChatOpenAI
 from langchain import OpenAI, Cohere

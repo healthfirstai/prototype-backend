@@ -1,4 +1,5 @@
-from re import finditer
+# NOTE: This is an example of how to interact with Redis from Python
+# The code does not work as is, but is helpful as a reference.
 import redis
 from redis.cluster import RedisCluster, ClusterNode
 import asyncio
@@ -14,7 +15,6 @@ import numpy as np
 import json
 
 from healthfirstai_prototype.database import REDIS_HOST, REDIS_PORT, OPENAI_API_KEY
-from healthfirstai_prototype.query import get_vector_from_id
 
 openai.api_key = OPENAI_API_KEY
 
