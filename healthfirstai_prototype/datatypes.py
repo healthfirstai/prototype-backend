@@ -8,7 +8,7 @@ Base = declarative_base()
 class Nutrition_Vector(Base):
     __tablename__ = "nutrition_vector"
     food_id = Column("food_id", Integer, primary_key=True)
-    embedding = Column("embedding", Vector(94))
+    embedding = Column("embedding", Vector(95))
 
 
 class Food(Base):
