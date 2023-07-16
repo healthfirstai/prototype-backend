@@ -14,33 +14,19 @@ services:
   #   volumes:
   #     - .:/demo
 
-  mysqldb:
-    container_name: mysqldb-2
-    image: mysql:latest
+  pgvector:
+    container_name: pgvector-1
+    image: ankane/pgvector:latest
     restart: always
     ports:
-      - 3306:3306
+      - 5432:5432
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      # MYSQL_DATABASE: lens
-  # volumes:
-  #   - ./knn3_nl_to_sql/init_db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_DB: healthfirstai
 
   # redisdb:
   #   container_name: redisdb-2
   #   image: redis/redis-stack-server:latest
   #   ports:
   #     - 6379:6379
-
-#   mongo:
-#     image: mongo
-#     restart: always
-#     ports:
-#       - "27017:27017"
-#     environment:
-#       MONGO_INITDB_ROOT_USERNAME: root
-#       MONGO_INITDB_ROOT_PASSWORD: root
-#     volumes:
-#       - dbdata6:/data/db
-# volumes:
-#   dbdata6:
