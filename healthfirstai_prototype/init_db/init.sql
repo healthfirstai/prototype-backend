@@ -1,16 +1,94 @@
 CREATE DATABASE IF NOT EXISTS `healthfirstai`;
 USE healthfirstai;
 
-DROP TABLE IF EXISTS `food`;
+# nutrition
 DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `city`;
 DROP TABLE IF EXISTS `country`;
-DROP TABLE IF EXISTS `meal_plan`;
-DROP TABLE IF EXISTS `meal`;
 DROP TABLE IF EXISTS `meal_ingredient`;
+DROP TABLE IF EXISTS `meal`;
+DROP TABLE IF EXISTS `meal_plan`;
+
 DROP TABLE IF EXISTS `measurement`;
 DROP TABLE IF EXISTS `country`;
+DROP TABLE IF EXISTS `food`;
 
+# exercise
+DROP TABLE IF EXISTS `exercise`;
+DROP TABLE IF EXISTS `workout`;
+DROP TABLE IF EXISTS `workout_exercise`;
+
+# user tables
+CREATE TABLE `country`
+(
+    `ID`        INT          NOT NULL AUTO_INCREMENT,
+    `name`      VARCHAR(255) NOT NULL,
+    `continent` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`ID`)
+);
+
+CREATE TABLE `city`
+(
+    `ID`         INT          NOT NULL AUTO_INCREMENT,
+    `name`       VARCHAR(255) NOT NULL,
+    `country_id` INT          NOT NULL,
+    PRIMARY KEY (`ID`),
+    FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE
+);
+
+CREATE TABLE `user`
+(
+    `ID`         INT                              NOT NULL AUTO_INCREMENT,
+    `height`     DECIMAL(5, 2)                    NOT NULL,
+    `weight`     DECIMAL(5, 2)                    NOT NULL,
+    `gender`     ENUM ('Male', 'Female', 'Other') NOT NULL,
+    `age`        INT                              NOT NULL,
+    `country_id` INT                              NOT NULL,
+    `city_id`    INT                              NOT NULL,
+    `start_date` DATE                             NOT NULL,
+    `end_date`   DATE                             NOT NULL,
+    PRIMARY KEY (`ID`),
+    FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE,
+    FOREIGN KEY (`city_id`) REFERENCES `city` (`ID`) ON DELETE CASCADE
+);
+
+# exercise tables
+CREATE TABLE exercise (
+    Exercise_ID int NOT NULL,
+    Name text NOT NULL,
+    Description text NOT NULL,
+    Type text NOT NULL,
+    BodyPart text NOT NULL,
+    Equipment text NOT NULL,
+    Difficulty text NOT NULL,
+
+    PRIMARY KEY (Exercise_ID)
+
+);
+
+CREATE TABLE workout (
+    Workout_ID int NOT NULL,
+    User_ID int NOT NULL,
+    Workout_Name text NOT NULL,
+    Workout_Description text,
+
+    PRIMARY KEY (Workout_ID),
+    FOREIGN KEY (User_ID) REFERENCES user(ID)
+);
+
+CREATE TABLE workout_exercise (
+    workout_exercise_ID int NOT NULL,
+    Workout_ID int NOT NULL,
+    Exercise_ID int NOT NULL,
+    Sets int NOT NULL,
+    Reps int NOT NULL,
+    Weight int,
+    Duration int,
+
+    PRIMARY KEY (workout_exercise_ID),
+    FOREIGN KEY (Workout_ID) REFERENCES workout(Workout_ID),
+    FOREIGN KEY (Exercise_ID) REFERENCES exercise(Exercise_ID)
+);
 
 CREATE TABLE `food` (
   `ID` int NOT NULL,
@@ -133,38 +211,7 @@ CREATE TABLE `food` (
   PRIMARY KEY(`ID`)
 );
 
-CREATE TABLE `country`
-(
-    `ID`        INT          NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(255) NOT NULL,
-    `continent` VARCHAR(255) NOT NULL,
-    PRIMARY KEY (`ID`)
-);
 
-CREATE TABLE `city`
-(
-    `ID`         INT          NOT NULL AUTO_INCREMENT,
-    `name`       VARCHAR(255) NOT NULL,
-    `country_id` INT          NOT NULL,
-    PRIMARY KEY (`ID`),
-    FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE
-);
-
-CREATE TABLE `user`
-(
-    `ID`         INT                              NOT NULL AUTO_INCREMENT,
-    `height`     DECIMAL(5, 2)                    NOT NULL,
-    `weight`     DECIMAL(5, 2)                    NOT NULL,
-    `gender`     ENUM ('Male', 'Female', 'Other') NOT NULL,
-    `age`        INT                              NOT NULL,
-    `country_id` INT                              NOT NULL,
-    `city_id`    INT                              NOT NULL,
-    `start_date` DATE                             NOT NULL,
-    `end_date`   DATE                             NOT NULL,
-    PRIMARY KEY (`ID`),
-    FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE,
-    FOREIGN KEY (`city_id`) REFERENCES `city` (`ID`) ON DELETE CASCADE
-);
 
 CREATE TABLE `meal_plan` (
     `ID` INT NOT NULL AUTO_INCREMENT,
