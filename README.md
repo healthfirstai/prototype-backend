@@ -47,7 +47,7 @@ To get a local development instance up and running follow these simple steps.
 5. Setup Python virtual environment with Poetry
 
    ```sh
-   poetry conifg virtualenvs.in-project true # Make poetry use local .venv folder
+   poetry config virtualenvs.in-project true # Make poetry use local .venv folder
    poetry install # Install dependencies
    . .venv/bin/activate # Activate virtual environment
    ```
@@ -65,6 +65,7 @@ To get a local development instance up and running follow these simple steps.
    ```sh
    . .venv/bin/activate
    ```
+
 2. CLI Help
 
    ```sh
