@@ -1,0 +1,253 @@
+"Can we add more protein to my meal plan?",edit nutrition plan
+"How can I reduce the amount of sugar in my diet?",edit nutrition plan
+"I need more fiber, what should I do?",edit nutrition plan
+"I don't like eating dairy, could we substitute those?",edit nutrition plan
+"Can I eat more carbs without gaining weight?",edit nutrition plan
+"How can I include more iron in my diet?",edit nutrition plan
+"I want to limit my caffeine intake, how can I adjust my plan?",edit nutrition plan
+"Can you suggest alternatives for snacks? I tend to eat junk food.",edit nutrition plan
+"Can we include more Omega-3 fatty acids in my diet?",edit nutrition plan
+"Can we cut down on red meat in my meal plan?",edit nutrition plan
+"Is it possible to make my diet gluten-free?",edit nutrition plan
+"I want to transition to a vegan diet, how should we proceed?",edit nutrition plan
+"Can we add more meals to my day but in smaller portions?",edit nutrition plan
+"What other options can I have for breakfast besides eggs?",edit nutrition plan
+"I'm allergic to peanuts. What are some alternative sources of protein?",edit nutrition plan
+"I need to increase my calcium intake, how can we adjust my plan?",edit nutrition plan
+"I don't like the taste of fish, what are other sources of lean protein?",edit nutrition plan
+"Can you suggest more dishes with whole grains?",edit nutrition plan
+"I'd like to include more fruits and vegetables in my diet.",edit nutrition plan
+"How can we adjust my meal plan to reduce saturated fats?",edit nutrition plan
+"Can we make my meal plan more balanced?",edit nutrition plan
+"How do I replace processed foods in my diet?",edit nutrition plan
+"I need to lower my cholesterol, what changes should I make?",edit nutrition plan
+"I need a diet that supports my high-intensity training.",edit nutrition plan
+"Can we switch my starchy carbs to more complex carbs?",edit nutrition plan
+"What are some alternatives to drinking so much juice?",edit nutrition plan
+"I want to increase my intake of Vitamin D, how should we adjust my plan?",edit nutrition plan
+"I need a meal plan that supports my endurance training.",edit nutrition plan
+"Can we replace some of my meals with smoothies or shakes?",edit nutrition plan
+"Can we add more low-glycemic foods to my diet?",edit nutrition plan
+"I'd like to incorporate more probiotics into my diet.",edit nutrition plan
+"Can we change my meal plan to include more anti-inflammatory foods?",edit nutrition plan
+"Can you recommend any healthy desserts?",edit nutrition plan
+"Can I have more variety in my meal plan?",edit nutrition plan
+"I need to increase my intake of Vitamin B12, what foods should I eat?",edit nutrition plan
+"Can we adjust my diet to manage my blood pressure?",edit nutrition plan
+"Can we incorporate more superfoods in my diet?",edit nutrition plan
+"I need to lower my carbohydrate intake, how can I adjust my plan?",edit nutrition plan
+"I am trying to gain muscle, what changes should I make?",edit nutrition plan
+"How can we add more lean proteins into my meal plan?",edit nutrition plan
+"I'd like more recipes that involve beans and lentils.",edit nutrition plan
+"Can we cut down on bread in my meal plan?",edit nutrition plan
+"What alternatives are there for pasta in my meal plan?",edit nutrition plan
+"Can we add more leafy greens to my diet?",edit nutrition plan
+"I need to increase my potassium intake, can you help?",edit nutrition plan
+"Can we reduce the dairy products in my meal plan?",edit nutrition plan
+"Can we incorporate more nuts and seeds in my diet?",edit nutrition plan
+"I need a diet that supports weight loss, what changes should I make?",edit nutrition plan
+"Can we swap out white rice with brown or wild rice?",edit nutrition plan
+"How can I add more variety to my protein sources?",edit nutrition plan
+
+"Could we add more core workouts into my regimen?",edit exercise plan
+"Can we focus more on my upper body strength?",edit exercise plan
+"I'd like to build more endurance, can we adjust my plan accordingly?",edit exercise plan
+"Can we incorporate more flexibility training into my routine?",edit exercise plan
+"Could we add more compound exercises to my workout?",edit exercise plan
+"I'd like to work on my lower body strength, how can we adjust my routine?",edit exercise plan
+"Can we add more high-intensity interval training (HIIT) workouts?",edit exercise plan
+"I'd like to do more yoga or stretching exercises.",edit exercise plan
+"Can we include more plyometric exercises in my routine?",edit exercise plan
+"How can we increase my cardiovascular endurance?",edit exercise plan
+"I want to build more lean muscle, what should I do?",edit exercise plan
+"Can we incorporate more bodyweight exercises?",edit exercise plan
+"I want to improve my agility, can we adjust my routine?",edit exercise plan
+"I'd like to focus more on my abs, how can we change my plan?",edit exercise plan
+"Can we include more strength training into my regimen?",edit exercise plan
+"I'd like more exercises that target my glutes.",edit exercise plan
+"Can we increase the difficulty of my workouts gradually?",edit exercise plan
+"I want to improve my balance, can we add exercises for that?",edit exercise plan
+"Can we add more swimming into my training plan?",edit exercise plan
+"How can we make my workouts more challenging?",edit exercise plan
+"Can we add more exercises that target my back muscles?",edit exercise plan
+"I want to train for a marathon, how should we adjust my plan?",edit exercise plan
+"I'd like to do more resistance band exercises.",edit exercise plan
+"Can we reduce the weightlifting and focus more on bodyweight exercises?",edit exercise plan
+"Can we adjust my workouts to improve my posture?",edit exercise plan
+"Can we include more interval training in my plan?",edit exercise plan
+"How can we increase the intensity of my cardio workouts?",edit exercise plan
+"I'd like to do more exercises that target my obliques.",edit exercise plan
+"Can we add more exercises that target my shoulder muscles?",edit exercise plan
+"I want to improve my speed, can we include sprint training?",edit exercise plan
+"Can we include more active recovery days in my routine?",edit exercise plan
+"Can we add more exercises that target my biceps and triceps?",edit exercise plan
+"Can we include more functional fitness exercises in my routine?",edit exercise plan
+"Can we add more stability exercises to my plan?",edit exercise plan
+"I want to improve my power for boxing, how should we adjust my plan?",edit exercise plan
+"Can we include more low impact exercises?",edit exercise plan
+"I want to work on my explosive power, can we include plyometrics?",edit exercise plan
+"Can we add more stretching to the beginning and end of my workouts?",edit exercise plan
+"I'd like to do more exercises that help with stress reduction.",edit exercise plan
+"Can we incorporate more kettlebell workouts in my routine?",edit exercise plan
+"How can we improve my mobility through my workout plan?",edit exercise plan
+"I'd like to focus more on cardiovascular exercises.",edit exercise plan
+"Can we include more variety in my workout routine?",edit exercise plan
+"I want to improve my golf swing, can we include specific exercises?",edit exercise plan
+"Can we add more cross-training to my fitness plan?",edit exercise plan
+"I want to improve my vertical jump, what exercises should I do?",edit exercise plan
+"Can we adjust my plan to improve my sports performance in soccer?",edit exercise plan
+"Can we add more exercises that target my quadriceps and hamstrings?",edit exercise plan
+"Can we include more rowing in my training plan?",edit exercise plan
+"I want to work on my grip strength, how can we adjust my plan?",edit exercise plan
+
+"What role does protein play in muscle recovery?""",ask for nutrition advice
+"What's the importance of omega-3 fatty acids in our diet?",ask for nutrition advice
+"How can a high sodium diet affect my blood pressure?",ask for nutrition advice
+"What's the difference between good fats and bad fats?",ask for nutrition advice
+"Why should I incorporate more fiber into my diet?",ask for nutrition advice
+"How does sugar impact my energy levels?",ask for nutrition advice
+"What's the recommended daily water intake for an adult?",ask for nutrition advice
+"Why is a varied diet important?",ask for nutrition advice
+"What are the effects of caffeine on the body?",ask for nutrition advice
+"Why are processed foods bad for my health?",ask for nutrition advice
+"What are the benefits of a plant-based diet?",ask for nutrition advice
+"What's the difference between soluble and insoluble fiber?",ask for nutrition advice
+"How does our body use carbohydrates?",ask for nutrition advice
+"What's the role of Vitamin C in our body?",ask for nutrition advice
+"Why is calcium important for our body?",ask for nutrition advice
+"What are some good sources of dietary iron?",ask for nutrition advice
+"What is the importance of eating breakfast?",ask for nutrition advice
+"How does alcohol impact our nutrition?",ask for nutrition advice
+"What are the nutritional differences between white and brown rice?",ask for nutrition advice
+"What's the role of probiotics in our digestive health?",ask for nutrition advice
+"How can I manage my blood sugar levels through diet?",ask for nutrition advice
+"What are the benefits of consuming enough Vitamin D?",ask for nutrition advice
+"What are the health implications of a high protein diet?",ask for nutrition advice
+"What are the benefits and drawbacks of a ketogenic diet?",ask for nutrition advice
+"What's the difference between whole grains and refined grains?",ask for nutrition advice
+"How does our body use B vitamins?",ask for nutrition advice
+"How can diet influence cholesterol levels?",ask for nutrition advice
+"What is the role of potassium in our body?",ask for nutrition advice
+"What are the benefits of eating seasonal fruits and vegetables?",ask for nutrition advice
+"What are some nutritionally dense foods that I should include in my diet?",ask for nutrition advice
+"How can nutrition support a healthy immune system?",ask for nutrition advice
+"What's the significance of the glycemic index?",ask for nutrition advice
+"How can I get enough nutrients on a vegan diet?",ask for nutrition advice
+"How does fasting impact our metabolism?",ask for nutrition advice
+"Why is it important to limit trans fats in our diet?",ask for nutrition advice
+"How can I add more protein to my diet without consuming meat?",ask for nutrition advice
+"What are the effects of a diet high in saturated fats?",ask for nutrition advice
+"What is a balanced diet and why is it important?",ask for nutrition advice
+"What does a serving of fruits or vegetables look like?",ask for nutrition advice
+"What are the nutritional benefits of eating nuts and seeds?",ask for nutrition advice
+"What's the role of magnesium in our body?",ask for nutrition advice
+"How do antioxidants benefit our health?",ask for nutrition advice
+"What is the best time to consume carbohydrates around a workout?",ask for nutrition advice
+"Why is portion control important?",ask for nutrition advice
+"What is the role of zinc in our body?",ask for nutrition advice
+"How can nutrition help to manage inflammation?",ask for nutrition advice
+"What are the health benefits of dark chocolate?",ask for nutrition advice
+"What are the differences between prebiotics and probiotics?",ask for nutrition advice
+"Why is Vitamin A important for our body?",ask for nutrition advice
+"What are the benefits of consuming enough dietary iodine?",ask for nutrition advice
+
+"What exercises can I do to strengthen my core?",ask for exercise advice
+"How can I improve my upper body strength?",ask for exercise advice
+"What's the best way to increase my running endurance?",ask for exercise advice
+"How do I improve my flexibility?",ask for exercise advice
+"What workouts can help me burn fat?",ask for exercise advice
+"What exercises are good for toning my legs?",ask for exercise advice
+"How can I improve my balance?",ask for exercise advice
+"What's the most effective way to train my abs?",ask for exercise advice
+"How can I increase the intensity of my workouts without risking injury?",ask for exercise advice
+"How should I warm up before a workout?",ask for exercise advice
+"What is the proper form for a deadlift?",ask for exercise advice
+"What exercises can help improve my posture?",ask for exercise advice
+"What's a good routine for improving cardiovascular fitness?",ask for exercise advice
+"How can I target my lower back in my workouts?",ask for exercise advice
+"What's the benefit of compound movements versus isolated movements?",ask for exercise advice
+"How can I increase my vertical jump?",ask for exercise advice
+"How should I cool down after a workout?",ask for exercise advice
+"How can I improve my swimming technique?",ask for exercise advice
+"What are the best exercises for targeting glutes?",ask for exercise advice
+"How can I prevent muscle cramps during a workout?",ask for exercise advice
+"How should I structure my workouts to gain muscle mass?",ask for exercise advice
+"What exercises can help increase my speed?",ask for exercise advice
+"How do I properly perform a squat?",ask for exercise advice
+"How can I increase the size of my arms?",ask for exercise advice
+"What's the best way to improve grip strength?",ask for exercise advice
+"How often should I change my workout routine?",ask for exercise advice
+"What are the benefits of high-intensity interval training (HIIT)?",ask for exercise advice
+"How do I safely lift heavy weights?",ask for exercise advice
+"How can I improve my agility?",ask for exercise advice
+"What are some effective exercises to strengthen my shoulders?",ask for exercise advice
+"How can I improve my boxing technique?",ask for exercise advice
+"How can I increase my chest size as a skinny guy?",ask for exercise advice
+"What exercises can help me run faster?",ask for exercise advice
+"How can I improve my lung capacity for better performance in sports?",ask for exercise advice
+"What are some good stretches for lower back pain?",ask for exercise advice
+"How can I prevent knee pain during squats?",ask for exercise advice
+"What exercises can help me improve my tennis swing?",ask for exercise advice
+"How can I increase my endurance for long-distance running?",ask for exercise advice
+"What are the benefits of Pilates?",ask for exercise advice
+"How can I strengthen my hip flexors?",ask for exercise advice
+"What is the proper way to do a bench press?",ask for exercise advice
+"What are some effective exercises for toning my abs?",ask for exercise advice
+"What's the best way to train for a triathlon?",ask for exercise advice
+"How can I increase my explosive power for sports like basketball?",ask for exercise advice
+"How do I train to improve my cycling speed?",ask for exercise advice
+"What exercises can help me strengthen my ankles?",ask for exercise advice
+"How can I improve my push-up technique?",ask for exercise advice
+"What are some exercises to increase flexibility for dance?",ask for exercise advice
+"How can I safely return to exercise after an injury?",ask for exercise advice
+"What exercises can help me improve my posture?",ask for exercise advice
+"Can you tell me the current weather?",unrelated queries
+"How do I reset my iPhone?",unrelated queries
+"What's the definition of 'serendipity'?",unrelated queries
+"Can you recommend a good mystery novel?",unrelated queries
+"What's the capital of Australia?",unrelated queries
+"How do I change the oil in my car?",unrelated queries
+"What was the highest grossing movie of 2022?",unrelated queries
+"Can you suggest a recipe for chocolate cake?",unrelated queries
+"Who won the Nobel Prize for Literature in 2021?",unrelated queries
+"How do I connect my phone to my Bluetooth speaker?",unrelated queries
+"What are the symptoms of COVID-19?",unrelated queries
+"Can you help me learn Spanish?",unrelated queries
+"What's the stock price of Google?",unrelated queries
+"Can you find a vegetarian recipe for lasagna?",unrelated queries
+"What are the benefits of meditation?",unrelated queries
+"Who invented the telephone?",unrelated queries
+"Can you tell me a joke?",unrelated queries
+"How do I update my Windows operating system?",unrelated queries
+"Who are the current members of the United Nations?",unrelated queries
+"What's the distance between New York and London?",unrelated queries
+"How do I create a pivot table in Excel?",unrelated queries
+"Can you recommend a romantic comedy movie?",unrelated queries
+"What are the side effects of ibuprofen?",unrelated queries
+"How do I plant tomatoes in my garden?",unrelated queries
+"What's the difference between a crocodile and an alligator?",unrelated queries
+"Can you set a reminder for my meeting at 3pm tomorrow?",unrelated queries
+"How do I make a homemade face mask?",unrelated queries
+"Can you play the latest hit songs?",unrelated queries
+"What is climate change?",unrelated queries
+"Who painted the Mona Lisa?",unrelated queries
+"What are the main points of the theory of relativity?",unrelated queries
+"Can you recommend a good podcast on personal finance?",unrelated queries
+"How do I turn on the night mode on my phone?",unrelated queries
+"What's the latest news in technology?",unrelated queries
+"What are the safety measures to prevent cyber attacks?",unrelated queries
+"Who was the first woman in space?",unrelated queries
+"How do I make homemade pizza dough?",unrelated queries
+"What is quantum computing?",unrelated queries
+"How do I write a formal letter?",unrelated queries
+"What's the scientific name for the common house cat?",unrelated queries
+"Can you help me calculate a tip for a $45 bill?",unrelated queries
+"How do I convert a PDF to a Word document?",unrelated queries
+"What's the currency of Japan?",unrelated queries
+"Who is the current President of the United States?",unrelated queries
+"Can you give me directions to the nearest grocery store?",unrelated queries
+"What is the Pythagorean theorem?",unrelated queries
+"How do I change my Wi-Fi password?",unrelated queries
+"Can you help me study for my chemistry exam?",unrelated queries
+"What are the symptoms of a common cold?",unrelated queries
+"How do I create a new email account?",unrelated queries
