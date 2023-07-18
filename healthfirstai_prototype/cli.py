@@ -4,6 +4,12 @@ from healthfirstai_prototype.redis_db import (
     search_similar_food,
 )
 
+from healthfirstai_prototype.transform import (
+    delete_all_vectors,
+    get_all_foods,
+    insert_all_vectors,
+)
+
 import click
 
 
@@ -20,6 +26,21 @@ def get_similar_food():
     click.echo("Searching by ID...")
     output = search_similar_food(167755, "get_similar_foods", 10)
     click.echo(output)
+    click.echo("Finished search")
+
+
+@cli.command()
+def reinsert_vectors():
+    """
+    Delete all vectors in nutrition_vectors and insert new vectors
+    """
+    click.echo("Reinserting nutrition vectors")
+    delete_all_vectors()
+    click.echo("Deleted all old vectors")
+    foods = get_all_foods()
+    click.echo("Queried and got all foods")
+    insert_all_vectors(foods)
+    click.echo("Inserted new food vectors")
     click.echo("Finished search")
 
 

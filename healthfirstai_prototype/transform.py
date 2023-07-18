@@ -7,7 +7,7 @@ if __name__ == "__main__":
     from datatypes import Food, Nutrition_Vector
 else:
     from healthfirstai_prototype.database import SessionLocal
-    from healthfirstai_prototype.datatypes import Food
+    from healthfirstai_prototype.datatypes import Food, Nutrition_Vector
 
 
 def get_all_foods() -> list[Food]:
@@ -106,9 +106,10 @@ def delete_all_vectors():
     session.close()
 
 
-def main():
-    delete_all_vectors()
-    foods = get_all_foods()
+def insert_all_vectors(foods: list[Food]):
+    """
+    Delete all vectors in nutrition_vectors and insert new vectors
+    """
     for food in foods:
         food_dict = food.__dict__
         food_id = food_dict.pop("id")
@@ -116,6 +117,13 @@ def main():
         v_weighted = add_vector_weights(v_cleaned)
         v_normalized = normalize_vector(v_weighted)
         insert_vector(food_id, v_normalized)
+
+
+# NOTE: Right now, by running this file, we delete all the vectors in the db and reinsert everything
+def main():
+    delete_all_vectors()
+    foods = get_all_foods()
+    insert_all_vectors(foods)
 
 
 if __name__ == "__main__":
