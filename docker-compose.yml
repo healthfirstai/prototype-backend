@@ -15,7 +15,7 @@ services:
   #     - .:/demo
 
   pgvector:
-    container_name: pgvector-1
+    container_name: pgvector-2
     image: ankane/pgvector:latest
     restart: always
     ports:
@@ -23,6 +23,9 @@ services:
     environment:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
+    volumes:
+      - ./healthfirstai_prototype/init_db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
 
   # redisdb:
   #   container_name: redisdb-2
