@@ -2,21 +2,24 @@ CREATE DATABASE IF NOT EXISTS `healthfirstai`;
 USE healthfirstai;
 
 # nutrition
+Drop TABLE if exists user_workout_schedule;
+DROP TABLE IF EXISTS `workout_exercise`;
+DROP TABLE IF EXISTS exercise_body_part;
+DROP TABLE IF EXISTS `exercise`;
+DROP TABLE IF EXISTS `exercise_type`;
+DROP TABLE IF EXISTS `workout`;
+Drop table if exists body_parts;
 DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `city`;
 DROP TABLE IF EXISTS `country`;
 DROP TABLE IF EXISTS `meal_ingredient`;
 DROP TABLE IF EXISTS `meal`;
 DROP TABLE IF EXISTS `meal_plan`;
-
 DROP TABLE IF EXISTS `measurement`;
 DROP TABLE IF EXISTS `country`;
 DROP TABLE IF EXISTS `food`;
 
-# exercise
-DROP TABLE IF EXISTS `exercise`;
-DROP TABLE IF EXISTS `workout`;
-DROP TABLE IF EXISTS `workout_exercise`;
+
 
 # user tables
 CREATE TABLE `country`
@@ -39,55 +42,87 @@ CREATE TABLE `city`
 CREATE TABLE `user`
 (
     `ID`         INT                              NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(255)                     NOT NULL,
     `height`     DECIMAL(5, 2)                    NOT NULL,
     `weight`     DECIMAL(5, 2)                    NOT NULL,
     `gender`     ENUM ('Male', 'Female', 'Other') NOT NULL,
     `age`        INT                              NOT NULL,
     `country_id` INT                              NOT NULL,
     `city_id`    INT                              NOT NULL,
-    `start_date` DATE                             NOT NULL,
-    `end_date`   DATE                             NOT NULL,
     PRIMARY KEY (`ID`),
     FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE,
     FOREIGN KEY (`city_id`) REFERENCES `city` (`ID`) ON DELETE CASCADE
 );
 
-# exercise tables
+CREATE TABLE exercise_type (
+    Exercise_type_ID int NOT NULL AUTO_INCREMENT,
+    Exercise_type text NOT NULL,
+
+    PRIMARY KEY (Exercise_type_ID)
+);
+
+CREATE TABLE body_parts (
+    BodyPart_ID INT NOT NULL AUTO_INCREMENT,
+    BodyPart_Name VARCHAR(50) NOT NULL,
+    PRIMARY KEY (BodyPart_ID)
+);
+
 CREATE TABLE exercise (
-    Exercise_ID int NOT NULL,
+    Exercise_ID int NOT NULL AUTO_INCREMENT,
     Name text NOT NULL,
     Description text NOT NULL,
-    Type text NOT NULL,
-    BodyPart text NOT NULL,
+    Exercise_type_ID int NOT NULL,
     Equipment text NOT NULL,
     Difficulty text NOT NULL,
 
-    PRIMARY KEY (Exercise_ID)
+    PRIMARY KEY (Exercise_ID),
+    FOREIGN KEY (Exercise_type_ID) REFERENCES exercise_type(Exercise_type_ID) ON DELETE CASCADE
 
 );
 
+CREATE TABLE exercise_body_part (
+    Exercise_BodyPart_ID INT NOT NULL AUTO_INCREMENT,
+    BodyPart_ID INT NOT NULL,
+    Exercise_ID INT NOT NULL,
+
+    PRIMARY KEY (Exercise_BodyPart_ID),
+    FOREIGN KEY (BodyPart_ID) REFERENCES body_parts(BodyPart_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Exercise_ID) REFERENCES exercise(Exercise_ID) ON DELETE CASCADE
+);
+
 CREATE TABLE workout (
-    Workout_ID int NOT NULL,
+    Workout_ID int NOT NULL AUTO_INCREMENT,
     User_ID int NOT NULL,
     Workout_Name text NOT NULL,
     Workout_Description text,
 
     PRIMARY KEY (Workout_ID),
-    FOREIGN KEY (User_ID) REFERENCES user(ID)
+    FOREIGN KEY (User_ID) REFERENCES user(ID) ON DELETE CASCADE
 );
 
 CREATE TABLE workout_exercise (
-    workout_exercise_ID int NOT NULL,
+    workout_exercise_ID int NOT NULL AUTO_INCREMENT,
     Workout_ID int NOT NULL,
     Exercise_ID int NOT NULL,
     Sets int NOT NULL,
     Reps int NOT NULL,
-    Weight int,
+    Weight int NOT NULL,
     Duration int,
 
     PRIMARY KEY (workout_exercise_ID),
-    FOREIGN KEY (Workout_ID) REFERENCES workout(Workout_ID),
-    FOREIGN KEY (Exercise_ID) REFERENCES exercise(Exercise_ID)
+    FOREIGN KEY (Workout_ID) REFERENCES workout(Workout_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Exercise_ID) REFERENCES exercise(Exercise_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE user_workout_schedule (
+    Schedule_ID INT NOT NULL AUTO_INCREMENT,
+    User_ID INT NOT NULL,
+    Workout_ID INT NOT NULL,
+    Schedule_Day VARCHAR(10) NOT NULL,
+    Schedule_Time TIME NOT NULL,
+    PRIMARY KEY (Schedule_ID),
+    FOREIGN KEY (User_ID) REFERENCES user(ID) ON DELETE CASCADE,
+    FOREIGN KEY (Workout_ID) REFERENCES workout(Workout_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE `food` (
