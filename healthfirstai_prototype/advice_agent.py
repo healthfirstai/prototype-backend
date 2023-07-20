@@ -95,3 +95,21 @@ def embed_text(texts: str):
     docsearch = FAISS.from_texts(texts, embeddings)
 
     return docsearch
+
+
+def load_chain() -> BaseCombineDocumentsChain:
+    chain = load_qa_chain(
+        Cohere(cohere_api_key=COHERE_API_KEY, verbose=True),  # type: ignore
+        # FIXME: think about the chain_type!!
+        chain_type="stuff",
+        verbose=True,
+    )
+    return chain
+
+
+def query_based_similarity_search(
+    query: str, docsearch: FAISS, chain: BaseCombineDocumentsChain
+) -> str:
+    docs = docsearch.similarity_search(query)
+    response = chain.run(input_documents=docs, question=query)
+    return response
