@@ -160,6 +160,7 @@ CREATE TABLE `city`
 CREATE TABLE `user`
 (
     `ID`         INT                              NOT NULL AUTO_INCREMENT,
+    username    VARCHAR(255)                     NOT NULL,
     `height`     DECIMAL(5, 2)                    NOT NULL,
     `weight`     DECIMAL(5, 2)                    NOT NULL,
     `gender`     ENUM ('Male', 'Female', 'Other') NOT NULL,
