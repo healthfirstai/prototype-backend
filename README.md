@@ -17,18 +17,24 @@ To get a local development instance up and running follow these simple steps.
 ### Deploy with Docker (with my LangChain fork)
 
 1. Ensure you have [Docker](https://www.docker.com/) installed.
+
    ```sh
    docker --version
    ```
+
 2. Clone the repo
+
    ```sh
    git clone https://github.com/larry-lime/prototype-backend
    cd prototype-backend
    ```
+
 3. Create `.env` file from `example.env` and change the values
+
    ```sh
    cp example.env .env
    ```
+
 4. Run docker compose up
 
    Building for first time
@@ -49,13 +55,8 @@ To get a local development instance up and running follow these simple steps.
    ```sh
    poetry config virtualenvs.in-project true # Make poetry use local .venv folder
    poetry install # Install dependencies
-   . .venv/bin/activate # Activate virtual environment
-   ```
-
-6. Initialize Redis database
-
-   ```sh
-   python3 cli.py init-redis
+   source .venv/bin/activate # Activate virtual environment in zsh
+   source .venv/bin/activate.[fish|csh] # For other shell types
    ```
 
 ### CLI Usage
@@ -63,7 +64,8 @@ To get a local development instance up and running follow these simple steps.
 1. Activate virtual environment
 
    ```sh
-   . .venv/bin/activate
+   source .venv/bin/activate # Activate virtual environment in zsh
+   source .venv/bin/activate.[fish|csh] # For other shell types
    ```
 
 2. CLI Help
