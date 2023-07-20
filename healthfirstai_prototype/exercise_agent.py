@@ -1,72 +1,112 @@
 # NOTE: This is where the main application logic is implemented for the exercise agent
 import json
-import mysql.connector
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
 
 def generate_schedule_json(user_id):
+    engine = create_engine('mysql+mysqlconnector://root:root@localhost:3307/healthfirstai', echo=True)
+    Base = declarative_base()
 
-    # Connect to the MySQL database
-    db_connection = mysql.connector.connect(
-        host='localhost',
-        user='root',
-        password='root',
-        database='healthfirstai',
-        port='3307'
-    )
+    class User(Base):
+        __tablename__ = 'users'
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+        schedules = relationship("UserWorkoutSchedule", back_populates="user")
 
-    # Create a cursor to execute SQL queries
-    cursor = db_connection.cursor()
+    class Workout(Base):
+        __tablename__ = 'workout'
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+        description = Column(String)
+        exercises = relationship("WorkoutExercise", back_populates="workout")
+
+    class Exercise(Base):
+        __tablename__ = 'exercise'
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+        description = Column(String)
+        exercise_type = Column(String)
+        equipment = Column(String)
+        difficulty = Column(String)
+        body_parts = relationship("BodyPart", secondary='exercise_body_part')
+
+    class UserWorkoutSchedule(Base):
+        __tablename__ = 'user_workout_schedule'
+        id = Column(Integer, primary_key=True)
+        user_id = Column(Integer, ForeignKey('users.id'))
+        schedule_day = Column(String)
+        schedule_time = Column(String)
+        workout_id = Column(Integer, ForeignKey('workout.id'))
+        user = relationship("User", back_populates="schedules")
+        workout = relationship("Workout")
+
+    class WorkoutExercise(Base):
+        __tablename__ = 'workout_exercise'
+        id = Column(Integer, primary_key=True)
+        workout_id = Column(Integer, ForeignKey('workout.id'))
+        exercise_id = Column(Integer, ForeignKey('exercise.id'))
+        reps = Column(Integer)
+        sets = Column(Integer)
+        workout = relationship("Workout", back_populates="exercises")
+        exercise = relationship("Exercise")
+
+    class ExerciseBodyPart(Base):
+        __tablename__ = 'exercise_body_part'
+        id = Column(Integer, primary_key=True)
+        exercise_id = Column(Integer, ForeignKey('exercise.id'))
+        body_part_id = Column(Integer, ForeignKey('body_parts.id'))
+
+    class BodyPart(Base):
+        __tablename__ = 'body_parts'
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
     try:
+
         # Query to fetch the user's schedule along with workout details
-        query = f"""
-                SELECT uws.Schedule_ID, uws.Schedule_Day, uws.Schedule_Time, 
-                       w.Workout_ID, w.Workout_Name, w.Workout_Description
-                FROM user_workout_schedule uws
-                INNER JOIN workout w ON uws.Workout_ID = w.Workout_ID
-                WHERE uws.User_ID = {user_id}
-            """
-        cursor.execute(query)
-        schedule_data = cursor.fetchall()
+        user_schedules = session.query(UserWorkoutSchedule).filter_by(user_id=user_id).all()
 
         # Initialize the schedule dictionary
         schedule_json = {}
 
-        for schedule in schedule_data:
-            schedule_id, schedule_day, schedule_time, workout_id, workout_name, workout_desc = schedule
+        for user_schedule in user_schedules:
+            schedule_id = user_schedule.id
+            schedule_day = user_schedule.schedule_day
+            schedule_time = user_schedule.schedule_time
+            workout_id = user_schedule.workout_id
+            workout_name = user_schedule.workout.name
+            workout_desc = user_schedule.workout.description
+
             exercise_dict = {}
+            for exercise in user_schedule.workout.exercises:
+                exercise_id = exercise.exercise_id
+                exercise_name = exercise.exercise.name
+                exercise_desc = exercise.exercise.description
+                exercise_type = exercise.exercise.exercise_type
+                exercise_equipment = exercise.exercise.equipment
+                exercise_difficulty = exercise.exercise.difficulty
+                body_part_names = [bp.name for bp in exercise.exercise.body_parts]
+                reps = exercise.reps
+                sets = exercise.sets
 
-            # Query to fetch exercises for the specific workout along with their body parts, reps, and sets
-            query = f"""
-                SELECT e.Exercise_ID, e.Name, e.Description, et.Exercise_type, 
-                       e.Equipment, e.Difficulty, bp.BodyPart_Name, we.Reps, we.Sets
-                FROM workout_exercise we
-                INNER JOIN exercise e ON we.Exercise_ID = e.Exercise_ID
-                INNER JOIN exercise_type et ON e.Exercise_type_ID = et.Exercise_type_ID
-                LEFT JOIN exercise_body_part ebp ON e.Exercise_ID = ebp.Exercise_ID
-                LEFT JOIN body_parts bp ON ebp.BodyPart_ID = bp.BodyPart_ID
-                WHERE we.Workout_ID = {workout_id}
-            """
-            cursor.execute(query)
-            exercise_data = cursor.fetchall()
-
-            for exercise in exercise_data:
-                exercise_id, exercise_name, exercise_desc, exercise_type, exercise_equipment, exercise_difficulty, body_part_name, reps, sets = exercise
-
-                if exercise_id in exercise_dict:
-                    exercise_dict[exercise_id]['Body_Part'].append(body_part_name)
-                else:
-                    exercise_info = {
-                        'Exercise_ID': exercise_id,
-                        'Name': exercise_name,
-                        'Description': exercise_desc,
-                        'Exercise_Type': exercise_type,
-                        'Equipment': exercise_equipment,
-                        'Difficulty': exercise_difficulty,
-                        'Body_Part': [body_part_name],
-                        'Reps': reps,
-                        'Sets': sets
-                    }
-                    exercise_dict[exercise_id] = exercise_info
+                exercise_info = {
+                    'Exercise_ID': exercise_id,
+                    'Name': exercise_name,
+                    'Description': exercise_desc,
+                    'Exercise_Type': exercise_type,
+                    'Equipment': exercise_equipment,
+                    'Difficulty': exercise_difficulty,
+                    'Body_Part': body_part_names,
+                    'Reps': reps,
+                    'Sets': sets
+                }
+                exercise_dict[exercise_id] = exercise_info
 
             schedule_info = {
                 'Schedule_Day': schedule_day,
@@ -89,9 +129,8 @@ def generate_schedule_json(user_id):
         print("Error:", e)
 
     finally:
-        # Close the database connection
-        cursor.close()
-        db_connection.close()
+        # Close the session when done
+        session.close()
 
 if __name__ == '__main__':
     generate_schedule_json(1)

@@ -167,8 +167,6 @@ CREATE TABLE `user`
     `age`        INT                              NOT NULL,
     `country_id` INT                              NOT NULL,
     `city_id`    INT                              NOT NULL,
-    `start_date` DATE                             NOT NULL,
-    `end_date`   DATE                             NOT NULL,
     PRIMARY KEY (`ID`),
     FOREIGN KEY (`country_id`) REFERENCES `country` (`ID`) ON DELETE CASCADE,
     FOREIGN KEY (`city_id`) REFERENCES `city` (`ID`) ON DELETE CASCADE
