@@ -29,7 +29,10 @@ from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 from langchain.embeddings.cohere import CohereEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
+from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 from langchain.vectorstores import FAISS
+from langchain.chains.question_answering import load_qa_chain
+from langchain.llms import Cohere
 
 """
 Facebook AI Similarity Search (Faiss) is a library for efficient similarity search and clustering of dense vectors. It contains algorithms 
@@ -48,7 +51,7 @@ path_to_pdf = "../notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf"
 reader = PdfReader(path_to_pdf)
 
 # read data from the file and put them into a variable called raw_text
-# FIXME: add the variable types
+# FIXME: refactor the code here
 
 
 def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
@@ -61,15 +64,15 @@ def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
     return raw_text
 
 
-def clean_raw_text(raw_text):
+def clean_raw_text(raw_text: str) -> str:
     # FIXME: preprocess the raw text and work more with irregularities in the text
     # REFER to this conversation: https://chat.openai.com/share/34e754f5-7342-4b17-a6ff-dc8b3487fd6a
 
     # Replace multiple spaces with a single space
-    cleaned_text = re.sub(r'\s+', ' ', raw_text)
+    cleaned_text = re.sub(r"\s+", " ", raw_text)
 
     # Remove unwanted characters, such as special characters and non-breaking spaces
-    cleaned_text = re.sub(r'[^\x00-\x7F]', '', cleaned_text)
+    cleaned_text = re.sub(r"[^\x00-\x7F]", "", cleaned_text)
 
     # Remove any remaining leading/trailing spaces and newline characters
     cleaned_text = cleaned_text.strip()
@@ -88,11 +91,11 @@ def split_text(raw_text: str) -> list[str]:
     return text_splitter.split_text(raw_text)
 
 
-def embed_text(texts: str):
+def embed_text(texts: str) -> FAISS:
     # Download embeddings from Cohere
-    embeddings = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)
+    embeddings = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
     # Construct FAISS wrapper from raw documents
-    docsearch = FAISS.from_texts(texts, embeddings)
+    docsearch = FAISS.from_texts(texts, embeddings)  # type: ignore
 
     return docsearch
 
