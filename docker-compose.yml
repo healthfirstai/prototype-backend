@@ -24,7 +24,7 @@ services:
         MYSQL_ROOT_PASSWORD: root
 
   pgvector:
-    container_name: pgvector-1
+    container_name: pgvector-2
     image: ankane/pgvector:latest
     restart: always
     ports:
@@ -32,7 +32,9 @@ services:
     environment:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
-      POSTGRES_DB: healthfirstai
+    volumes:
+      - ./healthfirstai_prototype/init_db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
 
   # redisdb:
   #   container_name: redisdb-2
