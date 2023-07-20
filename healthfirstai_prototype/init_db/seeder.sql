@@ -63,18 +63,18 @@ INSERT INTO body_parts (bodypart_id, BodyPart_Name) VALUES
     (15, 'Heart & Lungs');
 
 -- Fake data for `exercise` table
-INSERT INTO `exercise` (`Exercise_ID`, `Name`, `Description`, Exercise_type_ID, `Equipment`, `Difficulty`)
+INSERT INTO `exercise` (`Exercise_ID`, `Name`, `Description`, Exercise_type_ID, `Equipment`)
 VALUES
-    (1, 'Push-ups', 'Classic upper body exercise', 1, 'Bodyweight', 'Beginner'),
-    (2, 'Squats', 'Lower body exercise', 1, 'Barbell', 'Intermediate'),
-    (3, 'Running', 'Cardiovascular exercise', 2, 'None', 'Intermediate'),
-    (4, 'Pull-ups', 'Upper body exercise', 1, 'Pull-up bar', 'Intermediate'),
-    (5, 'Plank', 'Core exercise', 1, 'None', 'Beginner'),
-    (6, 'Bench Press', 'Upper body exercise', 1, 'Barbell', 'Intermediate'),
-    (7, 'Deadlift', 'Total body exercise', 1, 'Barbell', 'Advanced'),
-    (8, 'Cycling', 'Cardiovascular exercise', 2, 'Stationary bike', 'Intermediate'),
-    (9, 'Bicep Curls', 'Upper body exercise', 1, 'Dumbbells', 'Beginner'),
-    (10, 'Yoga', 'Mind-body exercise', 3, 'Yoga mat', 'Beginner');
+    (1, 'Push-ups', 'Classic upper body exercise', 1, 'Bodyweight'),
+    (2, 'Squats', 'Lower body exercise', 1, 'Barbell'),
+    (3, 'Running', 'Cardiovascular exercise', 2, 'None'),
+    (4, 'Pull-ups', 'Upper body exercise', 1, 'Pull-up bar'),
+    (5, 'Plank', 'Core exercise', 1, 'None'),
+    (6, 'Bench Press', 'Upper body exercise', 1, 'Barbell'),
+    (7, 'Deadlift', 'Total body exercise', 1, 'Barbell'),
+    (8, 'Cycling', 'Cardiovascular exercise', 2, 'Stationary bike'),
+    (9, 'Bicep Curls', 'Upper body exercise', 1, 'Dumbbells'),
+    (10, 'Yoga', 'Mind-body exercise', 3, 'Yoga mat');
 
 -- Fake data for `exercise_body_part` table
 INSERT INTO exercise_body_part (BodyPart_ID, Exercise_ID) VALUES
