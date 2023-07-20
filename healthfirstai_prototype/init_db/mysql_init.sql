@@ -222,7 +222,7 @@ CREATE TABLE exercise (
     Description text NOT NULL,
     Exercise_type_ID int NOT NULL,
     Equipment text NOT NULL,
-    Difficulty text NOT NULL,
+    Difficulty text,
 
     PRIMARY KEY (Exercise_ID),
     FOREIGN KEY (Exercise_type_ID) REFERENCES exercise_type(Exercise_type_ID) ON DELETE CASCADE
