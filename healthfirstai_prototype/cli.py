@@ -19,13 +19,13 @@ def cli():
 
 
 @cli.command()
-def get_similar_food():
+def show_foods():
     """
-    Test get_similar_food
+    Show all foods in the database
     """
-    click.echo("Searching by ID...")
-    output = search_similar_food(167755, "get_similar_foods", 10)
-    click.echo(output)
+    click.echo("Searching for all foods")
+    foods = get_all_foods()
+    click.echo(foods[0].__dict__)
     click.echo("Finished search")
 
 

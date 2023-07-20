@@ -1,0 +1,67 @@
+class CustomDailyMealPlan(Base):
+    __tablename__ = "custom_daily_meal_plan"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+
+
+class PersonalizedDailyMealPlan(Base):
+    __tablename__ = "personalized_daily_meal_plan"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    custom_daily_meal_plan = Column(
+        Integer, ForeignKey("custom_daily_meal_plan.id"), nullable=False
+    )
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    goal_id = Column(Integer, ForeignKey("goals.id"), nullable=False) user = relationship(
+        "User", backref="personalized_meal_plans", cascade="all, delete"
+    )
+    custom_daily_meal_plan_obj = relationship("CustomDailyMealPlan")
+    goal = relationship("Goal")
+
+
+class Meal(Base):
+    __tablename__ = "meal"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    meal_type = Column(String(10), nullable=False)
+    description = Column(Text)
+
+    __table_args__ = (
+        CheckConstraint(
+            meal_type.in_(["Breakfast", "Lunch", "Dinner", "Snack", "Drink", "Other"]),
+            name="meal_type_check",
+        ),
+    )
+
+
+class UnitOfMeasurement(Base):
+    __tablename__ = "unit_of_measurement"
+    unit = Column(String(255), primary_key=True)
+
+
+class MealIngredient(Base):
+    __tablename__ = "meal_ingredient"
+    meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
+    ingredient_id = Column(Integer, ForeignKey("food.id"), primary_key=True)
+    unit_of_measurement = Column(
+        String(255), ForeignKey("unit_of_measurement.unit"), nullable=False
+    )
+    quantity = Column(Float(precision=5), nullable=False)
+
+
+class DailyMealPlanAndMeal(Base):
+    __tablename__ = "daily_meal_plan_and_meal"
+    base_daily_meal_plan_id = Column(
+        Integer, ForeignKey("base_daily_meal_plan.id"), primary_key=True
+    )
+    meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
+
+
+class CustomDailyMealPlanAndMeal(Base):
+    __tablename__ = "custom_daily_meal_plan_and_meal"
+    custom_daily_meal_plan_id = Column(
+        Integer, ForeignKey("custom_daily_meal_plan.id"), primary_key=True
+    )
+    meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
