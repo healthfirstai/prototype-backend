@@ -4,30 +4,19 @@
 import psycopg2
 import json
 
-if __name__ == "__main__":
-    from database import SessionLocal
-    from datatypes import (
-        Food,
-        Nutrition_Vector,
-        BaseDailyMealPlan,
-        CustomDailyMealPlan,
-        CustomDailyMealPlanAndMeal,
-        DailyMealPlanAndMeal,
-        User,
-        PersonalizedDailyMealPlan,
-    )
-else:
-    from healthfirstai_prototype.database import SessionLocal
-    from healthfirstai_prototype.datatypes import (
-        Food,
-        Nutrition_Vector,
-        BaseDailyMealPlan,
-        CustomDailyMealPlan,
-        CustomDailyMealPlanAndMeal,
-        DailyMealPlanAndMeal,
-        User,
-        PersonalizedDailyMealPlan,
-    )
+from healthfirstai_prototype.database import SessionLocal
+from healthfirstai_prototype.datatypes import (
+    Food,
+    Nutrition_Vector,
+    BaseDailyMealPlan,
+    CustomDailyMealPlan,
+    CustomDailyMealPlanAndMeal,
+    DailyMealPlanAndMeal,
+    User,
+    PersonalizedDailyMealPlan,
+    Meal,
+    MealIngredient,
+)
 
 
 def create_new_custom_daily_meal_plan():
@@ -104,8 +93,80 @@ def insert_into_personalized_daily_meal_plan(user_info: User):
 def get_started(id: int):
     pass
 
-def get_user_plan(id: int):
-    pass
+
+# TODO: Review this function. This was written by GPT-4
+def get_user_meal_plans(user_id: int):
+    session = SessionLocal()
+    personalized_daily_meal_plans = (
+        session.query(PersonalizedDailyMealPlan, CustomDailyMealPlan)
+        .join(
+            CustomDailyMealPlan,
+            PersonalizedDailyMealPlan.custom_daily_meal_plan == CustomDailyMealPlan.id,
+        )
+        .filter(PersonalizedDailyMealPlan.user_id == user_id)
+        .all()
+    )
+
+    meal_plan_list = []
+    for (
+        personalized_daily_meal_plan,
+        custom_daily_meal_plan,
+    ) in personalized_daily_meal_plans:
+        meal_ids = (
+            session.query(CustomDailyMealPlanAndMeal.meal_id)
+            .filter(
+                CustomDailyMealPlanAndMeal.custom_daily_meal_plan_id
+                == custom_daily_meal_plan.id
+            )
+            .all()
+        )
+        meal_ids = [
+            meal_id[0] for meal_id in meal_ids
+        ]  # NOTE: Trying to clean the list
+        meals = session.query(Meal).filter(Meal.id.in_(meal_ids)).all()
+        meal_list = []
+        for meal in meals:
+            ingredients = (
+                session.query(MealIngredient, Food)
+                .join(Food, MealIngredient.ingredient_id == Food.id)
+                .filter(MealIngredient.meal_id == meal.id)
+                .all()
+            )
+            ingredient_list = [
+                {
+                    # "ingredient_id": ingredient.ingredient_id, # NOTE: We may not need the ID
+                    "food_name": food.Name,
+                    "unit_of_measurement": ingredient.unit_of_measurement,
+                    "quantity": ingredient.quantity,
+                }
+                for (ingredient, food) in ingredients
+            ]
+            meal_list.append(
+                {
+                    "id": meal.id,
+                    "name": meal.name,
+                    "meal_type": meal.meal_type,
+                    "description": meal.description,
+                    "ingredients": ingredient_list,
+                }
+            )
+        meal_plan_list.append(
+            {
+                "id": personalized_daily_meal_plan.id,
+                "start_date": str(personalized_daily_meal_plan.start_date),
+                "end_date": str(personalized_daily_meal_plan.end_date),
+                # "goal_id": personalized_daily_meal_plan.goal_id,
+                "goal_id": personalized_daily_meal_plan.goal_id,
+                "custom_daily_meal_plan": {
+                    "id": custom_daily_meal_plan.id,
+                    "name": custom_daily_meal_plan.name,
+                    "description": custom_daily_meal_plan.description,
+                    "meals": meal_list,
+                },
+            }
+        )
+    session.close()
+    return json.dumps(meal_plan_list, indent=2)
 
 
 def main():
