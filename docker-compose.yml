@@ -14,17 +14,8 @@ services:
   #   volumes:
   #     - .:/demo
 
-  mysqldb:
-    container_name: mysqldb-1
-    image: mysql:latest
-    restart: always
-    ports:
-      - 3307:3306
-    environment:
-        MYSQL_ROOT_PASSWORD: root
-
   pgvector:
-    container_name: pgvector-2
+    container_name: pgvector-healthfirstai
     image: ankane/pgvector:latest
     restart: always
     ports:
@@ -32,12 +23,12 @@ services:
     environment:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
+      POSTGRES_DB: postgres
     volumes:
-      - ./healthfirstai_prototype/init_db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./healthfirstai_prototype/sql-scripts:/docker-entrypoint-initdb.d
 
-
-  # redisdb:
-  #   container_name: redisdb-2
-  #   image: redis/redis-stack-server:latest
-  #   ports:
-  #     - 6379:6379
+  redisdb:
+    container_name: redisdb-healthfirstai
+    image: redis/redis-stack-server:latest
+    ports:
+      - 6379:6379
