@@ -25,46 +25,46 @@ def generate_schedule_json(user_id):
 
     class ExerciseType(Base):
         __tablename__ = 'exercise_type'
-        exercise_type_ID = Column(Integer, primary_key=True)
+        exercise_type_id = Column(Integer, primary_key=True)
         exercise_type = Column(String, nullable=False)
 
     class BodyPart(Base):
         __tablename__ = 'body_parts'
-        bodyPart_ID = Column(Integer, primary_key=True)
-        bodyPart_Name = Column(String(50), nullable=False)
+        bodypart_id = Column(Integer, primary_key=True)
+        bodypart_name = Column(String(50), nullable=False)
 
     class Difficulty(Base):
         __tablename__ = 'difficulty'
-        difficulty_ID = Column(Integer, primary_key=True)
-        difficulty_Name = Column(String(50), nullable=False)
+        difficulty_id = Column(Integer, primary_key=True)
+        difficulty_name = Column(String(50), nullable=False)
 
     class Equipment(Base):
         __tablename__ = 'equipment'
-        equipment_ID = Column(Integer, primary_key=True)
-        equipment_Name = Column(String(50), nullable=False)
+        equipment_id = Column(Integer, primary_key=True)
+        equipment_name = Column(String(50), nullable=False)
 
     class Exercise(Base):
         __tablename__ = 'exercise'
-        exercise_ID = Column(Integer, primary_key=True)
+        exercise_id = Column(Integer, primary_key=True)
         name = Column(String, nullable=False)
         description = Column(String, nullable=False)
-        bodyPart_ID = Column(Integer, ForeignKey('body_parts.BodyPart_ID'), nullable=False)
-        exercise_type_ID = Column(Integer, ForeignKey('exercise_type.Exercise_type_ID'), nullable=False)
-        equipment_ID = Column(String, ForeignKey('equipment.Equipment_Name'), nullable=False)
-        difficulty_ID = Column(String, ForeignKey('difficulty.Difficulty_Name'), nullable=False)
+        bodypart_id = Column(Integer, ForeignKey('body_parts.bodypart_id'), nullable=False)
+        exercise_type_id = Column(Integer, ForeignKey('exercise_type.exercise_type_id'), nullable=False)
+        equipment_id = Column(String, ForeignKey('equipment.equipment_name'), nullable=False)
+        difficulty_id = Column(String, ForeignKey('difficulty.difficulty_name'), nullable=False)
 
     class Workout(Base):
         __tablename__ = 'workout'
-        workout_ID = Column(Integer, primary_key=True)
-        user_ID = Column(Integer, nullable=False)
-        workout_Name = Column(String, nullable=False)
-        workout_Description = Column(String)
+        workout_id = Column(Integer, primary_key=True)
+        user_id = Column(Integer, nullable=False)
+        workout_name = Column(String, nullable=False)
+        workout_description = Column(String)
 
     class WorkoutExercise(Base):
         __tablename__ = 'workout_exercise'
-        workout_exercise_ID = Column(Integer, primary_key=True)
-        workout_ID = Column(Integer, ForeignKey('workout.Workout_ID'), nullable=False)
-        exercise_ID = Column(Integer, ForeignKey('exercise.Exercise_ID'), nullable=False)
+        workout_exercise_id = Column(Integer, primary_key=True)
+        workout_id = Column(Integer, ForeignKey('workout.workout_id'), nullable=False)
+        exercise_id = Column(Integer, ForeignKey('exercise.exercise_id'), nullable=False)
         sets = Column(Integer, nullable=False)
         reps = Column(Integer, nullable=False)
         weight = Column(Integer, nullable=False)
@@ -72,11 +72,11 @@ def generate_schedule_json(user_id):
 
     class UserWorkoutSchedule(Base):
         __tablename__ = 'user_workout_schedule'
-        schedule_ID = Column(Integer, primary_key=True)
-        user_ID = Column(Integer, nullable=False)
-        workout_ID = Column(Integer, ForeignKey('workout.Workout_ID'), nullable=False)
-        schedule_Day = Column(String(10), nullable=False)
-        schedule_Time = Column(String, nullable=False)
+        schedule_id = Column(Integer, primary_key=True)
+        user_id = Column(Integer, nullable=False)
+        workout_id = Column(Integer, ForeignKey('workout.workout_id'), nullable=False)
+        schedule_day = Column(String(10), nullable=False)
+        schedule_time = Column(String, nullable=False)
 
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
@@ -84,64 +84,63 @@ def generate_schedule_json(user_id):
 
     try:
         # Query to fetch the user's schedule along with workout details
-        user_schedules = session.query(UserWorkoutSchedule).filter_by(User_ID=user_id).all()
+        user_schedules = session.query(UserWorkoutSchedule).filter_by(user_id=user_id).all()
 
         # Initialize the schedule dictionary
         schedule_json = {}
 
         for user_schedule in user_schedules:
-            schedule_id = user_schedule.Schedule_ID
-            schedule_day = user_schedule.Schedule_Day
-            schedule_time = user_schedule.Schedule_Time
-            workout_id = user_schedule.Workout_ID
-            workout = session.query(Workout).filter_by(Workout_ID=workout_id).first()
+            schedule_id = user_schedule.schedule_id
+            schedule_day = user_schedule.schedule_day
+            schedule_time = user_schedule.schedule_time
+            workout_id = user_schedule.workout_id
+            workout = session.query(Workout).filter_by(workout_id=workout_id).first()
 
             exercise_dict = {}
             workout_exercises = (
                 session.query(WorkoutExercise)
-                .filter_by(Workout_ID=workout_id)
+                .filter_by(workout_id=workout_id)
                 .join(Exercise)
                 .join(ExerciseType)
-                .join(Difficulty)
                 .join(BodyPart)
                 .all()
             )
 
             for workout_exercise in workout_exercises:
-                exercise_id = workout_exercise.Exercise_ID
-                exercise = session.query(Exercise).filter_by(Exercise_ID=exercise_id).first()
-                exercise_type = session.query(ExerciseType.Exercise_type).filter_by(
-                    Exercise_type_ID=exercise.Exercise_type_ID
+                exercise_id = workout_exercise.exercise_id
+                exercise = session.query(Exercise).filter_by(exercise_id=exercise_id).first()
+                exercise_type = session.query(ExerciseType.exercise_type).filter_by(
+                    exercise_type_id=exercise.exercise_type_id
                 ).scalar()
-                body_parts = session.query(BodyPart.BodyPart_Name).filter_by(
-                    BodyPart_ID=exercise.BodyPart_ID
+                body_parts = session.query(BodyPart.bodypart_name).filter_by(
+                    bodypart_id=exercise.bodypart_id
                 ).scalar()
-                difficulty = session.query(Difficulty.Difficulty_Name).filter_by(
-                    Difficulty_ID=exercise.Difficulty_ID
+                difficulty = session.query(Difficulty.difficulty_name).filter_by(
+                    difficulty_id=exercise.difficulty_id
                 ).scalar()
-                equipment = session.query(Equipment.Equipment_name).filter_by(
-                    Equipment_ID=exercise.Equipment_ID
+                equipment = session.query(Equipment.equipment_name).filter_by(
+                    equipment_id=exercise.equipment_id
                 ).scalar()
 
                 exercise_info = {
-                    'Exercise_ID': exercise_id,
-                    'Name': exercise.Name,
-                    'Description': exercise.Description,
-                    'Exercise_Type': exercise_type,
-                    'Equipment': equipment,
-                    'Difficulty': difficulty,
-                    'Body_Part': body_parts,
-                    'Reps': workout_exercise.Reps,
-                    'Sets': workout_exercise.Sets
+                    'exercise_id': exercise_id,
+                    'name': exercise.name,
+                    'description': exercise.description,
+                    'exercise_type': exercise_type,
+                    'equipment': equipment,
+                    'difficulty': difficulty,
+                    'body_part': body_parts,
+                    'reps': workout_exercise.reps,
+                    'sets': workout_exercise.sets
                 }
                 exercise_dict[exercise_id] = exercise_info
 
                 schedule_info = {
-                    'Schedule_Day': schedule_day,
-                    'Schedule_Time': str(schedule_time),
-                    'Workout_Name': workout.Workout_Name,
-                    'Workout_Description': workout.Workout_Description,
-                    'Exercises': list(exercise_dict.values())
+                    'schedule_day': schedule_day,
+                    'schedule_time': str(schedule_time),
+                    'workout_name': workout.workout_name,
+                    'workout_description': workout.workout_description,
+                    'exercises': list(exercise_dict.values())
                 }
 
                 schedule_json[schedule_id] = schedule_info

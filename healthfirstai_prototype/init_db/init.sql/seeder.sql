@@ -26,7 +26,7 @@ VALUES
     (185.0, 90.5, 'Male', 40, 2, 3);
 
 -- Fake data for workout table
-INSERT INTO workout (user_ID, workout_Name, workout_Description)
+INSERT INTO workout (user_id, workout_name, workout_description)
 VALUES
     (1, 'Full Body Workout', 'A comprehensive workout targeting all muscle groups'),
     (2, 'Leg Day', 'Focused on leg exercises'),
@@ -35,7 +35,7 @@ VALUES
     (5, 'Core Strength', 'Exercises to strengthen the core');
 
 -- Fake data for workout_exercise table
-INSERT INTO workout_exercise (workout_ID, exercise_ID, sets, reps, weight, duration)
+INSERT INTO workout_exercise (workout_id, exercise_id, sets, reps, weight, duration)
 VALUES
     (1, 1, 3, 10, 30, NULL),
     (1, 2, 4, 12, 60, NULL),
@@ -44,7 +44,7 @@ VALUES
     (4, 4, 3, 8, 69, NULL);
 
 -- Fake data for user_workout_schedule table
-INSERT INTO user_workout_schedule (user_ID, workout_ID, schedule_Day, schedule_Time)
+INSERT INTO user_workout_schedule (user_id, workout_id, schedule_day, schedule_time)
 VALUES
     (1, 1, 'Monday', '09:00:00'),
     (1, 2, 'Wednesday', '15:30:00'),
