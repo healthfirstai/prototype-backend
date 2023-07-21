@@ -15,7 +15,6 @@ DB_NAME = os.getenv("POSTGRES_DATABASE") or ""
 DB_PORT = os.getenv("POSTGRES_PORT") or ""
 
 
-# TODO: Fix this
 def generate_schedule_json(user_id):
     # change echo to see the SQL statements
     engine = create_engine(
