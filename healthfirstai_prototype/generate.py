@@ -1,6 +1,3 @@
-# NOTE: Here, I'm going to query the PostGres database and generate JSON from the results.
-#       This will be used to generate the JSON for the front-end.
-
 import psycopg2
 import json
 
@@ -24,10 +21,9 @@ def create_new_custom_daily_meal_plan():
     session = SessionLocal()
     custom_daily_meal_plan = CustomDailyMealPlan()
 
-    # TODO: Change this so that it's not hard-coded
+    # TODO: Change this so that we get the base_daily_meal_plan_id through an algorithm
     base_daily_meal_plan_row = session.query(BaseDailyMealPlan).filter_by(id=1).first()
 
-    # Set the values of the custom_daily_meal_plan instance based on the replicated row
     if base_daily_meal_plan_row is None:
         print("Error: No base_daily_meal_plan row found.")
         return
@@ -35,17 +31,24 @@ def create_new_custom_daily_meal_plan():
     custom_daily_meal_plan.name = base_daily_meal_plan_row.name
     custom_daily_meal_plan.description = base_daily_meal_plan_row.description
 
-    # Add the custom_daily_meal_plan instance to the session and commit the changes
     session.add(custom_daily_meal_plan)
     session.commit()
     return custom_daily_meal_plan.id
 
 
-def insert_into_relationship_table(custom_daily_meal_plan_id: int = 1):
+def insert_into_relationship_table(
+    custom_daily_meal_plan_id: int = 1,
+    base_daily_meal_plan_id=1,
+):
+    """
+    Insert into many-to-many relationship table for custom_daily_meal_plan and meal
+    """
     session = SessionLocal()
 
     daily_meal_plan_and_meal_rows = (
-        session.query(DailyMealPlanAndMeal).filter_by(base_daily_meal_plan_id=1).all()
+        session.query(DailyMealPlanAndMeal)
+        .filter_by(base_daily_meal_plan_id=base_daily_meal_plan_id)
+        .all()
     )
 
     for daily_meal_plan_and_meal_row in daily_meal_plan_and_meal_rows:
@@ -88,14 +91,10 @@ def insert_into_personalized_daily_meal_plan(user_info: User):
     return personalized_daily_meal_plan
 
 
-# insert a user and generate a diet plan
-# Given a user ID, query the database and generate a diet plan in the form of a JSON string
-def get_started(id: int):
-    pass
-
-
-# TODO: Review this function. This was written by GPT-4
-def get_user_meal_plans(user_id: int):
+def get_user_meal_plans(user_id: int) -> str:
+    """
+    Given a user ID, query the database and return the user's meal plan as a JSON object.
+    """
     session = SessionLocal()
     personalized_daily_meal_plans = (
         session.query(PersonalizedDailyMealPlan, CustomDailyMealPlan)
@@ -107,7 +106,7 @@ def get_user_meal_plans(user_id: int):
         .all()
     )
 
-    meal_plan_list = []
+    meal_plan_dict = {}
     for (
         personalized_daily_meal_plan,
         custom_daily_meal_plan,
@@ -120,11 +119,13 @@ def get_user_meal_plans(user_id: int):
             )
             .all()
         )
-        meal_ids = [
-            meal_id[0] for meal_id in meal_ids
-        ]  # NOTE: Trying to clean the list
+        meal_ids = [meal_id[0] for meal_id in meal_ids]
         meals = session.query(Meal).filter(Meal.id.in_(meal_ids)).all()
-        meal_list = []
+        custom_daily_meal_plan_dict = {
+            "id": custom_daily_meal_plan.id,
+            "name": custom_daily_meal_plan.name,
+            "description": custom_daily_meal_plan.description,
+        }
         for meal in meals:
             ingredients = (
                 session.query(MealIngredient, Food)
@@ -141,32 +142,24 @@ def get_user_meal_plans(user_id: int):
                 }
                 for (ingredient, food) in ingredients
             ]
-            meal_list.append(
-                {
-                    "id": meal.id,
-                    "name": meal.name,
-                    "meal_type": meal.meal_type,
-                    "description": meal.description,
-                    "ingredients": ingredient_list,
-                }
-            )
-        meal_plan_list.append(
+            custom_daily_meal_plan_dict[str(meal.meal_type)] = {
+                "id": meal.id,
+                "name": meal.name,
+                "description": meal.description,
+                "ingredients": ingredient_list,
+            }
+        meal_plan_dict = (
             {
                 "id": personalized_daily_meal_plan.id,
                 "start_date": str(personalized_daily_meal_plan.start_date),
                 "end_date": str(personalized_daily_meal_plan.end_date),
                 # "goal_id": personalized_daily_meal_plan.goal_id,
                 "goal_id": personalized_daily_meal_plan.goal_id,
-                "custom_daily_meal_plan": {
-                    "id": custom_daily_meal_plan.id,
-                    "name": custom_daily_meal_plan.name,
-                    "description": custom_daily_meal_plan.description,
-                    "meals": meal_list,
-                },
-            }
+                "custom_daily_meal_plan": custom_daily_meal_plan_dict,
+            },
         )
     session.close()
-    return json.dumps(meal_plan_list, indent=2)
+    return json.dumps(meal_plan_dict, indent=2)
 
 
 def main():
