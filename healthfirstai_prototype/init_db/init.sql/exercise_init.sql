@@ -41,67 +41,67 @@ CREATE TABLE "user"
 );
 
 CREATE TABLE exercise_type (
-    Exercise_type_ID SERIAL PRIMARY KEY,
-    Exercise_type TEXT NOT NULL
+    exercise_type_ID SERIAL PRIMARY KEY,
+    exercise_type TEXT NOT NULL
 );
 
 CREATE TABLE body_parts (
-    BodyPart_ID SERIAL PRIMARY KEY,
-    BodyPart_Name VARCHAR(50) NOT NULL
+    bodyPart_ID SERIAL PRIMARY KEY,
+    bodyPart_Name VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE equipment (
-    Equipment_ID SERIAL PRIMARY KEY,
-    Equipment_Name VARCHAR(50) NOT NULL
+    equipment_ID SERIAL PRIMARY KEY,
+    equipment_Name VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE difficulty (
-    Difficulty_ID SERIAL PRIMARY KEY,
-    Difficulty_Name VARCHAR(50) NOT NULL
+    difficulty_ID SERIAL PRIMARY KEY,
+    difficulty_Name VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE exercise (
-    Exercise_ID SERIAL PRIMARY KEY,
-    Name TEXT NOT NULL,
-    Description TEXT NOT NULL,
-    BodyPart_ID INT NOT NULL,
-    Exercise_type_ID INT NOT NULL,
-    Equipment_ID INT NOT NULL,
-    Difficulty_ID INT,
+    exercise_ID SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    bodyPart_ID INT NOT NULL,
+    exercise_type_ID INT NOT NULL,
+    equipment_ID INT NOT NULL,
+    difficulty_ID INT,
 
-    FOREIGN KEY (Exercise_type_ID) REFERENCES exercise_type (Exercise_type_ID) ON DELETE CASCADE,
-    FOREIGN KEY (BodyPart_ID) REFERENCES body_parts (BodyPart_ID) ON DELETE CASCADE,
-    FOREIGN KEY (Equipment_ID) REFERENCES equipment (Equipment_ID) ON DELETE CASCADE,
-    FOREIGN KEY (Difficulty_ID) REFERENCES difficulty (Difficulty_ID) ON DELETE CASCADE
+    FOREIGN KEY (exercise_type_ID) REFERENCES exercise_type (exercise_type_ID) ON DELETE CASCADE,
+    FOREIGN KEY (bodyPart_ID) REFERENCES body_parts (bodyPart_ID) ON DELETE CASCADE,
+    FOREIGN KEY (equipment_ID) REFERENCES equipment (equipment_ID) ON DELETE CASCADE,
+    FOREIGN KEY (difficulty_ID) REFERENCES difficulty (difficulty_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE workout (
-    Workout_ID SERIAL PRIMARY KEY,
-    User_ID INT NOT NULL,
-    Workout_Name TEXT NOT NULL,
-    Workout_Description TEXT,
-    FOREIGN KEY (User_ID) REFERENCES "user" (ID) ON DELETE CASCADE
+    workout_ID SERIAL PRIMARY KEY,
+    user_ID INT NOT NULL,
+    workout_Name TEXT NOT NULL,
+    workout_Description TEXT,
+    FOREIGN KEY (user_ID) REFERENCES "user" (ID) ON DELETE CASCADE
 );
 
 CREATE TABLE workout_exercise (
     workout_exercise_ID SERIAL PRIMARY KEY,
-    Workout_ID INT NOT NULL,
-    Exercise_ID INT NOT NULL,
-    Sets INT NOT NULL,
-    Reps INT NOT NULL,
-    Weight INT NOT NULL,
-    Duration INT,
-    FOREIGN KEY (Workout_ID) REFERENCES workout (Workout_ID) ON DELETE CASCADE,
-    FOREIGN KEY (Exercise_ID) REFERENCES exercise (Exercise_ID) ON DELETE CASCADE
+    workout_ID INT NOT NULL,
+    exercise_ID INT NOT NULL,
+    sets INT NOT NULL,
+    reps INT NOT NULL,
+    weight INT NOT NULL,
+    duration INT,
+    FOREIGN KEY (workout_ID) REFERENCES workout (workout_ID) ON DELETE CASCADE,
+    FOREIGN KEY (exercise_ID) REFERENCES exercise (exercise_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE user_workout_schedule (
-    Schedule_ID SERIAL PRIMARY KEY,
-    User_ID INT NOT NULL,
-    Workout_ID INT NOT NULL,
-    Schedule_Day VARCHAR(10) NOT NULL,
-    Schedule_Time TIME NOT NULL,
-    FOREIGN KEY (User_ID) REFERENCES "user" (ID) ON DELETE CASCADE,
-    FOREIGN KEY (Workout_ID) REFERENCES workout (Workout_ID) ON DELETE CASCADE
+    schedule_ID SERIAL PRIMARY KEY,
+    user_ID INT NOT NULL,
+    workout_ID INT NOT NULL,
+    schedule_Day VARCHAR(10) NOT NULL,
+    schedule_Time TIME NOT NULL,
+    FOREIGN KEY (user_ID) REFERENCES "user" (ID) ON DELETE CASCADE,
+    FOREIGN KEY (workout_ID) REFERENCES workout (workout_ID) ON DELETE CASCADE
 );
 

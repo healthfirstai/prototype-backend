@@ -9,6 +9,7 @@ from langchain.llms.openai import OpenAI
 from langchain.requests import TextRequestsWrapper
 from langchain.tools.json.tool import JsonSpec
 
+
 # NOTE: Using this JSON agent is if the JSON object does not fit in the token window
 def start_nutrition_agent(json_string):
     json_dict = json.loads(json_string)[0]
