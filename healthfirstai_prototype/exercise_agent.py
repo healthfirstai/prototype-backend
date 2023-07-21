@@ -1,8 +1,13 @@
 # NOTE: This is where the main application logic is implemented for the exercise agent
-
 import json
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, and_
 from sqlalchemy.orm import sessionmaker, declarative_base
+from langchain.llms.openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 
 def generate_schedule_json(user_id):
     # change echo to see the SQL statements
@@ -27,7 +32,6 @@ def generate_schedule_json(user_id):
         Exercise_type_ID = Column(Integer, ForeignKey('exercise_type.Exercise_type_ID'), nullable=False)
         Equipment = Column(String, nullable=False)
         Difficulty = Column(String)
-
 
     class ExerciseBodyPart(Base):
         __tablename__ = 'exercise_body_part'
@@ -140,5 +144,6 @@ def generate_schedule_json(user_id):
 
 
 if __name__ == '__main__':
-    generate_schedule_json(1)
-
+    # generate_schedule_json(1)
+    OPEN_AI_API_KEY = os.getenv('OPEN_AI_API_KEY')
+    llm = OpenAI(temperature=0, openai_api_key=OPEN_AI_API_KEY)
