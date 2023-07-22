@@ -10,10 +10,8 @@ from langchain.requests import TextRequestsWrapper
 from langchain.tools.json.tool import JsonSpec
 
 
-def start_json_agent(json_string: str):
-    """
-    Starts a JSON agent with the given JSON string
-    """
+# NOTE: Using this JSON agent is if the JSON object does not fit in the token window
+def start_nutrition_agent(json_string):
     json_dict = json.loads(json_string)[0]
     json_spec = JsonSpec(dict_=json_dict, max_value_length=4000)
     json_toolkit = JsonToolkit(spec=json_spec)
