@@ -83,15 +83,18 @@ def clean_raw_text(raw_text: str) -> str:
 def split_text(raw_text: str) -> list[str]:
     text_splitter = CharacterTextSplitter(
         separator="\n",
-        chunk_size=1024,
-        chunk_overlap=256,
+        chunk_size=1000,
+        chunk_overlap=200,
         length_function=len,
     )
 
     return text_splitter.split_text(raw_text)
 
 
-def embed_text(texts: str) -> FAISS:
+def embed_text(texts: list[str]) -> FAISS:
+    """
+    this function is embedding the text using the Cohere embedding + FAISS library
+    """
     # Download embeddings from Cohere
     embeddings = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
     # Construct FAISS wrapper from raw documents
@@ -101,10 +104,13 @@ def embed_text(texts: str) -> FAISS:
 
 
 def load_chain() -> BaseCombineDocumentsChain:
+    """
+    this function is loading the chain and sets it up for the agent to use
+    """
     chain = load_qa_chain(
         Cohere(cohere_api_key=COHERE_API_KEY, verbose=True),  # type: ignore
-        # FIXME: think about the chain_type!!
-        chain_type="stuff",
+        chain_type="map_reduce",
+        # Setting verbose to True will print out some internal states of the Chain object while it is being ran.
         verbose=True,
     )
     return chain
@@ -113,6 +119,23 @@ def load_chain() -> BaseCombineDocumentsChain:
 def query_based_similarity_search(
     query: str, docsearch: FAISS, chain: BaseCombineDocumentsChain
 ) -> str:
+    """
+    this function is used to search through the knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
+    """
     docs = docsearch.similarity_search(query)
     response = chain.run(input_documents=docs, question=query)
     return response
+
+
+def main():
+    raw_text = collect_raw_text_from_pdf_data(reader)
+    texts = split_text(raw_text)
+    docsearch = embed_text(texts)
+    chain = load_chain()
+    query = "What is the best time to eat before exercise?"
+    response = query_based_similarity_search(query, docsearch, chain)
+    print(response)
+
+
+if __name__ == "__main__":
+    main()
