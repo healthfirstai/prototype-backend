@@ -1,5 +1,5 @@
 from healthfirstai_prototype.generate import get_user_meal_plans
-from healthfirstai_prototype.nutrition_agent import start_nutrition_agent
+from healthfirstai_prototype.nutrition_agent import start_json_agent
 from healthfirstai_prototype.transform import (
     delete_all_vectors,
     get_all_foods,
@@ -33,7 +33,7 @@ def test_json_agent():
     click.echo("Getting meal plan")
     meal_plan_json = get_user_meal_plans(1)
     click.echo("Starting agent")
-    agent = start_nutrition_agent(meal_plan_json)
+    agent = start_json_agent(meal_plan_json)
     click.echo("Running agent")
 
     user_input = "What are the ingredients in my dinner?"
