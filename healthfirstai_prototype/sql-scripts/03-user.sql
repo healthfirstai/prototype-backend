@@ -24,4 +24,4 @@ CREATE TABLE "user"
 ALTER TABLE "user"
     OWNER TO root;
 
-INSERT INTO public."user" (id, height, weight, gender, country_id, city_id, first_name, last_name, username, password, dob) VALUES (3, 180.50, 75.20, 'Male', 1, 3, 'John', 'Doe', 'johndoe123', 'password123', '1990-07-22');
+INSERT INTO public."user" (id, height, weight, gender, country_id, city_id, first_name, last_name, username, password, dob) VALUES (1, 180.50, 75.20, 'Male', 1, 3, 'John', 'Doe', 'johndoe123', 'password123', '1990-07-22');
