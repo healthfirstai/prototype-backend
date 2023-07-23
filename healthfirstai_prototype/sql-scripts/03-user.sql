@@ -7,17 +7,21 @@ CREATE TABLE "user"
     gender     varchar(10)   NOT NULL
         CONSTRAINT user_gender_check
             CHECK ((gender)::text = ANY
-                   ((ARRAY ['Male'::character varying, 'Female'::character varying, 'Other'::character varying])::text[])),
-    age        integer       NOT NULL,
+                   (ARRAY [('Male'::character varying)::text, ('Female'::character varying)::text, ('Other'::character varying)::text])),
     country_id integer       NOT NULL
         REFERENCES country
             ON DELETE CASCADE,
     city_id    integer       NOT NULL
         REFERENCES city
-            ON DELETE CASCADE
+            ON DELETE CASCADE,
+    first_name varchar(50),
+    last_name  varchar(50),
+    username   varchar(50),
+    password   varchar(100),
+    dob        date
 );
 
 ALTER TABLE "user"
     OWNER TO root;
 
-INSERT INTO public."user" (id, height, weight, gender, age, country_id, city_id) VALUES (1, 165.50, 68.20, 'Male', 25, 1, 3);
+INSERT INTO public."user" (id, height, weight, gender, country_id, city_id, first_name, last_name, username, password, dob) VALUES (3, 180.50, 75.20, 'Male', 1, 3, 'John', 'Doe', 'johndoe123', 'password123', '1990-07-22');
