@@ -1,69 +1,109 @@
 from typing import Type
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
-import yfinance as yf
 from datetime import datetime, timedelta
+from healthfirstai_prototype.nutrition_utils import (
+    get_user_info_dict,
+    get_user_meal_plans_as_json,
+    get_user_info_for_json_agent,
+)
+from healthfirstai_prototype.nutrition_chains import init_edit_json_chain
 
 
-def get_current_stock_price(ticker):
-    """Method to get current stock price"""
-
-    ticker_data = yf.Ticker(ticker)
-    recent = ticker_data.history(period="1d")
-    return {"price": recent.iloc[0]["Close"], "currency": ticker_data.info["currency"]}
-
-
-def get_stock_performance(ticker, days):
-    """Method to get stock price change in percentage"""
-
-    past_date = datetime.now() - timedelta(days=days)
-    ticker_data = yf.Ticker(ticker)
-    history = ticker_data.history(start=past_date)
-    old_price = history.iloc[0]["Close"]
-    current_price = history.iloc[-1]["Close"]
-    return {"percent_change": ((current_price - old_price) / old_price) * 100}
+def get_user_info(user_id: int):
+    """
+    Given a user ID, query the database and return the user's information.
+    """
+    return get_user_info_for_json_agent(user_id)
 
 
-class CurrentStockPriceInput(BaseModel):
-    """Inputs for get_current_stock_price"""
+class UserInfoInput(BaseModel):
+    """
+    Inputs for get_user_info
+    """
 
-    ticker: str = Field(description="Ticker symbol of the stock")
+    user_id: int = Field(description="User ID of the user")
 
 
-class CurrentStockPriceTool(BaseTool):
-    name = "get_current_stock_price"
+class UserInfoTool(BaseTool):
+    name = "get_user_info"
     description = """
-        Useful when you want to get current stock price.
-        You should enter the stock ticker symbol recognized by the yahoo finance
+        Useful when you want to check the user goal information.
+        You should enter the user id.
         """
-    args_schema: Type[BaseModel] = CurrentStockPriceInput
+    args_schema: Type[BaseModel] = UserInfoInput
 
-    def _run(self, ticker: str):
-        return get_current_stock_price(ticker)
+    def _run(self, user_id: int):
+        return get_user_info(user_id)
 
-    def _arun(self, ticker: str):
-        raise NotImplementedError("get_current_stock_price does not support async")
-
-
-class StockPercentChangeInput(BaseModel):
-    """Inputs for get_stock_performance"""
-
-    ticker: str = Field(description="Ticker symbol of the stock")
-    days: int = Field(description="Timedelta days to get past date from current date")
+    def _arun(self, user_id: int):
+        raise NotImplementedError("get_user_info does not support async")
 
 
-class StockPerformanceTool(BaseTool):
-    name = "get_stock_performance"
+def get_diet_plan(user_id: int, include_ingredients: bool):
+    """
+    Given a user ID, query the database and return the user's diet plan.
+    """
+    return get_user_meal_plans_as_json(user_id, include_ingredients)
+
+
+class DietPlanInput(BaseModel):
+    """
+    Inputs for get_diet_plan
+    """
+
+    user_id: int = Field(description="User ID of the user")
+    include_ingredients: bool = Field(
+        description="Whether to include the ingredients in the meal plan"
+    )
+
+
+class DietPlanTool(BaseTool):
+    name = "get_diet_plan"
     description = """
-        Useful when you want to check performance of the stock.
-        You should enter the stock ticker symbol recognized by the yahoo finance.
-        You should enter days as number of days from today from which performance needs to be check.
-        output will be the change in the stock price represented as a percentage.
+        Useful when you want to examine the user diet plan.
+        You should enter the user id.
+        You can also choose whether to include the ingredients in the meal plan.
         """
-    args_schema: Type[BaseModel] = StockPercentChangeInput
+    args_schema: Type[BaseModel] = DietPlanInput
 
-    def _run(self, ticker: str, days: int):
-        return get_stock_performance(ticker, days)
+    def _run(self, user_id: int, include_ingredients: bool):
+        return get_diet_plan(user_id, include_ingredients)
 
-    def _arun(self, ticker: str):
-        raise NotImplementedError("get_stock_performance does not support async")
+    def _arun(self, user_id: int, include_ingredients: bool):
+        raise NotImplementedError("get_diet_plan does not support async")
+
+
+def edit_diet_plan(agent_input: str, user_diet_plan_json: str):
+    """
+    Takes a user diet plan and edits it based on the agent input
+    """
+    return init_edit_json_chain().predict(
+        agent_input=agent_input,
+        user_diet_plan_json=user_diet_plan_json,
+    )
+
+
+class EditDietPlanInput(BaseModel):
+    """
+    Inputs for edit_diet_plan
+    """
+
+    agent_input: str = Field(description="The input from the user")
+    user_diet_plan: str = Field(description="JSON string of the user's diet plan")
+
+
+class EditDietPlanTool(BaseTool):
+    name = "edit_diet_plan"
+    description = """
+        Useful when you need to make changes to the user's diet plan.
+        You should pass the user input
+        You should add the JSON string of the user plan
+        """
+    args_schema: Type[BaseModel] = EditDietPlanInput
+
+    def _run(self, agent_input: str, user_diet_plan: str):
+        return edit_diet_plan(agent_input, user_diet_plan)
+
+    def _arun(self, agent_input: str, user_diet_plan: str):
+        raise NotImplementedError("edit_diet_plan does not support async")

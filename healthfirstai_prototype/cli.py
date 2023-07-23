@@ -1,5 +1,13 @@
-from healthfirstai_prototype.nutrition_utils import get_user_meal_plans_as_json, get_user_info_as_json
-from healthfirstai_prototype.nutrition_agent import start_nutrition_agent
+from healthfirstai_prototype.nutrition_utils import (
+    get_user_meal_plans_as_json,
+    get_user_info_for_json_agent,
+    get_user_info_dict,
+)
+from healthfirstai_prototype.nutrition_agent import (
+    start_nutrition_temp_agent,
+    init_agent,
+    init_plan_and_execute_diet_agent
+)
 from healthfirstai_prototype.transform import (
     delete_all_vectors,
     get_all_foods,
@@ -20,14 +28,56 @@ def cli():
     default=1,
     help="The user ID to get the meal plan for",
 )
-def meal_plan(uid: int):
+@click.option(
+    "--include-ingredients",
+    default=True,
+    help="Whether to include the ingredients in the meal plan",
+)
+def user_diet_plan(uid: int, include_ingredients: bool):
     """
     Get a meal plan from the database
     """
     click.echo("Getting meal plan")
-    meal_plan = get_user_meal_plans_as_json(uid)
+    meal_plan = get_user_meal_plans_as_json(uid, include_ingredients)
     click.echo(meal_plan)
     click.echo("Finished search")
+
+
+@cli.command()
+@click.option(
+    "--uid",
+    default=1,
+    help="The user ID of the user who has the meal plan",
+)
+@click.argument(
+    "input",
+    default="What am I having for dinner?",
+)
+def test_agent(uid: int, input: str):
+    """
+    Test ReAct Diet Plan Agent
+    """
+    diet_agent = init_agent()
+    diet_agent(f"User_{uid} says: {input}")
+    click.echo("\nOutput Finished")
+
+@cli.command()
+@click.option(
+    "--uid",
+    default=1,
+    help="The user ID of the user who has the meal plan",
+)
+@click.argument(
+    "input",
+    default="User_1 says: What am I having for dinner",
+)
+def test_plan_and_execute_agent(uid: int, input: str):
+    """
+    Test Plan and Execute Agent
+    """
+    diet_agent = init_plan_and_execute_diet_agent()
+    diet_agent(f"User_{uid} says: {input}")
+    click.echo("\nOutput Finished")
 
 
 @cli.command()
@@ -41,37 +91,8 @@ def user_info(uid: int):
     Get user info from the database
     """
     click.echo(f"Getting user info for user {uid}")
-    meal_plan = get_user_info_as_json(uid)
+    meal_plan = get_user_info_for_json_agent(uid)
     click.echo(meal_plan)
-    click.echo("Finished search")
-
-
-@cli.command()
-def test_json_agent():
-    """
-    Tests the JSON agent to answer questions about a meal plan
-    """
-    click.echo("Getting meal plan")
-    meal_plan_json = get_user_meal_plans_as_json(1)
-    click.echo("Starting agent")
-    agent = start_nutrition_agent(meal_plan_json)
-    click.echo("Running agent")
-
-    user_input = "What are the ingredients in my dinner?"
-    click.echo(f"User Input: {user_input}")
-    output = agent.run(user_input)
-    click.echo(f"Output: {output}")
-
-    user_input = "What is the protein content of my dinner?"  # NOTE: JSON currently does not contain macro + micro values
-    click.echo(f"User Input: {user_input}")
-    output = agent.run(user_input)
-    click.echo(f"Output: {output}")
-
-    user_input = "Please edit the above JSON object so that you replace the protein bar with something less sweet but equally protein rich"  # NOTE: Limited to reading the JSON file. We will likely go for another agent
-    click.echo(f"User Input: {user_input}")
-    output = agent.run(user_input)
-    click.echo(f"Output: {output}")
-
     click.echo("Finished search")
 
 

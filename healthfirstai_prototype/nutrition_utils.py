@@ -1,5 +1,6 @@
 import psycopg2
 import json
+from datetime import date
 
 from healthfirstai_prototype.database import SessionLocal
 from healthfirstai_prototype.datatypes import (
@@ -13,6 +14,8 @@ from healthfirstai_prototype.datatypes import (
     PersonalizedDailyMealPlan,
     Meal,
     MealIngredient,
+    Goal,
+    City,
 )
 
 
@@ -62,23 +65,68 @@ def insert_into_relationship_table(
     return custom_daily_meal_plan_id
 
 
-def get_user_info(user_id: int):
+def get_user_info_dict(user_id: int) -> dict:
     """
-    Given a user ID, query the database and return the user's information.
+    Given a user ID, query the database and return all of the user's information
     """
     session = SessionLocal()
     user_info = session.query(User).filter_by(id=user_id).first()
     session.close()
-    return user_info
+    user_dict = user_info.__dict__
+    del user_dict["_sa_instance_state"]
+    user_dict["dob"] = user_dict["dob"].isoformat()
+    user_dict = dict(sorted(user_dict.items()))
+    return user_dict
 
 
-def insert_into_personalized_daily_meal_plan(user_info: User):
+def get_user_info_for_json_agent(user_id: int) -> str:
+    """
+    Given a user ID, query the database and return the user's information in a more human-readable format for the JSON agent
+    """
+    session = SessionLocal()
+    o = (
+        session.query(User, City, PersonalizedDailyMealPlan, Goal)
+        .join(
+            City,
+            City.id == User.city_id,
+        )
+        .join(
+            PersonalizedDailyMealPlan,
+            PersonalizedDailyMealPlan.user_id == User.id,
+        )
+        .join(
+            Goal,
+            Goal.id == PersonalizedDailyMealPlan.goal_id,
+        )
+        .filter(User.id == user_id)
+        .all()
+    )
+    session.close()
+    user, user_city, user_meal_plan, user_goal = o[0]  # Get first element of list
+    user_dict = {
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "city_of_residence": user_city.name,
+        "age": date.today().year
+        - user.dob.year
+        - ((date.today().month, date.today().day) < (user.dob.month, user.dob.day)),
+        "gender": user.gender,
+        "height": f"{str(user.height)}CM",
+        "weight": f"{str(user.weight)}KG",
+        "goal": user_goal.name,
+        "goal_start_date": str(user_meal_plan.start_date),
+        "goal_end_date": str(user_meal_plan.end_date),
+    }
+    return json.dumps(user_dict, indent=2)
+
+
+def insert_into_personalized_daily_meal_plan(user_id: int):
     """
     Given a user ID, insert a row into the personalized_daily_meal_plan table.
     """
     session = SessionLocal()
     personalized_daily_meal_plan = PersonalizedDailyMealPlan(
-        user_id=user_info.id,
+        user_id=user_id,
         custom_daily_meal_plan=1,
         start_date="2020-01-01",
         end_date="2021-02-01",
@@ -91,7 +139,7 @@ def insert_into_personalized_daily_meal_plan(user_info: User):
     return personalized_daily_meal_plan
 
 
-def get_user_meal_plans(user_id: int) -> str:
+def get_user_meal_plans_as_json(user_id: int, include_ingredients: bool = True) -> str:
     """
     Given a user ID, query the database and return the user's meal plan as a JSON object.
     """
@@ -146,15 +194,14 @@ def get_user_meal_plans(user_id: int) -> str:
                 "id": meal.id,
                 "name": meal.name,
                 "description": meal.description,
-                "ingredients": ingredient_list,
             }
+            if include_ingredients:
+                custom_daily_meal_plan_dict[str(meal.meal_type)][
+                    "ingredients"
+                ] = ingredient_list
         meal_plan_dict = (
             {
                 "id": personalized_daily_meal_plan.id,
-                "start_date": str(personalized_daily_meal_plan.start_date),
-                "end_date": str(personalized_daily_meal_plan.end_date),
-                # "goal_id": personalized_daily_meal_plan.goal_id,
-                "goal_id": personalized_daily_meal_plan.goal_id,
                 "custom_daily_meal_plan": custom_daily_meal_plan_dict,
             },
         )
@@ -163,8 +210,7 @@ def get_user_meal_plans(user_id: int) -> str:
 
 
 def main():
-    # insert_into_relationship_table()
-    insert_into_personalized_daily_meal_plan(get_user_info(1))
+    pass
 
 
 if __name__ == "__main__":
