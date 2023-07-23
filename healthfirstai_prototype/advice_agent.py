@@ -33,6 +33,13 @@ from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 from langchain.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import Cohere
+from langchain.utilities import GoogleSerperAPIWrapper
+import pprint
+import requests
+import json
+from healthfirstai_prototype.generate import get_user_info
+
+# from langchain.evaluation import load_evaluator
 
 """
 Facebook AI Similarity Search (Faiss) is a library for efficient similarity search and clustering of dense vectors. It contains algorithms 
@@ -45,13 +52,20 @@ load_dotenv()
 
 # Load API key
 COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
+SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
 
 # location of the pdf file/files.
 path_to_pdf = "../notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf"
 reader = PdfReader(path_to_pdf)
 
-# read data from the file and put them into a variable called raw_text
-# FIXME: refactor the code here
+
+# FIXME: add datatypes
+def parse_user_info(user_data):
+    """
+    this function is used to get the user's personal information
+    """
+    # I dont know how does the user's info look like. Need to reconfigure the docker-compose file, especially the mount volume part
+    pass
 
 
 def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
@@ -62,22 +76,6 @@ def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
             raw_text += text
     print("Raw text collected from PDF file...")
     return raw_text
-
-
-def clean_raw_text(raw_text: str) -> str:
-    # FIXME: preprocess the raw text and work more with irregularities in the text
-    # REFER to this conversation: https://chat.openai.com/share/34e754f5-7342-4b17-a6ff-dc8b3487fd6a
-
-    # Replace multiple spaces with a single space
-    cleaned_text = re.sub(r"\s+", " ", raw_text)
-
-    # Remove unwanted characters, such as special characters and non-breaking spaces
-    cleaned_text = re.sub(r"[^\x00-\x7F]", "", cleaned_text)
-
-    # Remove any remaining leading/trailing spaces and newline characters
-    cleaned_text = cleaned_text.strip()
-    print("Raw text cleaned...")
-    return cleaned_text
 
 
 def split_text(raw_text: str) -> list[str]:
@@ -127,14 +125,41 @@ def query_based_similarity_search(
     return response
 
 
-def main():
+def load_prerequisites_for_vector_search(reader: PdfReader) -> FAISS:
     raw_text = collect_raw_text_from_pdf_data(reader)
     texts = split_text(raw_text)
     docsearch = embed_text(texts)
+    return docsearch
+
+
+def faiss_vector_search(query: str) -> str:
+    """
+    this function is used to load the chain and sets it up for the agent to use
+    """
     chain = load_chain()
-    query = "What is the best time to eat before exercise?"
+    docsearch = load_prerequisites_for_vector_search(reader)
     response = query_based_similarity_search(query, docsearch, chain)
-    print(response)
+    return response
+
+
+def serp_api_search(query: str) -> str:
+    """
+    this function is used to search through the internet (SerpAPI)
+    for nutrition/exercise information in case it doesn't require further clarification,
+    but a simple univocal answer.
+    """
+    search = GoogleSerperAPIWrapper(serper_api_key=SERPER_API_KEY)
+    response = search.run(query)
+    return response
+
+
+# testing the functions and putting them up together
+def main():
+    query = "What is the best time to eat before exercise?"
+    faiss_search = faiss_vector_search(query)
+    google_search = serp_api_search(query)
+    print("KB response: ", faiss_search)
+    print("Google Search: ", google_search)
 
 
 if __name__ == "__main__":
