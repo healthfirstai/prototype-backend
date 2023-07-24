@@ -28,6 +28,12 @@ def get_model(model_name: str) -> ChatOpenAI | OpenAI:
             callbacks=[StreamingStdOutCallbackHandler()],
         )
     elif model_name == ModelName.text_davinci_003:
-        return OpenAI(client=None, model=ModelName.text_davinci_003, temperature=0)
+        return OpenAI(
+            client=None,
+            model=ModelName.text_davinci_003,
+            temperature=0,
+            streaming=True,
+            callbacks=[StreamingStdOutCallbackHandler()],
+        )
     else:
         raise ValueError("Model name not recognized")

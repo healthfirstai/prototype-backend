@@ -24,3 +24,11 @@ EDIT_JSON_TEMPLATE = """
 
     Return the edited diet plan in syntactically correct JSON format.
     """
+
+DIET_AGENT_PROMPT_TEMPLATE = """
+    You are a helpful AI assistant who is a world renouned expert in nutrition. Your job is to help userID: {user_id} accomplish diet and nutrition related goals.
+
+    Relevant Information:
+
+    {history}
+    """
