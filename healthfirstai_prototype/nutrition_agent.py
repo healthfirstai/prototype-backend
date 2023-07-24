@@ -1,20 +1,19 @@
-import os
 import json
 from langchain.experimental.plan_and_execute import (
     PlanAndExecute,
     load_agent_executor,
     load_chat_planner,
 )
-
+from langchain.memory import (
+    RedisChatMessageHistory,
+    ConversationTokenBufferMemory,
+)
+from langchain.agents import AgentExecutor, OpenAIFunctionsAgent
+from langchain.schema import SystemMessage
 from langchain.agents import create_json_agent
 from langchain.agents.agent_toolkits import JsonToolkit
-from langchain.chains import LLMChain
 from langchain.llms.openai import OpenAI
-from langchain.requests import TextRequestsWrapper
 from langchain.tools.json.tool import JsonSpec
-from langchain.agents import AgentType
-from langchain.chat_models import ChatOpenAI
-from langchain.agents import initialize_agent
 from healthfirstai_prototype.nutrition_agent_tools import (
     UserInfoTool,
     DietPlanTool,
@@ -22,22 +21,87 @@ from healthfirstai_prototype.nutrition_agent_tools import (
 )
 from healthfirstai_prototype.utils import get_model
 from healthfirstai_prototype.util_models import ModelName
-from healthfirstai_prototype.nutrition_templates import SYSTEM_PROMPT
+from healthfirstai_prototype.nutrition_templates import (
+    SYSTEM_PROMPT,
+    DIET_AGENT_PROMPT_TEMPLATE,
+)
 import langchain
 
-# langchain.debug = True
+# NOTE: Imports for new agent
+from langchain.prompts import MessagesPlaceholder
+from langchain.memory import ConversationBufferMemory
+from langchain import (
+    OpenAI,
+)
+from langchain.agents import initialize_agent, Tool
+from langchain.agents import AgentType
+from langchain.chat_models import ChatOpenAI
+
+langchain.debug = False
 
 
-def init_agent():
-    return initialize_agent(
-        tools=[
-            DietPlanTool(),
-            UserInfoTool(),
-            EditDietPlanTool(),
-        ],
+def init_agent(user_input: str, user_id: int = 1, session_id="my-session"):
+    tools = [
+        DietPlanTool(),
+        UserInfoTool(),
+        EditDietPlanTool(),
+    ]
+    message_history = RedisChatMessageHistory(session_id=session_id)
+
+    memory = ConversationTokenBufferMemory(
         llm=get_model(ModelName.gpt_3_5_turbo_0613),
+        chat_memory=message_history,
+        max_token_limit=2000,
+    )
+
+    history = memory.load_memory_variables({"input": user_input}).get("history")
+    prompt = OpenAIFunctionsAgent.create_prompt(
+        SystemMessage(
+            content=DIET_AGENT_PROMPT_TEMPLATE.format(
+                history=history,
+                user_id=user_id,
+            )
+        )
+    )
+    agent = OpenAIFunctionsAgent(
+        llm=get_model(ModelName.gpt_3_5_turbo_0613),
+        tools=tools,
+        prompt=prompt,
+    )
+    return AgentExecutor.from_agent_and_tools(
+        agent=agent,
+        tools=tools,
+        verbose=False,
+        memory=memory,
+    )
+
+
+def init_new_agent(user_input: str, session_id="other-session", user_id: int = 1):
+    agent_kwargs = {
+        "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+    }
+    message_history = RedisChatMessageHistory(session_id=session_id)
+    memory = ConversationTokenBufferMemory(
+        llm=get_model(ModelName.gpt_3_5_turbo_0613),
+        memory_key="memory",
+        chat_memory=message_history,
+        max_token_limit=2000,
+        return_messages=True,
+    )
+
+    llm = get_model(ModelName.gpt_3_5_turbo_0613)
+    tools = [
+        DietPlanTool(),
+        UserInfoTool(),
+        EditDietPlanTool(),
+    ]
+    return initialize_agent(
+        tools,
+        llm,
         agent=AgentType.OPENAI_FUNCTIONS,
         verbose=True,
+        agent_kwargs=agent_kwargs,
+        memory=memory,
     )
 
 
@@ -59,7 +123,7 @@ def init_plan_and_execute_diet_agent():
             EditDietPlanTool(),
         ],
         verbose=True,
-        include_task_in_prompt=True
+        include_task_in_prompt=True,
     )
 
     return PlanAndExecute(
