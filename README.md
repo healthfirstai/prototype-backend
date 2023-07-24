@@ -13,6 +13,29 @@ To get a local development instance up and running follow these simple steps.
 
 - Docker
 - Poetry
+- Supabase CLI
+
+## Setting up Supabase local development
+
+```bash
+supabase link --project-ref yhkoibydboihnkcupibk
+```
+
+And enter the database password
+
+To fetch the newest migration to the remote DB,
+
+```bash
+supabase db remote commit
+```
+
+Finally, run
+
+```bash
+supabase start
+```
+
+Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db), for other stuff.
 
 ### Deploy with Docker (with my LangChain fork)
 
