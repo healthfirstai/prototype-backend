@@ -6,7 +6,8 @@ from healthfirstai_prototype.nutrition_utils import (
 from healthfirstai_prototype.nutrition_agent import (
     start_nutrition_temp_agent,
     init_agent,
-    init_plan_and_execute_diet_agent
+    init_new_agent,
+    init_plan_and_execute_diet_agent,
 )
 from healthfirstai_prototype.transform import (
     delete_all_vectors,
@@ -57,9 +58,27 @@ def test_agent(uid: int, input: str):
     """
     Test ReAct Diet Plan Agent
     """
-    diet_agent = init_agent()
-    diet_agent(f"User_{uid} says: {input}")
-    click.echo("\nOutput Finished")
+    diet_agent = init_agent(input, uid)
+    diet_agent(input)
+
+
+@cli.command()
+@click.option(
+    "--uid",
+    default=1,
+    help="The user ID of the user who has the meal plan",
+)
+@click.argument(
+    "input",
+    default="What am I having for dinner?",
+)
+def test_new_agent(uid: int, input: str):
+    """
+    Test New Diet Agent
+    """
+    diet_agent = init_new_agent(input)
+    diet_agent(input)
+
 
 @cli.command()
 @click.option(
