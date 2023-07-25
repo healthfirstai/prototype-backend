@@ -145,11 +145,12 @@ def get_meal(
 def test_agent(
     input: str,
     uid: int = 1,
+    session_id="my-session",
 ):
     """
     Test ReAct Diet Plan Agent
     """
-    diet_agent = init_agent(input, uid)
+    diet_agent = init_agent(input, uid, session_id)
     diet_agent(input)
 
 

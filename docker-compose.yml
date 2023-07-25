@@ -1,18 +1,18 @@
 version: "3"
 
 services:
-  # web:
-  #   build: .
-  #   container_name: fastAPI
-  #   ports:
-  #     - 8000:8000
-  #   environment:
-  #     MYSQL_HOST: mysqldb
-  #     MYSQL_PORT: 3306
-  #     REDIS_HOST: redisdb
-  #     REDIS_PORT: 6379
-  #   volumes:
-  #     - .:/demo
+  api:
+    build: .
+    container_name: fastapi-healthfirstai
+    ports:
+      - 8000:8000
+    environment:
+      POSTGRES_HOST: pgvector
+      POSTGRES_PORT: 5432
+      REDIS_HOST: redisdb
+      REDIS_PORT: 6379
+    volumes:
+      - .:/app
 
   pgvector:
     container_name: pgvector-healthfirstai
