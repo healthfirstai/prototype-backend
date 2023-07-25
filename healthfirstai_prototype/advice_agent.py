@@ -1,4 +1,4 @@
-# NOTE: Yan is working on this
+# Yan is working on this
 
 """
 this agent is created for a number of goals/functions. the primary goal for this file is to provide a way to process user queries which require
@@ -6,27 +6,18 @@ information about nutrition and exercise. so, this is more of a knowledge base/a
 
 1. to provide a way to search through the nutrition knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
 2. to provide a gateway for the user to search through the internet (SerpAPI) for nutrition/exercise information 
-3. get user's personal information
-
-CREATE TABLE “user”
-(
-    “id”         SERIAL PRIMARY KEY,
-    “height”     DECIMAL(5, 2) NOT NULL,
-    “weight”     DECIMAL(5, 2) NOT NULL,
-    “gender”     VARCHAR(10)   NOT NULL CHECK (“gender” IN ('Male', 'Female', 'Other')),
-    “age”        INT           NOT NULL,
-    “country_id” INT           NOT NULL,
-    “city_id”    INT           NOT NULL,
-    FOREIGN KEY (“country_id”) REFERENCES “country” (“id”) ON DELETE CASCADE,
-    FOREIGN KEY (“city_id”) REFERENCES “city” (“id”) ON DELETE CASCADE
-);
-
+3. get user's personal information NOTE: this function is not used yet
 """
 
 import os
 import re
+import pprint
+import requests
+import json
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
+from healthfirstai_prototype.generate import get_user_info
+from healthfirstai_prototype.datatypes import User
 from langchain.embeddings.cohere import CohereEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
@@ -34,10 +25,11 @@ from langchain.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import Cohere
 from langchain.utilities import GoogleSerperAPIWrapper
-import pprint
-import requests
-import json
-from healthfirstai_prototype.generate import get_user_info
+from langchain.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 
 # from langchain.evaluation import load_evaluator
 
