@@ -2,7 +2,7 @@
 
 ## About The Project
 
-Prototype for HealthFirst AI project.
+Prototype for our HealthFirst AI web app.
 
 ## Getting Started
 
@@ -14,7 +14,7 @@ To get a local development instance up and running follow these simple steps.
 - Docker
 - Poetry
 
-### Deploy with Docker (with my LangChain fork)
+### Deploy with Docker
 
 1. Ensure you have [Docker](https://www.docker.com/) installed.
 
@@ -25,7 +25,7 @@ To get a local development instance up and running follow these simple steps.
 2. Clone the repo
 
    ```sh
-   git clone https://github.com/larry-lime/prototype-backend
+   git clone https://github.com/healthfirstai/prototype-backend
    cd prototype-backend
    ```
 

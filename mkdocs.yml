@@ -1,0 +1,41 @@
+site_name: HealthFirst AI
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+plugins:
+  - search
+  - mkdocstrings
+
+nav:
+  - Home: index.md
+  - About: about.md
+  - Getting Started: getting_started.md
+  - CLI: cli.md
+  - Agents:
+      - Nutrition Agent: nutrition-agent-reference.md
+      - Exercise Agent: exercise-agent-reference.md
+  - Toolkits:
+      - Nutrition Tools: nutrition-tools-reference.md
+      - Exercise Tools: exercise-tools-reference.md

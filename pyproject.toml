@@ -1,3 +1,7 @@
+[tool.pyright]
+
+typeCheckingMode = "basic"
+
 [tool.ruff]
 ignore = ["E501"]
 
@@ -29,6 +33,11 @@ psycopg2-binary = "^2.9.6"
 google-search-results = "^2.4.2"
 networkx = "^3.1"
 tiktoken = "^0.4.0"
+pyright = "^1.1.318"
+mkdocs-material = "^9.1.19"
+mkdocstrings = {extras = ["python"], version = "^0.22.0"}
+typer-cli = {extras = ["all"], version = "^0.0.13"}
+rich = "^13.4.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -41,4 +50,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-cli = 'healthfirstai_prototype.cli:cli'
+cli = 'healthfirstai_prototype.cli:app'
