@@ -1,4 +1,24 @@
-# Yan is working on this
+import os
+from dotenv import load_dotenv
+from PyPDF2 import PdfReader
+from langchain.embeddings.cohere import CohereEmbeddings
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
+from langchain.vectorstores import FAISS
+from langchain.chains.question_answering import load_qa_chain
+from langchain.llms import Cohere
+from langchain.chains import LLMChain
+from langchain.utilities import GoogleSerperAPIWrapper
+from langchain.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+    PromptTemplate,
+)
+from langchain.schema import BaseMessage
+
+# NOTE: Use this class in the future to implement the evaluation techniques
+from langchain.evaluation import QAEvalChain
 
 """
 this agent is created for a number of goals/functions. the primary goal for this file is to provide a way to process user queries which require
@@ -7,37 +27,6 @@ information about nutrition and exercise. so, this is more of a knowledge base/a
 1. to provide a way to search through the nutrition knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
 2. to provide a gateway for the user to search through the internet (SerpAPI) for nutrition/exercise information 
 3. get user's personal information NOTE: this function is not used yet
-"""
-
-import os
-import re
-import pprint
-import requests
-import json
-from dotenv import load_dotenv
-from PyPDF2 import PdfReader
-from healthfirstai_prototype.generate import get_user_info
-from healthfirstai_prototype.datatypes import User
-from langchain.embeddings.cohere import CohereEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
-from langchain.vectorstores import FAISS
-from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import Cohere
-from langchain.utilities import GoogleSerperAPIWrapper
-from langchain.prompts import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
-
-# NOTE: Use this class in the future to implement the evaluation techniques
-from langchain.evaluation import QAEvalChain
-
-"""
-Facebook AI Similarity Search (Faiss) is a library for efficient similarity search and clustering of dense vectors. It contains algorithms 
-that search in sets of vectors of any size, up to ones that possibly do not fit in RAM. It also contains supporting code for evaluation 
-and parameter tuning.
 """
 
 # Load env file
@@ -76,7 +65,8 @@ def set_template(
     age: str,
     height_unit: str = "cm",
     weight_unit: str = "kg",
-):
+    text: str = "This is a default query.",
+) -> list[BaseMessage]:
     """
     this function is setting the template for the chat to use given user's personal information
     NOTE: this function is not used yet
@@ -88,12 +78,12 @@ def set_template(
     :param weight_unit: user's weight unit
     :return: a list of messages using the formatted prompt
     """
-    system_message_template = "You are a helpful nutrition and exercise assistant that takes into the considerations user's height as {user_height}, user weight as {user_weight}, user's gender as {user_gender}, and user's {user_age} to provide a user with answers to their questions."
+    system_message_template = "You are a helpful nutrition and exercise assistant that takes into the considerations user's height as {user_height}, user weight as {user_weight}, user's gender as {user_gender}, and user's {user_age} to provide a user with answers to their questions. If you don't have a specific answer, just say I don't know, and do not make anything up."
     system_message_prompt = SystemMessagePromptTemplate.from_template(
         system_message_template
     )
 
-    human_template = "{text}"
+    human_template = text
     human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
     chat_prompt = ChatPromptTemplate.from_messages(
@@ -112,7 +102,7 @@ def template_to_assess_search_results(
     google_search_result: str = "",
     faiss_search_result: str = "",
     prompt: str = "",
-):
+) -> str:
     """
     this function is used to assess the outputs from the two search engines
     :param google_search_result: the response from the SerpAPI's query to Google
@@ -157,7 +147,6 @@ def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
         text = page.extract_text()
         if text:
             raw_text += text
-    print("Raw text collected from PDF file...")
     return raw_text
 
 
@@ -264,8 +253,6 @@ def main():
     query = "What is the best time to eat before exercise?"
     faiss_search = faiss_vector_search(query)
     google_search = serp_api_search(query)
-    print("KB response: ", faiss_search)
-    print("Google Search: ", google_search)
 
 
 if __name__ == "__main__":
