@@ -31,7 +31,7 @@ def edit_diet_plan_json(
     user_id: int,
     meal_choice: MealNames = MealNames.all,
     include_ingredients: bool = True,
-    store_in_cache: bool = True,
+    store_in_redis: bool = True,
 ) -> str:
     """
     Run the Edit JSON chain with the provided agent's input and the user's ID.
@@ -56,7 +56,7 @@ def edit_diet_plan_json(
             ),
             meal="diet",
         )
-        if store_in_cache:
+        if store_in_redis:
             store_new_diet_plan(user_id, new_meal)
     else:
         new_meal = init_edit_json_chain().predict(
@@ -66,8 +66,10 @@ def edit_diet_plan_json(
                 meal_choice=meal_choice,
                 include_ingredients=include_ingredients,
             ),
+            # TODO: For some reason the prompt is not showing meal_choice properly
             meal=meal_choice,
         )
-        if store_in_cache:
+        if store_in_redis:
             store_meal(user_id, new_meal, meal_choice)
-    return new_meal
+    # TODO: Make sure that the return value "continues the conversation"
+    return "Your diet plan has been updated successfully."
