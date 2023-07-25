@@ -20,6 +20,17 @@ class MealNames(str, Enum):
     dinner = "Dinner"
     snack = "Snack"
     drink = "Drink"
+    all = ""
+
+class MealChoice(str, Enum):
+    """
+    Enum for abbreviated meal choice
+    """
+    breakfast = "b"
+    lunch = "l"
+    dinner = "d"
+    snack = "s"
+    all = ""
 
 class UserInput(BaseModel):
     user_input: str = ""

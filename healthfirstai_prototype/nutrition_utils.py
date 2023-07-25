@@ -19,9 +19,13 @@ from healthfirstai_prototype.datatypes import (
 )
 from langchain.vectorstores import FAISS
 from langchain.schema import Document
-from healthfirstai_prototype.util_models import ModelName, MealNames
+from healthfirstai_prototype.util_models import MealChoice, ModelName, MealNames
 
-from healthfirstai_prototype.utils import get_model, get_embedding_model,connect_to_redis
+from healthfirstai_prototype.utils import (
+    get_model,
+    get_embedding_model,
+    connect_to_redis,
+)
 
 
 def create_new_custom_daily_meal_plan():
@@ -234,7 +238,7 @@ def get_user_meal_plans_as_json(
     return json.dumps(meal_plan_dict, indent=2)
 
 
-def store_diet_plan(user_id: int):
+def cache_diet_plan_redis(user_id: int):
     r = connect_to_redis()
     r.hset(f"my-diet-plan:{user_id}", "diet_plan", get_user_meal_plans_as_json(user_id))
 
@@ -244,24 +248,49 @@ def store_new_diet_plan(user_id: int, new_diet_plan: str):
     r.hset(f"my-diet-plan:{user_id}", "diet_plan", new_diet_plan)
 
 
+def store_meal(
+    user_id: int,
+    new_meal: str,
+    meal_type: MealNames,
+):
+    r = connect_to_redis()
+    if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
+        raise ValueError("No cached plan found for this user.")
+    # NOTE: The following two lines will throw an error if the plan + meal is not valid JSON
+    cached_plan_dict = json.loads(cached_plan)
+    cached_plan_dict[meal_type] = json.loads(new_meal)
+    r.hset(f"my-diet-plan:{user_id}", "diet_plan", json.dumps(cached_plan_dict))
+
+
 def get_cached_plan_json(
     user_id: int,
     include_ingredients: bool = True,
-    meal_choice: str = "",
+    meal_choice: MealNames = MealNames.all,
 ):
     r = connect_to_redis()
-    cached_plan = r.hget(f"my-diet-plan:{user_id}", "diet_plan")
-    # TODO: Fix this type issue
+    if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
+        raise ValueError("No cached plan found for this user.")
+
     cached_plan_dict = json.loads(cached_plan)
     if not include_ingredients:
-        for meal_type in cached_plan_dict:
-            cached_plan_dict[meal_type].pop("ingredients", None)
+        if MealNames.breakfast in cached_plan_dict:
+            cached_plan_dict[MealNames.breakfast].pop("ingredients", None)
+        if MealNames.lunch in cached_plan_dict:
+            cached_plan_dict[MealNames.lunch].pop("ingredients", None)
+        if MealNames.dinner in cached_plan_dict:
+            cached_plan_dict[MealNames.dinner].pop("ingredients", None)
+        if MealNames.snack in cached_plan_dict:
+            cached_plan_dict[MealNames.snack].pop("ingredients", None)
+        if MealNames.drink in cached_plan_dict:
+            cached_plan_dict[MealNames.drink].pop("ingredients", None)
+
     if not meal_choice:
         return json.dumps(cached_plan_dict, indent=2)
     else:
         return json.dumps(cached_plan_dict[meal_choice], indent=2)
 
 
+# TODO: Store these ranked tools somewhere else. Don't create the vector store every time.
 def rank_tools(user_input: str, tools: list):
     vector_store = FAISS.from_documents(
         [
@@ -278,16 +307,24 @@ def get_user_meal_info_json(
     user_id: int,
     include_ingredients: bool,
     include_nutrients: bool,
-    meal_choice: str,
+    meal_choice: MealNames,
+    cached: bool = False,
 ):
     """
     Given a user ID, query the database and return the user's diet plan.
     """
-    meal_json = get_user_meal_plans_as_json(
-        user_id,
-        include_ingredients=True,
-        meal_choice=meal_choice,
-    )
+    if not cached:
+        meal_json = get_user_meal_plans_as_json(
+            user_id,
+            include_ingredients=True,
+            meal_choice=meal_choice,
+        )
+    else:
+        meal_json = get_cached_plan_json(
+            user_id,
+            include_ingredients=True,
+            meal_choice=meal_choice,
+        )
     meal_dict = json.loads(meal_json)
     session = SessionLocal()
     if include_nutrients:
