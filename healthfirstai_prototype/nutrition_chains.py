@@ -1,32 +1,73 @@
-# NOTE: In this file, I'm coding the JSON LLM chain
 from langchain import PromptTemplate, OpenAI, LLMChain
-from healthfirstai_prototype.util_models import ModelName
+from healthfirstai_prototype.util_models import ModelName, MealNames
 from healthfirstai_prototype.utils import get_model
 from healthfirstai_prototype.nutrition_templates import EDIT_JSON_TEMPLATE
-from healthfirstai_prototype.nutrition_utils import get_cached_plan_json, store_new_diet_plan
-import redis
+from healthfirstai_prototype.nutrition_utils import (
+    get_cached_plan_json,
+    store_new_diet_plan,
+    store_meal,
+)
 
 
-# TODO: This is WAY too slow. I need it to only replace certain keys
 def init_edit_json_chain():
     """
-    Initialize the edit json chain
+    Initialize and configure the Edit JSON chain.
+
+    Returns:
+        LLMChain: An instance of the language model chain ready to process the inputs.
     """
     return LLMChain(
         llm=get_model(ModelName.gpt_3_5_turbo_0613),
         prompt=PromptTemplate(
-            input_variables=["agent_input", "user_diet_plan_json"],
+            input_variables=["agent_input", "user_diet_plan_json", "meal"],
             template=EDIT_JSON_TEMPLATE,
         ),
         verbose=True,
     )
 
 
-def run_edit_json_chain(agent_input: str, user_id: int):
-    user_diet_plan_json = get_cached_plan_json(user_id)
-    new_diet_plan = init_edit_json_chain().predict(
-        agent_input=agent_input,
-        user_diet_plan_json=user_diet_plan_json,
-    )
-    store_new_diet_plan(user_id, new_diet_plan)
-    return "Successfully updated your diet plan!"
+def edit_diet_plan_json(
+    agent_input: str,
+    user_id: int,
+    meal_choice: MealNames = MealNames.all,
+    include_ingredients: bool = True,
+    store_in_cache: bool = True,
+) -> str:
+    """
+    Run the Edit JSON chain with the provided agent's input and the user's ID.
+
+    Parameters:
+        agent_input (str): The agent's input text for the conversation.
+        user_id (int): The ID of the user.
+        meal_choice (str): The meal choice to edit.
+        include_ingredients (bool): Whether to include the ingredients in the meal plan.
+        store_in_cache (bool): Whether to store the new meal plan in the cache.
+
+    Returns:
+        confirmation_message (str): A success message indicating the diet plan was updated successfully.
+    """
+    if meal_choice == MealNames.all:
+        new_meal = init_edit_json_chain().predict(
+            agent_input=agent_input,
+            user_diet_plan_json=get_cached_plan_json(
+                user_id,
+                meal_choice=MealNames.all,
+                include_ingredients=include_ingredients,
+            ),
+            meal="diet",
+        )
+        if store_in_cache:
+            store_new_diet_plan(user_id, new_meal)
+    else:
+        new_meal = init_edit_json_chain().predict(
+            agent_input=agent_input,
+            user_diet_plan_json=get_cached_plan_json(
+                user_id,
+                meal_choice=meal_choice,
+                include_ingredients=include_ingredients,
+            ),
+            meal=meal_choice,
+        )
+        if store_in_cache:
+            store_meal(user_id, new_meal, meal_choice)
+    return new_meal

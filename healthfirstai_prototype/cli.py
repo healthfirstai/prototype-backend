@@ -1,9 +1,12 @@
+from typing_extensions import Annotated
+from healthfirstai_prototype.nutrition_chains import edit_diet_plan_json
 from healthfirstai_prototype.nutrition_utils import (
     get_user_meal_plans_as_json,
     get_user_info_for_json_agent,
     get_user_meal_info_json,
     get_user_info_dict,
-    store_diet_plan,
+    get_cached_plan_json,
+    cache_diet_plan_redis,
     get_cached_plan_json,
 )
 from healthfirstai_prototype.nutrition_agent import (
@@ -13,6 +16,7 @@ from healthfirstai_prototype.nutrition_agent import (
     init_plan_and_execute_diet_agent,
 )
 from healthfirstai_prototype.advice_agent import faiss_vector_search, serp_api_search
+from healthfirstai_prototype.util_models import MealNames, MealChoice
 from healthfirstai_prototype.transform import (
     delete_all_vectors,
     get_all_foods,
@@ -39,31 +43,96 @@ def get_diet_plan(
 
 
 @app.command()
-def get_meal(
+def get_cached_meal(
+    meal_choice: MealChoice = MealChoice.breakfast,
     uid: int = 1,
-    include_ingredients: bool = True,
-    include_nutrients: bool = True,
-    meal_choice: str = "b",
+    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
 ):
     """
-    Get meal from the database given meal name
+    Get meal from the Redis Cache given meal name
     """
     typer.echo("Getting breakfast")
     if meal_choice == "b":
         meal = get_user_meal_info_json(
-            uid, include_ingredients, include_nutrients, "Breakfast"
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.breakfast,
+            cached=True,
         )
     elif meal_choice == "l":
         meal = get_user_meal_info_json(
-            uid, include_ingredients, include_nutrients, "Lunch"
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.lunch,
+            cached=True,
         )
     elif meal_choice == "d":
         meal = get_user_meal_info_json(
-            uid, include_ingredients, include_nutrients, "Dinner"
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.dinner,
+            cached=True,
         )
     elif meal_choice == "s":
         meal = get_user_meal_info_json(
-            uid, include_ingredients, include_nutrients, "Snack"
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.snack,
+            cached=True,
+        )
+    else:
+        typer.echo("Invalid meal choice")
+        return
+    typer.echo(meal)
+    typer.echo("Finished search")
+
+
+@app.command()
+def get_meal(
+    meal_choice: MealChoice = MealChoice.breakfast,
+    uid: int = 1,
+    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+):
+    """
+    Get meal from the SQL database given meal name
+    """
+    if meal_choice == "b":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.breakfast,
+            cached=False,
+        )
+    elif meal_choice == "l":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.lunch,
+            cached=False,
+        )
+    elif meal_choice == "d":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.dinner,
+            cached=False,
+        )
+    elif meal_choice == "s":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.snack,
+            cached=False,
         )
     else:
         typer.echo("Invalid meal choice")
@@ -108,24 +177,50 @@ def reinsert_vectors():
 
 
 @app.command()
-def store_plan(uid: int = 1):
+def cache_diet_plan(uid: int = 1):
     """
-    Store a plan in the database
+    Stores diet plan as it is in the SQL database in Redis
     """
     typer.echo("Storing plan")
-    store_diet_plan(uid)
+    cache_diet_plan_redis(uid)
     typer.echo("Finished storing plan")
 
 
 @app.command()
-def get_cached_plan(uid: int = 1):
+def get_cached_plan(
+    uid: int = 1,
+    include_ingredients: bool = True,
+):
     """
     Get diet plan from Redis
     """
     typer.echo("Getting plan")
-    plan = get_cached_plan_json(uid)
+    plan = get_cached_plan_json(uid, include_ingredients)
     typer.echo(plan)
     typer.echo("Finished getting plan")
+
+
+@app.command()
+def edit_cached_meal(
+    agent_input: str,
+    meal_choice: MealNames,
+    user_id: int = 1,
+    include_ingredients: bool = False,
+    store_in_cache: bool = False,
+):
+    """
+    Get diet plan from Redis
+    """
+    typer.echo("Editing plan")
+    new_plan = edit_diet_plan_json(
+        agent_input,
+        user_id,
+        meal_choice,
+        include_ingredients,
+        store_in_cache,
+    )
+    typer.echo(new_plan)
+    typer.echo("Finished editing plan")
 
 
 @app.callback()
@@ -135,21 +230,21 @@ def cli():
     """
 
 
-# @cli.command()
-# def test_advice_agent():
-#     """
-#     Test the core functionality of the advice agent
-#     """
-#     click.echo("Testing advice agent...")
-#     query = input("Enter a query: ")
-#     faiss_response = faiss_vector_search(query)
-#     google_response = serp_api_search(query)
-#     click.echo("Finished search. Wait for the results below:")
-#     click.echo(f"K-Base search response: {faiss_response}")
-#     click.echo("------------------------------------------")
-#     click.echo(f"Google search response: {google_response}")
-#     click.echo("------------------------------------------")
-#     click.echo("Finished testing advice agent.")
+@app.command()
+def test_advice_agent():
+    """
+    Test the core functionality of the advice agent
+    """
+    typer.echo("Testing advice agent...")
+    query = input("Enter a query: ")
+    faiss_response = faiss_vector_search(query)
+    google_response = serp_api_search(query)
+    typer.echo("Finished search. Wait for the results below:")
+    typer.echo(f"K-Base search response: {faiss_response}")
+    typer.echo("------------------------------------------")
+    typer.echo(f"Google search response: {google_response}")
+    typer.echo("------------------------------------------")
+    typer.echo("Finished testing advice agent.")
 
 
 if __name__ == "__main__":
