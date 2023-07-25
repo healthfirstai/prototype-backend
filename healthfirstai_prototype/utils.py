@@ -2,14 +2,26 @@ from langchain.chat_models import ChatOpenAI
 from langchain import OpenAI
 from healthfirstai_prototype.util_models import ModelName
 from langchain.embeddings import OpenAIEmbeddings
+import redis
 
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 
 def get_model(model_name: str) -> ChatOpenAI | OpenAI:
     """
-    Choose the model to use
-    Returns the model class
+    Creates and returns an instance of the required model.
+
+    The function takes as input the name of the model and returns the corresponding model instance.
+    If the model name is not recognized, a ValueError is raised.
+
+    Parameters:
+        model_name (str): The name of the model.
+
+    Returns:
+        ChatOpenAI | OpenAI: An instance of the corresponding model.
+
+    Raises:
+        ValueError: If the model name is not recognized.
     """
     if model_name == ModelName.gpt_3_5_turbo:
         return ChatOpenAI(
@@ -38,7 +50,23 @@ def get_model(model_name: str) -> ChatOpenAI | OpenAI:
     else:
         raise ValueError("Model name not recognized")
 
+
 def get_embedding_model(model_name: str):
+    """
+    Creates and returns an instance of the required embedding model.
+
+    The function takes as input the name of the embedding model and returns the corresponding model instance.
+    If the model name is not recognized, a ValueError is raised.
+
+    Parameters:
+        model_name (str): The name of the embedding model.
+
+    Returns:
+        OpenAIEmbeddings: An instance of the corresponding embedding model.
+
+    Raises:
+        ValueError: If the model name is not recognized.
+    """
     if model_name == ModelName.text_embedding_ada_002:
         return OpenAIEmbeddings(
             client=None,
@@ -47,3 +75,12 @@ def get_embedding_model(model_name: str):
         )
     else:
         raise ValueError("Model name not recognized")
+
+def connect_to_redis():
+    """
+    Creates and returns an instance of the required redis client.
+
+    Returns:
+        redis.Redis: An instance of the corresponding redis client.
+    """
+    return redis.Redis(host="localhost", port=6379, db=0)

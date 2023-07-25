@@ -21,7 +21,7 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 from healthfirstai_prototype.util_models import ModelName, MealNames
 
-from healthfirstai_prototype.utils import get_model, get_embedding_model
+from healthfirstai_prototype.utils import get_model, get_embedding_model,connect_to_redis
 
 
 def create_new_custom_daily_meal_plan():
@@ -235,12 +235,12 @@ def get_user_meal_plans_as_json(
 
 
 def store_diet_plan(user_id: int):
-    r = redis.Redis(host="localhost", port=6379, db=0)
+    r = connect_to_redis()
     r.hset(f"my-diet-plan:{user_id}", "diet_plan", get_user_meal_plans_as_json(user_id))
 
 
 def store_new_diet_plan(user_id: int, new_diet_plan: str):
-    r = redis.Redis(host="localhost", port=6379, db=0)
+    r = connect_to_redis()
     r.hset(f"my-diet-plan:{user_id}", "diet_plan", new_diet_plan)
 
 
@@ -249,12 +249,17 @@ def get_cached_plan_json(
     include_ingredients: bool = True,
     meal_choice: str = "",
 ):
-    r = redis.Redis(host="localhost", port=6379, db=0)
-    # If include_ingredients is True, we can just return the cached plan
-    # else, we need drop all the ingredients from the cached plan
-    # if meal_choice is "", we return the cached plan as is
-    # else we need to get the value for the meal_choice key
-    return r.hget(f"my-diet-plan:{user_id}", "diet_plan")
+    r = connect_to_redis()
+    cached_plan = r.hget(f"my-diet-plan:{user_id}", "diet_plan")
+    # TODO: Fix this type issue
+    cached_plan_dict = json.loads(cached_plan)
+    if not include_ingredients:
+        for meal_type in cached_plan_dict:
+            cached_plan_dict[meal_type].pop("ingredients", None)
+    if not meal_choice:
+        return json.dumps(cached_plan_dict, indent=2)
+    else:
+        return json.dumps(cached_plan_dict[meal_choice], indent=2)
 
 
 def rank_tools(user_input: str, tools: list):

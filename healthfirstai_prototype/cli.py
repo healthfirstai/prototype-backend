@@ -12,6 +12,7 @@ from healthfirstai_prototype.nutrition_agent import (
     init_new_agent,
     init_plan_and_execute_diet_agent,
 )
+from healthfirstai_prototype.advice_agent import faiss_vector_search, serp_api_search
 from healthfirstai_prototype.transform import (
     delete_all_vectors,
     get_all_foods,
@@ -132,6 +133,23 @@ def cli():
     """
     HealthFirstAI Prototype CLI
     """
+
+
+# @cli.command()
+# def test_advice_agent():
+#     """
+#     Test the core functionality of the advice agent
+#     """
+#     click.echo("Testing advice agent...")
+#     query = input("Enter a query: ")
+#     faiss_response = faiss_vector_search(query)
+#     google_response = serp_api_search(query)
+#     click.echo("Finished search. Wait for the results below:")
+#     click.echo(f"K-Base search response: {faiss_response}")
+#     click.echo("------------------------------------------")
+#     click.echo(f"Google search response: {google_response}")
+#     click.echo("------------------------------------------")
+#     click.echo("Finished testing advice agent.")
 
 
 if __name__ == "__main__":
