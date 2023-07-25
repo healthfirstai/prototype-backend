@@ -17,9 +17,12 @@ from langchain.agents.agent_toolkits import JsonToolkit
 from langchain.llms.openai import OpenAI
 from langchain.tools.json.tool import JsonSpec
 from healthfirstai_prototype.nutrition_tools import (
-    UserInfoTool,
+    GetUserInfoTool,
     DietPlanTool,
     EditDietPlanTool,
+    EditBreakfastTool,
+    EditLunchTool,
+    EditDinnerTool,
     BreakfastTool,
     LunchTool,
     DinnerTool,
@@ -59,8 +62,11 @@ def init_agent(
     """
     tools = [
         DietPlanTool(),
-        UserInfoTool(),
+        GetUserInfoTool(),
         EditDietPlanTool(),
+        EditBreakfastTool(),
+        EditLunchTool(),
+        EditDinnerTool(),
         BreakfastTool(),
         LunchTool(),
         DinnerTool(),
@@ -112,7 +118,7 @@ def init_new_agent(user_input: str, session_id="other-session", user_id: int = 1
     llm = get_model(ModelName.gpt_3_5_turbo_0613)
     tools = [
         DietPlanTool(),
-        UserInfoTool(),
+        GetUserInfoTool(),
         EditDietPlanTool(),
     ]
     return initialize_agent(
@@ -138,7 +144,7 @@ def init_plan_and_execute_diet_agent():
     executor = load_agent_executor(
         llm=get_model(ModelName.gpt_3_5_turbo_0613),
         tools=[
-            UserInfoTool(),
+            GetUserInfoTool(),
             DietPlanTool(),
             EditDietPlanTool(),
         ],
