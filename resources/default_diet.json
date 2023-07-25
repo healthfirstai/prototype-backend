@@ -1,0 +1,170 @@
+[
+  {
+    "id": 1,
+    "custom_daily_meal_plan": {
+      "id": 1,
+      "name": "Default Daily Meal Plan",
+      "description": "Default daily meal plan from bodybuilding.com",
+      "Breakfast": {
+        "id": 1,
+        "name": "Default Meal 1",
+        "description": "Greek Yogurt & Fruit breakfast",
+        "ingredients": [
+          {
+            "food_name": "Snacks Granola Bars Hard Plain",
+            "unit_of_measurement": "cups",
+            "quantity": 0.33
+          },
+          {
+            "food_name": "Raspberries",
+            "unit_of_measurement": "cups",
+            "quantity": 0.5
+          },
+          {
+            "food_name": "Eggs (Raw)",
+            "unit_of_measurement": "units",
+            "quantity": 3.0
+          },
+          {
+            "food_name": "Greek Yogurt (Plain)",
+            "unit_of_measurement": "cups",
+            "quantity": 1.5
+          }
+        ]
+      },
+      "Drink": {
+        "id": 2,
+        "name": "Default Meal 2",
+        "description": "Double Chocolate Cherry Smoothie",
+        "ingredients": [
+          {
+            "food_name": "Flax Seeds",
+            "unit_of_measurement": "tbsp",
+            "quantity": 1.0
+          },
+          {
+            "food_name": "Cocoa Powder",
+            "unit_of_measurement": "tbsp",
+            "quantity": 1.0
+          },
+          {
+            "food_name": "Coconut Milk",
+            "unit_of_measurement": "cups",
+            "quantity": 0.25
+          },
+          {
+            "food_name": "Cherries (Sweet)",
+            "unit_of_measurement": "cups",
+            "quantity": 0.75
+          },
+          {
+            "food_name": "Whey Protein Powder Isolate",
+            "unit_of_measurement": "scoops",
+            "quantity": 2.0
+          },
+          {
+            "food_name": "Water Bottled Poland Spring",
+            "unit_of_measurement": "cups",
+            "quantity": 1.0
+          },
+          {
+            "food_name": "Water Tap Municipal",
+            "unit_of_measurement": "cubes",
+            "quantity": 3.0
+          }
+        ]
+      },
+      "Lunch": {
+        "id": 3,
+        "name": "Default Meal 3",
+        "description": "Bibb Lettuce Burger",
+        "ingredients": [
+          {
+            "food_name": "Mayonnaise Dressing No Cholesterol",
+            "unit_of_measurement": "tbsp",
+            "quantity": 1.0
+          },
+          {
+            "food_name": "Ketchup",
+            "unit_of_measurement": "tbsp",
+            "quantity": 1.0
+          },
+          {
+            "food_name": "Romaine Lettuce",
+            "unit_of_measurement": "leaves",
+            "quantity": 2.0
+          },
+          {
+            "food_name": "Cooked Green Beans (Previously Frozen)",
+            "unit_of_measurement": "cups",
+            "quantity": 1.0
+          },
+          {
+            "food_name": "Onions",
+            "unit_of_measurement": "slices",
+            "quantity": 2.0
+          },
+          {
+            "food_name": "Tomatoes",
+            "unit_of_measurement": "slices",
+            "quantity": 2.0
+          },
+          {
+            "food_name": "Broiled Ground Beef Patty (93% Lean)",
+            "unit_of_measurement": "oz",
+            "quantity": 8.0
+          }
+        ]
+      },
+      "Snack": {
+        "id": 4,
+        "name": "Default Meal 4",
+        "description": "Post-Workout Nutrition",
+        "ingredients": [
+          {
+            "food_name": "Formulated Bar South Beach Protein Bar",
+            "unit_of_measurement": "bar",
+            "quantity": 1.0
+          }
+        ]
+      },
+      "Dinner": {
+        "id": 5,
+        "name": "Default Meal 5",
+        "description": "Shrimp With Spinach Salad & Brown Rice",
+        "ingredients": [
+          {
+            "food_name": "Spinach",
+            "unit_of_measurement": "cups",
+            "quantity": 4.0
+          },
+          {
+            "food_name": "Red Bell Peppers (Cooked)",
+            "unit_of_measurement": "units",
+            "quantity": 0.5
+          },
+          {
+            "food_name": "Cooked Brown Rice",
+            "unit_of_measurement": "cups",
+            "quantity": 0.25
+          },
+          {
+            "food_name": "Olive Oil",
+            "unit_of_measurement": "tbsp",
+            "quantity": 2.0
+          },
+          {
+            "food_name": "Cooked Shrimp",
+            "unit_of_measurement": "oz",
+            "quantity": 6.0
+          },
+          {
+            "food_name": "Feta Cheese",
+            "unit_of_measurement": "cups",
+            "quantity": 0.25
+          }
+        ]
+      }
+    }
+  }
+]

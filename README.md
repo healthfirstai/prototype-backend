@@ -2,19 +2,37 @@
 
 ## About The Project
 
-Prototype for HealthFirst AI project.
-
-## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-To get a local development instance up and running follow these simple steps.
+Prototype for our HealthFirst AI web app.
 
 ## Pre-requisites
 
 - Docker
 - Poetry
+- Supabase CLI
 
-### Deploy with Docker (with my LangChain fork)
+## Setting up Supabase local development
+
+```bash
+supabase link --project-ref yhkoibydboihnkcupibk
+```
+
+And enter the database password
+
+To fetch the newest migration to the remote DB,
+
+```bash
+supabase db remote commit
+```
+
+Finally, run
+
+```bash
+supabase start
+```
+
+Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db), for other stuff.
+
+### Deploy with Docker
 
 1. Ensure you have [Docker](https://www.docker.com/) installed.
 
@@ -25,7 +43,7 @@ To get a local development instance up and running follow these simple steps.
 2. Clone the repo
 
    ```sh
-   git clone https://github.com/larry-lime/prototype-backend
+   git clone https://github.com/healthfirstai/prototype-backend
    cd prototype-backend
    ```
 

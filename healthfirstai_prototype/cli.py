@@ -1,190 +1,271 @@
-# NOTE: This is an example of how to interact with our application code with the command line
-
-from healthfirstai_prototype.redis_db import (
-    search_similar_food,
+from typing_extensions import Annotated
+from healthfirstai_prototype.nutrition_chains import edit_diet_plan_json
+from healthfirstai_prototype.nutrition_utils import (
+    get_user_meal_plans_as_json,
+    get_user_info_for_json_agent,
+    get_user_meal_info_json,
+    get_user_info_dict,
+    get_cached_plan_json,
+    cache_diet_plan_redis,
+    get_cached_plan_json,
+)
+from healthfirstai_prototype.nutrition_agent import (
+    start_nutrition_temp_agent,
+    init_agent,
+    init_new_agent,
+    init_plan_and_execute_diet_agent,
+)
+from healthfirstai_prototype.advice_agent import faiss_vector_search, serp_api_search
+from healthfirstai_prototype.util_models import MealNames, MealChoice
+from healthfirstai_prototype.transform import (
+    delete_all_vectors,
+    get_all_foods,
+    insert_all_vectors,
 )
 
-import click
+import typer
+
+app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
-@click.group()
+@app.command()
+def get_diet_plan(
+    uid: int = 1,
+    include_ingredients: bool = True,
+):
+    """
+    Get a meal plan from the database
+    """
+    typer.echo("Getting meal plan")
+    meal_plan = get_user_meal_plans_as_json(uid, include_ingredients)
+    typer.echo(meal_plan)
+    typer.echo("Finished search")
+
+
+@app.command()
+def get_cached_meal(
+    meal_choice: MealChoice = MealChoice.breakfast,
+    uid: int = 1,
+    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+):
+    """
+    Get meal from the Redis Cache given meal name
+    """
+    typer.echo("Getting breakfast")
+    if meal_choice == "b":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.breakfast,
+            cached=True,
+        )
+    elif meal_choice == "l":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.lunch,
+            cached=True,
+        )
+    elif meal_choice == "d":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.dinner,
+            cached=True,
+        )
+    elif meal_choice == "s":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.snack,
+            cached=True,
+        )
+    else:
+        typer.echo("Invalid meal choice")
+        return
+    typer.echo(meal)
+    typer.echo("Finished search")
+
+
+@app.command()
+def get_meal(
+    meal_choice: MealChoice = MealChoice.breakfast,
+    uid: int = 1,
+    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+):
+    """
+    Get meal from the SQL database given meal name
+    """
+    if meal_choice == "b":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.breakfast,
+            cached=False,
+        )
+    elif meal_choice == "l":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.lunch,
+            cached=False,
+        )
+    elif meal_choice == "d":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.dinner,
+            cached=False,
+        )
+    elif meal_choice == "s":
+        meal = get_user_meal_info_json(
+            uid,
+            include_ingredients,
+            include_nutrients,
+            MealNames.snack,
+            cached=False,
+        )
+    else:
+        typer.echo("Invalid meal choice")
+        return
+    typer.echo(meal)
+    typer.echo("Finished search")
+
+
+@app.command()
+def test_agent(
+    input: str,
+    uid: int = 1,
+):
+    """
+    Test ReAct Diet Plan Agent
+    """
+    diet_agent = init_agent(input, uid)
+    diet_agent(input)
+
+
+@app.command()
+def get_user_info(uid: int = 1):
+    """
+    Get user info from the database
+    """
+    typer.echo(f"Getting user info for user {uid}")
+    user_info = get_user_info_for_json_agent(uid)
+    typer.echo(user_info)
+    typer.echo("Finished search")
+
+
+@app.command()
+def reinsert_vectors():
+    """
+    Delete all vectors in nutrition_vectors and insert new vectors
+    """
+    typer.echo("Reinserting nutrition vectors")
+    delete_all_vectors()
+    typer.echo("Deleted all old vectors")
+    foods = get_all_foods()
+    typer.echo("Queried and got all foods")
+    insert_all_vectors(foods)
+    typer.echo("Inserted new food vectors")
+    typer.echo("Finished search")
+
+
+@app.command()
+def cache_diet_plan(uid: int = 1):
+    """
+    Stores diet plan as it is in the SQL database in Redis
+    """
+    typer.echo("Storing plan")
+    cache_diet_plan_redis(uid)
+    typer.echo("Finished storing plan")
+
+
+@app.command()
+def get_cached_plan(
+    uid: int = 1,
+    include_ingredients: bool = True,
+):
+    """
+    Get diet plan from Redis
+    """
+    typer.echo("Getting plan")
+    plan = get_cached_plan_json(uid, include_ingredients)
+    typer.echo(plan)
+    typer.echo("Finished getting plan")
+
+
+@app.command()
+def edit_cached_meal(
+    agent_input: str,
+    meal_choice: MealNames,
+    user_id: int = 1,
+    include_ingredients: bool = False,
+    store_in_cache: bool = False,
+):
+    """
+    Get diet plan from Redis
+    """
+    typer.echo("Editing plan")
+    new_plan = edit_diet_plan_json(
+        agent_input,
+        user_id,
+        meal_choice,
+        include_ingredients,
+        store_in_cache,
+    )
+    typer.echo(new_plan)
+    typer.echo("Finished editing plan")
+
+
+@app.callback()
 def cli():
-    pass
+    """
+    HealthFirstAI Prototype CLI
+    """
+
+
+@app.command()
+def test_advice_agent():
+    """
+    Test the core functionality of the advice agent
+    """
+    typer.echo("Testing advice agent...")
+    query = input("Enter a query: ")
+    faiss_response = faiss_vector_search(query)
+    google_response = serp_api_search(query)
+    typer.echo("Finished search. Wait for the results below:")
+    typer.echo(f"K-Base search response: {faiss_response}")
+    typer.echo("------------------------------------------")
+    typer.echo(f"Google search response: {google_response}")
+    typer.echo("------------------------------------------")
+    typer.echo("Finished testing advice agent.")
 
 
 @cli.command()
-def get_similar_food():
+def test_advice_agent():
     """
-    Test get_similar_food
+    Test the core functionality of the advice agent
     """
-    click.echo("Searching by ID...")
-    output = search_similar_food(167755, "get_similar_foods", 10)
-    click.echo(output)
-    click.echo("Finished search")
-
-
-# @cli.command()
-# def exec_sql():
-#     """
-#     SQL Execution Chain
-#     """
-#     user_input = click.prompt("Enter your query", type=str)
-#     output = start_sql_chain(user_input, verbose=True)
-#     click.echo(f"SQL Query: {output}")
-#
-#
-# @cli.command()
-# def exec_std():
-#     """
-#     Standard Execution Chain
-#     """
-#     user_input = click.prompt("Enter your query", type=str)
-#     output = start_std_chain(user_input, verbose=True)
-#     click.echo(f"SQL Query: {output['output_sql_query']}")
-#     click.echo(f"Query Result: {output['result']}")
-#
-#
-# @cli.command()
-# def exec_seq():
-#     """
-#     Sequential Execution Chain
-#     """
-#     user_input = click.prompt("Enter your query", type=str)
-#     output = start_seq_chain(user_input, verbose=True)
-#     click.echo(f"SQL Query: {output['output_sql_query']}")
-#     click.echo(f"Query Result: {output['result']}")
-#
-#
-# @cli.command()
-# def exec_agent():
-#     """
-#     Agent Execution Chain
-#     """
-#     user_input = click.prompt("Enter your query", type=str)
-#     output = start_sql_agent(user_input, verbose=True)
-#     click.echo(f"SQL Query: {output['output_sql_query']}")
-#     click.echo(f"Query Result: {output['result']}")
-#
-#
-# @cli.command()
-# # Add filename to load_test_cases from
-# @click.option(
-#     "--filename",
-#     default="select_queries.json",
-#     help="Specify a json file to load test cases from",
-# )
-# @click.option(
-#     "--json_file_name",
-#     default="std_predictions",
-#     help="Specify a json file to save predictions to",
-# )
-# # Add verbose option
-# @click.option(
-#     "--verbose",
-#     default=False,
-#     help="Verbose output",
-# )
-# # Add top k default to 5
-# @click.option(
-#     "--top_k",
-#     default=5,
-#     help="Specify maximum number of rows to be returned",
-# )
-# def test_std(filename, json_file_name, verbose, top_k):
-#     """
-#     Test Standard Execution Chain
-#     """
-#     dataset = load_test_queries(filename)
-#     predictions, predicted_dataset, error_dataset = run_std_chain(
-#         dataset, verbose, top_k
-#     )
-#     graded_results = grade_results(predicted_dataset, predictions)
-#     log_ouput, json_file_name = log_predictions(
-#         graded_results, "Std Chain", json_file_name=json_file_name
-#     )
-#     click.echo(f"Predictions logged to json/{json_file_name}.json")
-#     click.echo(log_ouput)
-#
-#
-# @cli.command()
-# # Add filename to load_test_cases from
-# @click.option(
-#     "--filename",
-#     default="select_queries.json",
-#     help="Specify a json file to load test cases from",
-# )
-#
-# # Specify a json_file_name
-# @click.option(
-#     "--json_file_name",
-#     default="seq_predictions",
-#     help="Specify a json file to save predictions to",
-# )
-# # Add verbose option
-# @click.option(
-#     "--verbose",
-#     default=False,
-#     help="Verbose output",
-# )
-# # Add top k default to 5
-# @click.option(
-#     "--top_k",
-#     default=5,
-#     help="Specify maximum number of rows to be returned",
-# )
-# def test_seq(filename, json_file_name, verbose, top_k):
-#     """
-#     Test Sequential Execution Chain
-#     """
-#     dataset = load_test_queries(filename)
-#     predictions, predicted_dataset, error_dataset = run_seq_chain(
-#         dataset, verbose, top_k
-#     )
-#     graded_results = grade_results(predicted_dataset, predictions)
-#     log_ouput, json_file_name = log_predictions(
-#         graded_results, "Seq Chain", json_file_name=json_file_name
-#     )
-#     click.echo(f"Predictions logged to json/{json_file_name}.json")
-#     click.echo(log_ouput)
-#
-#
-# @cli.command()
-# # Add filename to load_test_cases from
-# @click.option(
-#     "--filename",
-#     default="select_queries.json",
-#     help="Specify a json file to load test cases from",
-# )
-# @click.option(
-#     "--json_file_name",
-#     default="agent_predictions",
-#     help="Specify a json file to save predictions to",
-# )
-# # Add verbose option
-# @click.option(
-#     "--verbose",
-#     default=False,
-#     help="Verbose output",
-# )
-# # Add top k default to 5
-# @click.option(
-#     "--top_k",
-#     default=5,
-#     help="Specify maximum number of rows to be returned",
-# )
-# def test_agent(filename, json_file_name, verbose, top_k):
-#     """
-#     Test Agent Execution Chain
-#     """
-#     dataset = load_test_queries(filename)
-#     predictions, predicted_dataset, error_dataset = run_agent(dataset, verbose, top_k)
-#     graded_results = grade_results(predicted_dataset, predictions)
-#     log_ouput, json_file_name = log_predictions(
-#         graded_results, "Agent", json_file_name=json_file_name
-#     )
-#     click.echo(f"Predictions logged to json/{json_file_name}.json")
-#     click.echo(log_ouput)
+    click.echo("Testing advice agent...")
+    query = input("Enter a query: ")
+    faiss_response = faiss_vector_search(query)
+    google_response = serp_api_search(query)
+    click.echo("Finished search. Wait for the results below:")
+    click.echo(f"K-Base search response: {faiss_response}")
+    click.echo("------------------------------------------")
+    click.echo(f"Google search response: {google_response}")
+    click.echo("------------------------------------------")
+    click.echo("Finished testing advice agent.")
 
 
 if __name__ == "__main__":
-    cli()
+    app()

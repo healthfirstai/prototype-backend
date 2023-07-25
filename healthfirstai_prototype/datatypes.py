@@ -1,4 +1,15 @@
-from sqlalchemy import Column, Integer, Float, String, Text
+from decimal import Decimal
+from sqlalchemy import (
+    Column,
+    Integer,
+    Float,
+    String,
+    Text,
+    ForeignKey,
+    Date,
+    CheckConstraint,
+)
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from pgvector.sqlalchemy import Vector
 
@@ -8,7 +19,7 @@ Base = declarative_base()
 class Nutrition_Vector(Base):
     __tablename__ = "nutrition_vector"
     food_id = Column("food_id", Integer, primary_key=True)
-    embedding = Column("embedding", Vector(94))
+    embedding = Column("embedding", Vector(95))
 
 
 class Food(Base):
@@ -136,3 +147,179 @@ class Food(Base):
     Serving_Description_8_g = Column("Serving Description 8 (g)", String)
     Serving_Weight_9_g = Column("Serving Weight 9 (g)", Float)
     Serving_Description_9_g = Column("Serving Description 9 (g)", String)
+
+
+class Country(Base):
+    __tablename__ = "country"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    continent = Column(String(255), nullable=False)
+
+
+class City(Base):
+    __tablename__ = "city"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    country_id = Column(Integer, ForeignKey("country.id"), nullable=False)
+    country = relationship("Country", backref="cities", cascade="all, delete")
+
+
+class User(Base):
+    __tablename__ = "user"
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String(50))
+    last_name = Column(String(50))
+    username = Column(String(50))
+    password = Column(String(100))
+    height = Column(Float(precision=5), nullable=False)
+    weight = Column(Float(precision=5), nullable=False)
+    gender = Column(String(10), nullable=False)
+    dob = Column(Date)
+    country_id = Column(Integer, ForeignKey("country.id"), nullable=False)
+    city_id = Column(Integer, ForeignKey("city.id"), nullable=False)
+
+    country = relationship("Country", backref="users", cascade="all, delete")
+    city = relationship("City", backref="users", cascade="all, delete")
+
+    __table_args__ = (
+        CheckConstraint(
+            gender.in_(["Male", "Female", "Other"]), name="user_gender_check"
+        ),
+    )
+
+
+class Goal(Base):
+    __tablename__ = "goals"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+
+
+class BaseWeeklyMealPlan(Base):
+    __tablename__ = "base_weekly_meal_plan"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    link = Column(String(255))
+
+
+class BaseDailyMealPlan(Base):
+    __tablename__ = "base_daily_meal_plan"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    link = Column(String(255))
+
+
+class CustomWeeklyMealPlan(Base):
+    __tablename__ = "custom_weekly_meal_plan"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+
+
+class CustomDailyMealPlan(Base):
+    __tablename__ = "custom_daily_meal_plan"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+
+
+class PersonalizedDailyMealPlan(Base):
+    __tablename__ = "personalized_daily_meal_plan"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    custom_daily_meal_plan = Column(
+        Integer, ForeignKey("custom_daily_meal_plan.id"), nullable=False
+    )
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    goal_id = Column(Integer, ForeignKey("goals.id"), nullable=False)
+    user = relationship(
+        "User", backref="personalized_meal_plans", cascade="all, delete"
+    )
+    custom_daily_meal_plan_obj = relationship("CustomDailyMealPlan")
+    goal = relationship("Goal")
+
+
+class PersonalizedWeeklyMealPlan(Base):
+    __tablename__ = "personalized_weekly_meal_plan"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    custom_weekly_meal_plan = Column(
+        Integer, ForeignKey("custom_weekly_meal_plan.id"), nullable=False
+    )
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    goal_id = Column(Integer, ForeignKey("goals.id"), nullable=False)
+    user = relationship(
+        "User", backref="personalized_weekly_meal_plans", cascade="all, delete"
+    )
+    custom_weekly_meal_plan_obj = relationship("CustomWeeklyMealPlan")
+    goal = relationship("Goal")
+
+
+class Meal(Base):
+    __tablename__ = "meal"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    meal_type = Column(String(10), nullable=False)
+    description = Column(Text)
+
+    __table_args__ = (
+        CheckConstraint(
+            meal_type.in_(["Breakfast", "Lunch", "Dinner", "Snack", "Drink", "Other"]),
+            name="meal_type_check",
+        ),
+    )
+
+
+class UnitOfMeasurement(Base):
+    __tablename__ = "unit_of_measurement"
+    unit = Column(String(255), primary_key=True)
+
+
+class MealIngredient(Base):
+    __tablename__ = "meal_ingredient"
+    meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
+    ingredient_id = Column(Integer, ForeignKey("food.id"), primary_key=True)
+    unit_of_measurement = Column(
+        String(255), ForeignKey("unit_of_measurement.unit"), nullable=False
+    )
+    quantity = Column(Float(precision=5), nullable=False)
+
+
+class DailyMealPlanAndMeal(Base):
+    __tablename__ = "daily_meal_plan_and_meal"
+    base_daily_meal_plan_id = Column(
+        Integer, ForeignKey("base_daily_meal_plan.id"), primary_key=True
+    )
+    meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
+
+
+class WeeklyMealPlanAndDailyMealPlan(Base):
+    __tablename__ = "weekly_meal_plan_and_daily_meal_plan"
+    base_weekly_meal_plan_id = Column(
+        Integer, ForeignKey("base_weekly_meal_plan.id"), primary_key=True
+    )
+    base_daily_meal_plan_id = Column(
+        Integer, ForeignKey("base_daily_meal_plan.id"), primary_key=True
+    )
+
+
+class CustomDailyMealPlanAndMeal(Base):
+    __tablename__ = "custom_daily_meal_plan_and_meal"
+    custom_daily_meal_plan_id = Column(
+        Integer, ForeignKey("custom_daily_meal_plan.id"), primary_key=True
+    )
+    meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
+
+
+class CustomWeeklyMealPlanAndCustomDailyMealPlan(Base):
+    __tablename__ = "custom_weekly_meal_plan_and_custom_daily_meal_plan"
+    custom_weekly_meal_plan_id = Column(
+        Integer, ForeignKey("custom_weekly_meal_plan.id"), primary_key=True
+    )
+    custom_daily_meal_plan_id = Column(
+        Integer, ForeignKey("custom_daily_meal_plan.id"), primary_key=True
+    )
