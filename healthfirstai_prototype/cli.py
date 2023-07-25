@@ -250,5 +250,22 @@ def test_advice_agent():
     typer.echo("Finished testing advice agent.")
 
 
+@cli.command()
+def test_advice_agent():
+    """
+    Test the core functionality of the advice agent
+    """
+    click.echo("Testing advice agent...")
+    query = input("Enter a query: ")
+    faiss_response = faiss_vector_search(query)
+    google_response = serp_api_search(query)
+    click.echo("Finished search. Wait for the results below:")
+    click.echo(f"K-Base search response: {faiss_response}")
+    click.echo("------------------------------------------")
+    click.echo(f"Google search response: {google_response}")
+    click.echo("------------------------------------------")
+    click.echo("Finished testing advice agent.")
+
+
 if __name__ == "__main__":
     app()
