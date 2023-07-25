@@ -1,6 +1,8 @@
 import psycopg2
 import json
 from datetime import date
+import redis
+from langchain.embeddings import OpenAIEmbeddings
 
 from healthfirstai_prototype.database import SessionLocal
 from healthfirstai_prototype.datatypes import (
@@ -17,6 +19,11 @@ from healthfirstai_prototype.datatypes import (
     Goal,
     City,
 )
+from langchain.vectorstores import FAISS
+from langchain.schema import Document
+from healthfirstai_prototype.util_models import ModelName, MealNames
+
+from healthfirstai_prototype.utils import get_model, get_embedding_model
 
 
 def create_new_custom_daily_meal_plan():
@@ -139,7 +146,11 @@ def insert_into_personalized_daily_meal_plan(user_id: int):
     return personalized_daily_meal_plan
 
 
-def get_user_meal_plans_as_json(user_id: int, include_ingredients: bool = True) -> str:
+def get_user_meal_plans_as_json(
+    user_id: int,
+    include_ingredients: bool = True,
+    meal_choice: str = "",
+) -> str:
     """
     Given a user ID, query the database and return the user's meal plan as a JSON object.
     """
@@ -183,7 +194,7 @@ def get_user_meal_plans_as_json(user_id: int, include_ingredients: bool = True) 
             )
             ingredient_list = [
                 {
-                    # "ingredient_id": ingredient.ingredient_id, # NOTE: We may not need the ID
+                    "ingredient_id": ingredient.ingredient_id,  # NOTE: We may not need the ID
                     "food_name": food.Name,
                     "unit_of_measurement": ingredient.unit_of_measurement,
                     "quantity": ingredient.quantity,
@@ -206,7 +217,132 @@ def get_user_meal_plans_as_json(user_id: int, include_ingredients: bool = True) 
             },
         )
     session.close()
+    # Choose whether to include key nutrients
+    # Choose a meal type
+    if meal_choice == MealNames.breakfast:
+        meal_plan_dict = meal_plan_dict[0]["custom_daily_meal_plan"][
+            MealNames.breakfast
+        ]
+    elif meal_choice == MealNames.lunch:
+        meal_plan_dict = meal_plan_dict[0]["custom_daily_meal_plan"][MealNames.lunch]
+    elif meal_choice == MealNames.dinner:
+        meal_plan_dict = meal_plan_dict[0]["custom_daily_meal_plan"][MealNames.dinner]
+    elif meal_choice == MealNames.snack:
+        meal_plan_dict = meal_plan_dict[0]["custom_daily_meal_plan"][MealNames.snack]
+    elif meal_choice == MealNames.drink:
+        meal_plan_dict = meal_plan_dict[0]["custom_daily_meal_plan"][MealNames.drink]
+    else:
+        meal_plan_dict = meal_plan_dict[0]["custom_daily_meal_plan"]
     return json.dumps(meal_plan_dict, indent=2)
+
+
+def store_diet_plan(user_id: int):
+    r = redis.Redis(host="localhost", port=6379, db=0)
+    r.hset(f"my-diet-plan:{user_id}", "diet_plan", get_user_meal_plans_as_json(user_id))
+
+
+def store_new_diet_plan(user_id: int, new_diet_plan: str):
+    r = redis.Redis(host="localhost", port=6379, db=0)
+    r.hset(f"my-diet-plan:{user_id}", "diet_plan", new_diet_plan)
+
+
+def get_cached_plan_json(
+    user_id: int,
+    include_ingredients: bool = True,
+    meal_choice: str = "",
+):
+    r = redis.Redis(host="localhost", port=6379, db=0)
+    # If include_ingredients is True, we can just return the cached plan
+    # else, we need drop all the ingredients from the cached plan
+    # if meal_choice is "", we return the cached plan as is
+    # else we need to get the value for the meal_choice key
+    return r.hget(f"my-diet-plan:{user_id}", "diet_plan")
+
+
+def rank_tools(user_input: str, tools: list):
+    vector_store = FAISS.from_documents(
+        [
+            Document(page_content=t.description, metadata={"index": i})
+            for i, t in enumerate(tools)
+        ],
+        get_embedding_model(ModelName.text_embedding_ada_002),
+    )
+    docs = vector_store.similarity_search(user_input, k=3)
+    return [tools[d.metadata["index"]] for d in docs]
+
+
+def get_user_meal_info_json(
+    user_id: int,
+    include_ingredients: bool,
+    include_nutrients: bool,
+    meal_choice: str,
+):
+    """
+    Given a user ID, query the database and return the user's diet plan.
+    """
+    meal_json = get_user_meal_plans_as_json(
+        user_id,
+        include_ingredients=True,
+        meal_choice=meal_choice,
+    )
+    meal_dict = json.loads(meal_json)
+    session = SessionLocal()
+    if include_nutrients:
+        nutrients = {
+            "calories": 0,
+            "fat": 0,
+            "cholesterol": 0,
+            "sodium": 0,
+            "carbs": 0,
+            "fiber": 0,
+            "sugar": 0,
+            "protein": 0,
+            "vitamin_a": 0,
+            "vitamin_c": 0,
+            "calcium": 0,
+            "iron": 0,
+        }
+        for ingredient in meal_dict["ingredients"]:
+            food = (
+                session.query(Food)
+                .filter(Food.id == ingredient["ingredient_id"])
+                .all()[0].__dict__
+            )
+            # set values even if they do not exist
+            nutrients["calories"] += int(food['Calories']) if food['Calories'] else 0
+            nutrients["fat"] += int(food['Fat_g']) if food['Fat_g'] else 0
+            nutrients["cholesterol"] += int(food['Cholesterol_mg']) if food['Cholesterol_mg'] else 0
+            nutrients["sodium"] += int(food['Sodium_mg']) if food['Sodium_mg'] else 0
+            nutrients["carbs"] += int(food['Carbohydrate_g']) if food['Carbohydrate_g'] else 0
+            nutrients["fiber"] += int(food['Fiber_g']) if food['Fiber_g'] else 0
+            nutrients["sugar"] += int(food['Sugars_g']) if food['Sugars_g'] else 0
+            nutrients["protein"] += int(food['Protein_g']) if food['Protein_g'] else 0
+            nutrients["vitamin_a"] += int(food['Vitamin_A_IU_IU']) if food['Vitamin_A_IU_IU'] else 0
+            nutrients["vitamin_c"] += int(food['Vitamin_C_mg']) if food['Vitamin_C_mg'] else 0
+            nutrients["calcium"] += int(food['Calcium_mg']) if food['Calcium_mg'] else 0
+            nutrients["iron"] += int(food['Iron_Fe_mg']) if food['Iron_Fe_mg'] else 0
+
+        # Add the convert the nutrition values to strings and add the proper units
+        nutrients_with_units = {
+            "calories": str(nutrients["calories"]) + " kcal",
+            "fat": str(nutrients["fat"]) + " g",
+            "cholesterol": str(nutrients["cholesterol"]) + " mg",
+            "sodium": str(nutrients["sodium"]) + " mg",
+            "carbs": str(nutrients["carbs"]) + " g",
+            "fiber": str(nutrients["fiber"]) + " g",
+            "sugar": str(nutrients["sugar"]) + " g",
+            "protein": str(nutrients["protein"]) + " g",
+            "vitamin_a": str(nutrients["vitamin_a"]) + " IU",
+            "vitamin_c": str(nutrients["vitamin_c"]) + " mg",
+            "calcium": str(nutrients["calcium"]) + " mg",
+            "iron": str(nutrients["iron"]) + " mg",
+        }
+        meal_dict["nutrients"] = nutrients_with_units
+    session.close()
+    if not include_ingredients:
+        del meal_dict["ingredients"]
+    meal_json = json.dumps(meal_dict, indent=2)
+    return meal_json
 
 
 def main():
