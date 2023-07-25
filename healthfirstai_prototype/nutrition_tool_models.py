@@ -64,8 +64,43 @@ class DietPlanInput(BaseModel):
 
 class EditDietPlanInput(BaseModel):
     """
-    Inputs for edit_diet_plan
+    Inputs for edit_entire_diet_plan
     """
 
     agent_input: str = Field(description="The input from the user")
     user_id: int = Field(description="User ID of the user")
+
+
+class EditBreakfastInput(BaseModel):
+    """
+    Inputs for edit_entire_diet_plan
+    """
+
+    agent_input: str = Field(description="The input from the user")
+    user_id: int = Field(description="User ID of the user")
+    edit_ingredients: bool = Field(
+        description="Whether to edit the breakfast ingredients"
+    )
+
+
+class EditLunchInput(BaseModel):
+    """
+    Inputs for edit_entire_diet_plan
+    """
+
+    agent_input: str = Field(description="The input from the user")
+    user_id: int = Field(description="User ID of the user")
+    edit_ingredients: bool = Field(description="Whether to edit the lunch ingredients")
+
+
+class EditDinnerInput(BaseModel):
+    """
+    Inputs for edit_entire_diet_plan
+    """
+
+    agent_input: str = Field(description="The input from the user")
+    user_id: int = Field(description="User ID of the user")
+    edit_ingredients: bool = Field(description="Whether to edit the dinner ingredients")
+
+
+# TODO: Experiment and see whether it is better to split up "Change Meal" and "Adjust meal ingredients". I have a feeling that would be better
