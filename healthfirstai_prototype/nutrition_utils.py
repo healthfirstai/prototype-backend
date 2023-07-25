@@ -1,13 +1,11 @@
-import psycopg2
 import json
+from typing import Any
 from datetime import date
 import redis
-from langchain.embeddings import OpenAIEmbeddings
 
 from healthfirstai_prototype.database import SessionLocal
 from healthfirstai_prototype.datatypes import (
     Food,
-    Nutrition_Vector,
     BaseDailyMealPlan,
     CustomDailyMealPlan,
     CustomDailyMealPlanAndMeal,
@@ -48,7 +46,7 @@ def create_new_custom_daily_meal_plan():
 
 def insert_into_relationship_table(
     custom_daily_meal_plan_id: int = 1,
-    base_daily_meal_plan_id=1,
+    base_daily_meal_plan_id: int = 1,
 ):
     """
     Insert into many-to-many relationship table for custom_daily_meal_plan and meal
@@ -72,7 +70,7 @@ def insert_into_relationship_table(
     return custom_daily_meal_plan_id
 
 
-def get_user_info_dict(user_id: int) -> dict:
+def get_user_info_dict(user_id: int) -> dict[str, Any]:
     """
     Given a user ID, query the database and return all of the user's information
     """
@@ -306,21 +304,30 @@ def get_user_meal_info_json(
             food = (
                 session.query(Food)
                 .filter(Food.id == ingredient["ingredient_id"])
-                .all()[0].__dict__
+                .all()[0]
+                .__dict__
             )
             # set values even if they do not exist
-            nutrients["calories"] += int(food['Calories']) if food['Calories'] else 0
-            nutrients["fat"] += int(food['Fat_g']) if food['Fat_g'] else 0
-            nutrients["cholesterol"] += int(food['Cholesterol_mg']) if food['Cholesterol_mg'] else 0
-            nutrients["sodium"] += int(food['Sodium_mg']) if food['Sodium_mg'] else 0
-            nutrients["carbs"] += int(food['Carbohydrate_g']) if food['Carbohydrate_g'] else 0
-            nutrients["fiber"] += int(food['Fiber_g']) if food['Fiber_g'] else 0
-            nutrients["sugar"] += int(food['Sugars_g']) if food['Sugars_g'] else 0
-            nutrients["protein"] += int(food['Protein_g']) if food['Protein_g'] else 0
-            nutrients["vitamin_a"] += int(food['Vitamin_A_IU_IU']) if food['Vitamin_A_IU_IU'] else 0
-            nutrients["vitamin_c"] += int(food['Vitamin_C_mg']) if food['Vitamin_C_mg'] else 0
-            nutrients["calcium"] += int(food['Calcium_mg']) if food['Calcium_mg'] else 0
-            nutrients["iron"] += int(food['Iron_Fe_mg']) if food['Iron_Fe_mg'] else 0
+            nutrients["calories"] += int(food["Calories"]) if food["Calories"] else 0
+            nutrients["fat"] += int(food["Fat_g"]) if food["Fat_g"] else 0
+            nutrients["cholesterol"] += (
+                int(food["Cholesterol_mg"]) if food["Cholesterol_mg"] else 0
+            )
+            nutrients["sodium"] += int(food["Sodium_mg"]) if food["Sodium_mg"] else 0
+            nutrients["carbs"] += (
+                int(food["Carbohydrate_g"]) if food["Carbohydrate_g"] else 0
+            )
+            nutrients["fiber"] += int(food["Fiber_g"]) if food["Fiber_g"] else 0
+            nutrients["sugar"] += int(food["Sugars_g"]) if food["Sugars_g"] else 0
+            nutrients["protein"] += int(food["Protein_g"]) if food["Protein_g"] else 0
+            nutrients["vitamin_a"] += (
+                int(food["Vitamin_A_IU_IU"]) if food["Vitamin_A_IU_IU"] else 0
+            )
+            nutrients["vitamin_c"] += (
+                int(food["Vitamin_C_mg"]) if food["Vitamin_C_mg"] else 0
+            )
+            nutrients["calcium"] += int(food["Calcium_mg"]) if food["Calcium_mg"] else 0
+            nutrients["iron"] += int(food["Iron_Fe_mg"]) if food["Iron_Fe_mg"] else 0
 
         # Add the convert the nutrition values to strings and add the proper units
         nutrients_with_units = {
