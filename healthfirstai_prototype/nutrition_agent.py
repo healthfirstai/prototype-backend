@@ -10,16 +10,22 @@ from langchain.memory import (
 )
 from langchain.agents import AgentExecutor, OpenAIFunctionsAgent
 from langchain.schema import SystemMessage
+from langchain.agents.agent_toolkits.json.prompt import JSON_PREFIX, JSON_SUFFIX
+from langchain.agents.mrkl.prompt import FORMAT_INSTRUCTIONS
 from langchain.agents import create_json_agent
 from langchain.agents.agent_toolkits import JsonToolkit
 from langchain.llms.openai import OpenAI
 from langchain.tools.json.tool import JsonSpec
-from healthfirstai_prototype.nutrition_agent_tools import (
+from healthfirstai_prototype.nutrition_tools import (
     UserInfoTool,
     DietPlanTool,
     EditDietPlanTool,
+    BreakfastTool,
+    LunchTool,
+    DinnerTool,
 )
 from healthfirstai_prototype.utils import get_model
+from healthfirstai_prototype.nutrition_utils import rank_tools
 from healthfirstai_prototype.util_models import ModelName
 from healthfirstai_prototype.nutrition_templates import (
     SYSTEM_PROMPT,
@@ -29,29 +35,43 @@ import langchain
 
 # NOTE: Imports for new agent
 from langchain.prompts import MessagesPlaceholder
-from langchain.memory import ConversationBufferMemory
-from langchain import (
-    OpenAI,
-)
-from langchain.agents import initialize_agent, Tool
+from langchain.agents import initialize_agent
 from langchain.agents import AgentType
-from langchain.chat_models import ChatOpenAI
 
 langchain.debug = False
 
 
-def init_agent(user_input: str, user_id: int = 1, session_id="my-session"):
+def init_agent(
+    user_input: str,
+    user_id: int = 1,
+    session_id="my-session",
+) -> AgentExecutor:
+    """
+    Initialize and configure the conversation agent with the provided user input.
+
+    Parameters:
+        user_input (str): The user's input text for the conversation.
+        user_id (int, optional): The ID of the user. Default is 1.
+        session_id (str, optional): The session ID for maintaining conversation history. Default is "my-session".
+
+    Returns:
+        AgentExecutor: An instance of the conversation agent executor ready to handle user interactions.
+    """
     tools = [
         DietPlanTool(),
         UserInfoTool(),
         EditDietPlanTool(),
+        BreakfastTool(),
+        LunchTool(),
+        DinnerTool(),
     ]
+    tools = rank_tools(user_input, tools)
     message_history = RedisChatMessageHistory(session_id=session_id)
 
     memory = ConversationTokenBufferMemory(
         llm=get_model(ModelName.gpt_3_5_turbo_0613),
         chat_memory=message_history,
-        max_token_limit=2000,
+        max_token_limit=1000,
     )
 
     history = memory.load_memory_variables({"input": user_input}).get("history")
@@ -71,7 +91,7 @@ def init_agent(user_input: str, user_id: int = 1, session_id="my-session"):
     return AgentExecutor.from_agent_and_tools(
         agent=agent,
         tools=tools,
-        verbose=False,
+        verbose=True,
         memory=memory,
     )
 
@@ -145,6 +165,8 @@ def start_nutrition_temp_agent(json_string):
             model="text-davinci-003",
             temperature=0,
         ),
+        prefix=JSON_PREFIX,
+        suffix=JSON_SUFFIX,
         toolkit=json_toolkit,
         verbose=True,
     )
