@@ -59,13 +59,60 @@ path_to_pdf = "../notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf"
 reader = PdfReader(path_to_pdf)
 
 
-# FIXME: add datatypes
-def parse_user_info(user_data):
+def parse_user_info(user_data) -> dict[str, str]:
     """
-    this function is used to get the user's personal information
+    this function is used to parse the user's personal information
+    :param user_data: the user's personal information
+    :return: a dictionary containing the user's personal information
+    NOTE: this function is not used yet
     """
-    # I dont know how does the user's info look like. Need to reconfigure the docker-compose file, especially the mount volume part
-    pass
+    return {
+        "height": str(user_data.height),
+        "weight": str(user_data.weight),
+        "gender": str(user_data.gender),
+        "age": str(user_data.age),
+        "city_id": str(user_data.city_id),
+        "country_id": str(user_data.country_id),
+    }
+
+
+def set_template(
+    height: str,
+    weight: str,
+    gender: str,
+    age: str,
+    height_unit: str = "cm",
+    weight_unit: str = "kg",
+):
+    """
+    this function is setting the template for the chat to use given user's personal information
+    NOTE: this function is not used yet
+    :param height: user's height
+    :param weight: user's weight
+    :param gender: user's gender
+    :param age: user's age
+    :param height_unit: user's height unit
+    :param weight_unit: user's weight unit
+    :return: a list of messages using the formatted prompt
+    """
+    system_message_template = "You are a helpful nutrition and exercise assistant that takes into the considerations user's height as {user_height}, user weight as {user_weight}, user's gender as {user_gender}, and user's {user_age} to provide a user with answers to their questions."
+    system_message_prompt = SystemMessagePromptTemplate.from_template(
+        system_message_template
+    )
+
+    human_template = "{text}"
+    human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+
+    chat_prompt = ChatPromptTemplate.from_messages(
+        [system_message_prompt, human_message_prompt]
+    )
+
+    return chat_prompt.format_prompt(
+        user_height=height + " " + height_unit,
+        user_weight=weight + " " + weight_unit,
+        user_gender=gender,
+        user_age=age + " years old",
+    ).to_messages()
 
 
 def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
