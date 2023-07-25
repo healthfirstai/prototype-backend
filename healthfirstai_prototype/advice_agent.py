@@ -134,6 +134,18 @@ def template_to_assess_search_results(
     )
 
 
+def run_assessment_chain(prompt_template: str) -> str:
+    llm = Cohere(
+        cohere_api_key=COHERE_API_KEY,
+        temperature=0,
+        verbose=False,
+        model="command-light",
+    )  # type: ignore
+    llm_chain = LLMChain(prompt=prompt_template, llm=llm)  # type: ignore
+    response = llm_chain.run()
+    return response
+
+
 def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
     """
     this function is used to collect raw text from the PDF file
