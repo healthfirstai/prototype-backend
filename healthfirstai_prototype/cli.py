@@ -142,7 +142,10 @@ def get_meal(
 
 
 @app.command()
-def test_agent(uid: int = 1, input: str = "What am I having for dinner?"):
+def test_agent(
+    input: str,
+    uid: int = 1,
+):
     """
     Test ReAct Diet Plan Agent
     """
