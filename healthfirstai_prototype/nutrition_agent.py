@@ -48,6 +48,7 @@ def init_agent(
     user_input: str,
     user_id: int = 1,
     session_id="my-session",
+    verbose=True,
 ) -> AgentExecutor:
     """
     Initialize and configure the conversation agent with the provided user input.
@@ -97,7 +98,7 @@ def init_agent(
     return AgentExecutor.from_agent_and_tools(
         agent=agent,
         tools=tools,
-        verbose=True,
+        verbose=verbose,
         memory=memory,
     )
 

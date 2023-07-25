@@ -77,6 +77,12 @@ Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db
    source .venv/bin/activate.[fish|csh] # For other shell types
    ```
 
+6. Save to requirements.txt
+
+   ```sh
+   poetry export -f requirements.txt --output requirements.txt
+   ```
+
 ### CLI Usage
 
 1. Activate virtual environment

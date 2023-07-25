@@ -1,63 +1,58 @@
-# NOTE: This is an example of a FastAPI server.
 from enum import Enum
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
+from healthfirstai_prototype.nutrition_agent import init_agent
 
 app = FastAPI()
 
 
-# NOTE: Example of a Enum class
-class ExecName(str, Enum):
-    sql_chain = "sql_chain"
-    standard_chain = "std_chain"
-    sequential_chain = "seq_chain"
-    sql_agent = "sql_agent"
-
-
-# NOTE: Example of a Pydantic Data Model
 class UserInput(BaseModel):
-    user_input: str = ""
-    exec_type: ExecName = ExecName.sql_chain
+    user_input: str
+    uid: int
+    session_id: str
     verbose: bool = False
-
-
-class UserInputInteractive(BaseModel):
-    user_input: str = ""
-    sql_input: str = ""
-    included_tables: list[str] | None = []
-    verbose: bool = True
 
 
 @app.get("/")
 async def root():
-    return {"status": "Hello world!"}
+    return {"status": "Web server is running"}
 
 
-# NOTE: Example of a POST endpoint and its corresponding documentation
-@app.post("/chat_to_sql_interactive/")
-async def chat_to_sql_interactive(user_input: UserInput):
+@app.post("/chat_agent/")
+async def chat_agent(user_input: UserInput):
     """
-    This is the main endpoint for interactive chat to SQL conversion.
+    Initiate an interactive chat session.
 
-    Args:
-        - user_input (UserInputInteractive): An object representing the user input.
-            - user_input.user_input (str): The user's input for the chat.
-            - user_input.sql_input (str, optional): The initial SQL query (if provided).
-            - user_input.included_tables (List[str], optional): List of included tables in the SQL query.
-            - user_input.verbose (bool, optional): Flag indicating verbose output.
-            - user_input.model_name (str, optional): The name of the model used for conversion.
+    POST Parameters:
+    - user_input (str): The user's input text for the conversation. It's a required field.
+    - uid (int): The ID of the user. It's a required field.
+    - session_id (str): The session ID for maintaining conversation history. It's a required field.
+    - verbose (bool, optional): If set to True, the function provides more detailed output. Default is False.
 
-    Returns:
-        dict: A JSON object with the following keys:
-            - "sql" (str): The revised SQL query.
-            - "ok" (bool): Whether the query was successful.
-            - "error" (str): The error message if the query was unsuccessful.
-            - "record_id" (str): The record ID of the query.
-
-    Raises:
-        HTTPException: If user input is missing or included tables are missing when SQL query is provided.
+    Raises HTTPException:
+    - status_code: 404
+    - detail: "User input not provided" / "User ID not provided" / "Session ID not provided"
     """
     if not user_input.user_input:
         raise HTTPException(status_code=404, detail="User input not provided")
+    if not user_input.uid:
+        raise HTTPException(status_code=404, detail="User ID not provided")
+    if not user_input.session_id:
+        raise HTTPException(status_code=404, detail="Session ID not provided")
 
-    # NOTE: Return awaited value
+    agent_object = init_agent(
+        user_input.user_input,
+        user_input.uid,
+        user_input.session_id,
+        verbose=user_input.verbose,
+    )
+    return {"agent_response": agent_object(user_input.user_input)}
+
+
+# TODO: Add endpoint to get similar foods
+
+# TODO: Add endpoint to get meal info
+
+# TODO: Add endpoint to get food info
+
+# TODO: Add endpoint to confirm diet plan changes

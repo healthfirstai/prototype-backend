@@ -13,6 +13,7 @@ authors = ["Lawrence Lim <ll4715@nyu.edu>"]
 readme = "README.md"
 packages = [{include = "healthfirstai_prototype"}]
 
+# TODO: Organize dependencies better
 [tool.poetry.dependencies]
 python = "^3.11"
 langchain = "^0.0.220"
@@ -38,6 +39,7 @@ mkdocs-material = "^9.1.19"
 mkdocstrings = {extras = ["python"], version = "^0.22.0"}
 typer-cli = {extras = ["all"], version = "^0.0.13"}
 rich = "^13.4.2"
+uvicorn = "^0.23.1"
 
 
 [tool.poetry.group.dev.dependencies]
