@@ -108,6 +108,32 @@ def set_template(
     ).to_messages()
 
 
+def template_to_assess_search_results(
+    google_search_result: str = "",
+    faiss_search_result: str = "",
+    prompt: str = "",
+):
+    """
+    this function is used to assess the outputs from the two search engines
+    :param google_search_result: the response from the SerpAPI's query to Google
+    :param faiss_search_result: the response from the LLM chain object
+    :return: a list of messages using the formatted prompt
+    """
+    system_message_template = """\
+    You are a helpful assistant which helps to assess the relevance of the Google search result: {google_search_result}, and the knowledge base search result: {faiss_search_result} regarding the following prompt / question: {prompt}. 
+    Please look at both of the search results regarding the prompt I gave you, and return to me that particular result without modifying it. If you think they are both good enough, please return the knowledge base search result, otherwise return the Google search result. 
+    Do not make anything up.
+    """
+
+    system_message_prompt = PromptTemplate.from_template(system_message_template)
+
+    return system_message_prompt.format(
+        google_search_result=google_search_result,
+        faiss_search_result=faiss_search_result,
+        prompt=prompt,
+    )
+
+
 def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
     """
     this function is used to collect raw text from the PDF file
