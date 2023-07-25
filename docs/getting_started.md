@@ -1,4 +1,10 @@
-# Getting Started
+# HealthFirst AI Prototype
+
+## About The Project
+
+Prototype for our HealthFirst AI web app.
+
+## Getting Started
 
 This is an example of how you may give instructions on setting up your project locally.
 To get a local development instance up and running follow these simple steps.

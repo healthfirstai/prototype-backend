@@ -29,13 +29,11 @@ plugins:
   - mkdocstrings
 
 nav:
-  - Home: index.md
-  - About: about.md
   - Getting Started: getting_started.md
-  - CLI: cli.md
   - Agents:
       - Nutrition Agent: nutrition-agent-reference.md
       - Exercise Agent: exercise-agent-reference.md
   - Toolkits:
       - Nutrition Tools: nutrition-tools-reference.md
       - Exercise Tools: exercise-tools-reference.md
+  - Command Line Interface: cli.md
