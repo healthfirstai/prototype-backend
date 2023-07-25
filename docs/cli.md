@@ -14,13 +14,29 @@ $ cli [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
+* `cache-diet-plan`: Stores diet plan as it is in the SQL...
 * `get-cached-plan`: Get diet plan from Redis
 * `get-diet-plan`: Get a meal plan from the database
 * `get-meal`: Get meal from the database given meal name
 * `get-user-info`: Get user info from the database
 * `reinsert-vectors`: Delete all vectors in nutrition_vectors...
-* `store-plan`: Store a plan in the database
+* `test-advice-agent`: Test the core functionality of the advice...
 * `test-agent`: Test ReAct Diet Plan Agent
+
+## `cli cache-diet-plan`
+
+Stores diet plan as it is in the SQL database in Redis
+
+**Usage**:
+
+```console
+$ cli cache-diet-plan [OPTIONS]
+```
+
+**Options**:
+
+* `--uid INTEGER`: [default: 1]
+* `--help`: Show this message and exit.
 
 ## `cli get-cached-plan`
 
@@ -100,19 +116,18 @@ $ cli reinsert-vectors [OPTIONS]
 
 * `--help`: Show this message and exit.
 
-## `cli store-plan`
+## `cli test-advice-agent`
 
-Store a plan in the database
+Test the core functionality of the advice agent
 
 **Usage**:
 
 ```console
-$ cli store-plan [OPTIONS]
+$ cli test-advice-agent [OPTIONS]
 ```
 
 **Options**:
 
-* `--uid INTEGER`: [default: 1]
 * `--help`: Show this message and exit.
 
 ## `cli test-agent`

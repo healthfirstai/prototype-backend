@@ -33,7 +33,11 @@ nav:
   - Agents:
       - Nutrition Agent: nutrition-agent-reference.md
       - Exercise Agent: exercise-agent-reference.md
+  - Chains:
+      - Advice Chain: advice-chain-reference.md
+      - Diet Plan Chain: diet-plan-chain-reference.md
   - Toolkits:
       - Nutrition Tools: nutrition-tools-reference.md
       - Exercise Tools: exercise-tools-reference.md
   - Command Line Interface: cli.md
+  - Utility Functions: utils.md
