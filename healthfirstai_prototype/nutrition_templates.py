@@ -17,12 +17,12 @@ SYSTEM_PROMPT = """
 """
 
 EDIT_JSON_TEMPLATE = """
-    Given the following diet plan in JSON format:
+    Given the following {meal} plan in JSON format:
     {user_diet_plan_json}
 
-    Please edit the diet plan according to the following instructions: {agent_input}
+    Please edit the {meal} plan according to the following instructions: {agent_input}
 
-    Return the edited diet plan in syntactically correct JSON format.
+    Return the edited {meal} plan in syntactically correct JSON format.
     """
 
 DIET_AGENT_PROMPT_TEMPLATE = """
