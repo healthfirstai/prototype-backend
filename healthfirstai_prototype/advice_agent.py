@@ -16,6 +16,7 @@ from langchain.prompts import (
     PromptTemplate,
 )
 from langchain.schema import BaseMessage
+from healthfirstai_prototype.datatypes import User
 
 # NOTE: Use this class in the future to implement the evaluation techniques
 from langchain.evaluation import QAEvalChain
@@ -41,12 +42,16 @@ path_to_pdf = "./notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf"
 reader = PdfReader(path_to_pdf)
 
 
-def parse_user_info(user_data) -> dict[str, str]:
+# NOTE: this function is not used yet
+def parse_user_info(user_data: User) -> dict[str, str]:
     """
-    this function is used to parse the user's personal information
-    :param user_data: the user's personal information
-    :return: a dictionary containing the user's personal information
-    NOTE: this function is not used yet
+    This function is used to parse the user's personal information
+
+    Params:
+        user_data (int) : User's personal information
+
+    Returns:
+        a dictionary containing the user's personal information
     """
     return {
         "height": str(user_data.height),
@@ -68,17 +73,25 @@ def set_template(
     text: str = "This is a default query.",
 ) -> list[BaseMessage]:
     """
-    this function is setting the template for the chat to use given user's personal information
-    NOTE: this function is not used yet
-    :param height: user's height
-    :param weight: user's weight
-    :param gender: user's gender
-    :param age: user's age
-    :param height_unit: user's height unit
-    :param weight_unit: user's weight unit
-    :return: a list of messages using the formatted prompt
+    This function is setting the template for the chat to use given user's personal information
+
+    Params:
+        height (str) : user's height
+        weight (str) : user's weight
+        gender (str) : user's gender
+        age (str) : user's age
+        height_unit (str, optional) : user's height unit
+        weight_unit (str, optional) : user's weight unit
+        text (str, optional) : The user's query / question
+
+    Returns:
+        a list of messages using the formatted prompt
     """
-    system_message_template = "You are a helpful nutrition and exercise assistant that takes into the considerations user's height as {user_height}, user weight as {user_weight}, user's gender as {user_gender}, and user's {user_age} to provide a user with answers to their questions. If you don't have a specific answer, just say I don't know, and do not make anything up."
+    system_message_template = """
+    You are a helpful nutrition and exercise assistant that takes into the considerations user's height as {user_height}, 
+    user weight as {user_weight}, user's gender as {user_gender}, and user's {user_age} to provide a user with answers to their questions. 
+    If you don't have a specific answer, just say I don't know, and do not make anything up.
+    """
     system_message_prompt = SystemMessagePromptTemplate.from_template(
         system_message_template
     )
@@ -104,10 +117,15 @@ def template_to_assess_search_results(
     prompt: str = "",
 ) -> str:
     """
-    this function is used to assess the outputs from the two search engines
-    :param google_search_result: the response from the SerpAPI's query to Google
-    :param faiss_search_result: the response from the LLM chain object
-    :return: a list of messages using the formatted prompt
+    This function is used to assess the outputs from the two search engines
+
+    Params:
+        google_search_result (str, optional) : The response from the SerpAPI's query to Google
+        faiss_search_result (str, optional) : The response from the LLM chain object
+        prompt (str, optional) : The user's query / question
+
+    Returns:
+        a list of messages using the formatted prompt
     """
     system_message_template = """\
     You are a helpful assistant which helps to assess the relevance of the Google search result: {google_search_result}, and the knowledge base search result: {faiss_search_result} regarding the following prompt / question: {prompt}. 
@@ -125,6 +143,17 @@ def template_to_assess_search_results(
 
 
 def run_assessment_chain(prompt_template: str) -> str:
+    """
+    This function is used to run the assessment chain which is simply a single chain object powered
+    by the LLM which is supposed to check the relevance of the search results from the two different search methods
+    and provide us with the best result.
+
+    Params:
+        prompt_template (str): The template for the assessment chain will use
+
+    Returns:
+        (str): The response from the LLM chain object
+    """
     llm = Cohere(
         cohere_api_key=COHERE_API_KEY,
         temperature=0,
@@ -138,9 +167,13 @@ def run_assessment_chain(prompt_template: str) -> str:
 
 def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
     """
-    this function is used to collect raw text from the PDF file
-    :param reader: the PDF file in the PDFReader format
-    :return: raw text collected from PDF file
+    This function is used to collect raw text from the PDF file
+
+    Params:
+        reader (PdfReader) : The PDF file in the PDFReader format
+
+    Returns:
+        raw text collected from PDF file
     """
     raw_text = ""
     for i, page in enumerate(reader.pages):
@@ -152,9 +185,13 @@ def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
 
 def split_text(raw_text: str) -> list[str]:
     """
-    this function is used to split the raw text into chunks
-    :param raw_text: raw text collected from the PDF file
-    :return: a list of text chunks
+    This function is used to split the raw text into chunks
+
+    Params:
+        raw_text (str) : raw text collected from the PDF file
+
+    Returns:
+        a list of text chunks
     """
     text_splitter = CharacterTextSplitter(
         separator="\n",
@@ -166,12 +203,16 @@ def split_text(raw_text: str) -> list[str]:
     return text_splitter.split_text(raw_text)
 
 
-# FIXME: think of how this fucntion's output could be stored in Redis DB
+# NOTE: think of how this fucntion's output could be stored in Weaviate
 def embed_text(texts: list[str]) -> FAISS:
     """
-    this function is embedding the text using the Cohere embedding + FAISS library
-    :param texts: a list of text chunks
-    :return: FAISS wrapper from raw documents
+    This function is embedding the text using the Cohere embedding + FAISS library
+
+    Params:
+        texts (list[str]) : a list of text chunks
+
+    Returns:
+        FAISS wrapper from raw documents
     """
     # Download embeddings from Cohere
     embeddings = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
@@ -183,9 +224,13 @@ def embed_text(texts: list[str]) -> FAISS:
 
 def load_prerequisites_for_vector_search(reader: PdfReader) -> FAISS:
     """
-    this function is used to load the prerequisites for the agent to use
-    :param reader: the PDF file in the PDFReader format
-    :return: FAISS wrapper from raw documents
+    This function is used to load the prerequisites for the agent to use
+
+    Params:
+        reader (PdfReader) : The PDF file in the PDFReader format
+
+    Returns:
+        FAISS wrapper from raw documents
     """
     raw_text = collect_raw_text_from_pdf_data(reader)
     texts = split_text(raw_text)
@@ -195,9 +240,13 @@ def load_prerequisites_for_vector_search(reader: PdfReader) -> FAISS:
 
 def load_chain(chain_type: str = "map_reduce") -> BaseCombineDocumentsChain:
     """
-    this function is loading the chain and sets it up for the agent to use
-    :param chain_type: the type of chain to use
-    :return: the LLM chain object
+    This function is loading the chain and sets it up for the agent to use
+
+    Params:
+        chain_type (str, optional) : The type of chain to use
+
+    Returns:
+        The LLM chain object
     """
     chain = load_qa_chain(
         Cohere(cohere_api_key=COHERE_API_KEY, verbose=True),  # type: ignore
@@ -212,11 +261,15 @@ def query_based_similarity_search(
     query: str, docsearch: FAISS, chain: BaseCombineDocumentsChain
 ) -> str:
     """
-    this function is used to search through the knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
-    :param query: the user's query / question
-    :param docsearch: FAISS wrapper from raw documents to search from based on the similarity search algos
-    :param chain: the LLM chain object
-    :return: the response from the LLM chain object
+    This function is used to search through the knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
+
+    Params:
+        query (str) : The user's query / question
+        docsearch (FAISS) : FAISS wrapper from raw documents to search from based on the similarity search algos
+        chain (BaseCombineDocumentsChain) : The LLM chain object
+
+    Returns:
+        The response from the LLM chain object
     """
     docs = docsearch.similarity_search(query)
     response = chain.run(input_documents=docs, question=query)
@@ -225,9 +278,13 @@ def query_based_similarity_search(
 
 def faiss_vector_search(query: str) -> str:
     """
-    this function is used to load the chain and sets it up for the agent to use
-    :param query: the user's query / question
-    :return: the response from the LLM chain object
+    This function is used to load the chain and sets it up for the agent to use
+
+    Params:
+        query (str) : The user's query / question
+
+    Returns:
+        The response from the LLM chain object
     """
     chain = load_chain()
     docsearch = load_prerequisites_for_vector_search(reader)
@@ -237,26 +294,19 @@ def faiss_vector_search(query: str) -> str:
 
 def serp_api_search(query: str) -> str:
     """
-    this function is used to search through the internet (SerpAPI)
+    This function is used to search through the internet (SerpAPI)
     for nutrition/exercise information in case it doesn't require further clarification,
     but a simple univocal answer.
-    :param query: the user's query / question
-    :return: the response from the SerpAPI's query to Google
+
+    Params:
+        query (str) : The user's query / question
+
+    Returns:
+        The response from the SerpAPI's query to Google
     """
     search = GoogleSerperAPIWrapper(serper_api_key=SERPER_API_KEY)
     response = search.run(query)
     return response
-
-
-# def scoring_with_faiss(query, faiss_search_result, google_search_result):
-#     evaluator = load_evaluator("pairwise_string", requires_reference=True)
-
-#     evaluator.evaluate_string_pairs(
-#         prediction="there are three dogs",
-#         prediction_b="4",
-#         input="how many dogs are in the park?",
-#         reference="four",
-#     )
 
 
 # testing the functions and putting them up together
