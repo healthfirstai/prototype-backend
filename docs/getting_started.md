@@ -32,7 +32,7 @@ supabase start
 
 Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db), for other stuff.
 
-### Deploy with Docker
+## Deploy with Docker
 
 1. Ensure you have [Docker](https://www.docker.com/) installed.
 
@@ -77,13 +77,7 @@ Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db
    source .venv/bin/activate.[fish|csh] # For other shell types
    ```
 
-6. Save to requirements.txt
-
-   ```sh
-   poetry export --without-hashes --format=requirements.txt > requirements.txt
-   ```
-
-### CLI Usage
+## CLI Usage
 
 1. Activate virtual environment
 
@@ -97,3 +91,24 @@ Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db
    ```sh
    cli # or python3 healthfirstai_prototype/cli.py
    ```
+
+## Useful Commands for Development
+
+- Save dependencies to requirements.txt
+
+  ```sh
+  poetry export --without-hashes --format=requirements.txt > requirements.txt
+  ```
+
+- Build and serve documentation
+
+  ```sh
+  mkdocs build
+  mkdocs serve -a localhost:9000
+  ```
+
+- Start Streamlit app
+
+  ```sh
+  streamlit run healthfirstai_prototype/streamlit_frontend/🏠_Home.py
+  ```
