@@ -16,7 +16,7 @@ import requests
 import json
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
-from healthfirstai_prototype.datatypes import User
+from healthfirstai_prototype.data_models import User
 from langchain.embeddings.cohere import CohereEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
@@ -138,7 +138,7 @@ def split_text(raw_text: str) -> list[str]:
     return text_splitter.split_text(raw_text)
 
 
-# FIXME: think of how this fucntion's output could be stored in Redis DB
+# FIXME: think of how this function's output could be stored in Redis DB
 def embed_text(texts: list[str]) -> FAISS:
     """
     this function is embedding the text using the Cohere embedding + FAISS library

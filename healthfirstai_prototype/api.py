@@ -1,7 +1,15 @@
+"""FastAPI server for HealthFirstAI prototype.
+
+This file contains the FastAPI server for the HealthFirstAI prototype. It provides the following endpoints:
+
+- GET /: Returns a JSON object with the status of the web server.
+- POST /chat_agent/: Returns a JSON object with the response from the chat agent.
+
+"""
 from enum import Enum
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
-from healthfirstai_prototype.nutrition_agent import init_agent
+from healthfirstai_prototype.chat_agent import init_agent
 
 app = FastAPI()
 
@@ -55,4 +63,4 @@ async def chat_agent(user_input: UserInput):
 
 # TODO: Add endpoint to get food info
 
-# TODO: Add endpoint to confirm diet plan changes
+# TODO: Add endpoint to confirm diet plan changes and write to SQL database

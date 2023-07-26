@@ -158,5 +158,5 @@ def generate_schedule_json(user_id):
 
 if __name__ == '__main__':
     generate_schedule_json(1)
-    # OPEN_AI_API_KEY = os.getenv('OPEN_AI_API_KEY')
-    # llm = OpenAI(temperature=0, openai_api_key=OPEN_AI_API_KEY)
+    OPEN_AI_API_KEY = os.getenv('OPEN_AI_API_KEY')
+    llm = OpenAI(temperature=0, openai_api_key=OPEN_AI_API_KEY)

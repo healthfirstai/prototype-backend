@@ -4,6 +4,9 @@ from pydantic import BaseModel, Field
 class UserInfoInput(BaseModel):
     """
     Inputs for get_user_info
+
+    Attributes:
+        user_id: User ID of the user
     """
 
     user_id: int = Field(description="User ID of the user")
@@ -12,6 +15,11 @@ class UserInfoInput(BaseModel):
 class DinnerInput(BaseModel):
     """
     Inputs for get_dinner
+
+    Attributes:
+        user_id: User ID of the user
+        include_ingredients: Whether to include the ingredients in the dinner description
+        include_nutrients: Whether to include nutrient information about dinner in the breakfast description
     """
 
     user_id: int = Field(description="User ID of the user")
@@ -26,6 +34,11 @@ class DinnerInput(BaseModel):
 class LunchInput(BaseModel):
     """
     Inputs for get_lunch
+
+    Attributes:
+        user_id: User ID of the user
+        include_ingredients: Whether to include the ingredients in the lunch description
+        include_nutrients: Whether to include nutrient information about lunch in the breakfast description
     """
 
     user_id: int = Field(description="User ID of the user")
@@ -40,6 +53,11 @@ class LunchInput(BaseModel):
 class BreakfastInput(BaseModel):
     """
     Inputs for get_breakfast
+
+    Attributes:
+        user_id: User ID of the user
+        include_ingredients: Whether to include the ingredients in the breakfast description
+        include_nutrients: Whether to include nutrient information about breakfast in the breakfast description
     """
 
     user_id: int = Field(description="User ID of the user")
@@ -54,6 +72,10 @@ class BreakfastInput(BaseModel):
 class DietPlanInput(BaseModel):
     """
     Inputs for get_diet_plan
+
+    Attributes:
+        user_id: User ID of the user
+        include_ingredients: Whether to include the ingredients in the meal plan
     """
 
     user_id: int = Field(description="User ID of the user")
@@ -65,6 +87,10 @@ class DietPlanInput(BaseModel):
 class EditDietPlanInput(BaseModel):
     """
     Inputs for edit_entire_diet_plan
+
+    Attributes:
+        agent_input: The input from the user
+        user_id: User ID of the user
     """
 
     agent_input: str = Field(description="The input from the user")
@@ -74,6 +100,10 @@ class EditDietPlanInput(BaseModel):
 class EditBreakfastInput(BaseModel):
     """
     Inputs for edit_entire_diet_plan
+
+    Attributes:
+        agent_input: The input from the user
+        user_id: User ID of the user
     """
 
     agent_input: str = Field(description="The input from the user")
@@ -86,6 +116,11 @@ class EditBreakfastInput(BaseModel):
 class EditLunchInput(BaseModel):
     """
     Inputs for edit_entire_diet_plan
+
+    Attributes:
+        agent_input: The input from the user
+        user_id: User ID of the user
+        edit_ingredients: Whether to edit the lunch ingredients
     """
 
     agent_input: str = Field(description="The input from the user")
@@ -96,11 +131,13 @@ class EditLunchInput(BaseModel):
 class EditDinnerInput(BaseModel):
     """
     Inputs for edit_entire_diet_plan
+
+    Attributes:
+        agent_input: The input from the user
+        user_id: User ID of the user
+        edit_ingredients: Whether to edit the dinner ingredients
     """
 
     agent_input: str = Field(description="The input from the user")
     user_id: int = Field(description="User ID of the user")
     edit_ingredients: bool = Field(description="Whether to edit the dinner ingredients")
-
-
-# TODO: Experiment and see whether it is better to split up "Change Meal" and "Adjust meal ingredients". I have a feeling that would be better
