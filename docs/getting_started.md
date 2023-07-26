@@ -104,11 +104,17 @@ Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db
 
   ```sh
   mkdocs build
-  mkdocs serve -a localhost:9000
+  mkdocs serve -a localhost:9000 # Runs on port 9000
   ```
 
 - Start Streamlit app
 
   ```sh
-  streamlit run healthfirstai_prototype/streamlit_frontend/🏠_Home.py
+  streamlit run healthfirstai_prototype/streamlit_frontend/🏠_Home.py # Runs on port 8501
+  ```
+
+- Start FastAPI Development Web Server
+
+  ```sh
+  uvicorn healthfirstai_prototype.api:app --reload # Runs on port 8000
   ```

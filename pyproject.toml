@@ -38,6 +38,8 @@ mkdocs-material = "^9.1.19"
 mkdocstrings = {extras = ["python"], version = "^0.22.0"}
 rich = "^13.4.2"
 uvicorn = "^0.23.1"
+streamlit = "^1.25.0"
+watchdog = "^3.0.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.23.3"
