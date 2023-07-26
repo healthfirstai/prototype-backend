@@ -1,4 +1,9 @@
-# NOTE: This is an example of prompt templates for our langchain agents
+"""Nutrition Templates
+
+Prompt templates used in agents for the nutrition feature.
+
+"""
+
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from langchain.prompts.prompt import PromptTemplate
 
