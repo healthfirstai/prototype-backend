@@ -1,16 +1,19 @@
 from PyPDF2 import PdfReader
-from healthfirstai_prototype.datatypes import User
+from healthfirstai_prototype.data_models import User
 from langchain.embeddings.cohere import CohereEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
 
 # NOTE: Use this class in the future to implement the evaluation techniques
 from langchain.evaluation import QAEvalChain
-from healthfirstai_prototype.advice_agent import COHERE_API_KEY
+import os
+
+COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
+SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
 
 
 def read_pdf(
-    path_to_pdf: str = "./notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf",
+    path_to_pdf: str = "../notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf",
 ) -> PdfReader:
     """
     This function is simply taking the path to the PDF file and returning the PDFReader object

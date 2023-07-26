@@ -1,11 +1,15 @@
 import os
 from dotenv import load_dotenv
-from healthfirstai_prototype.advice_chains import (
-    faiss_vector_search,
-    serp_api_search,
-)
-
+from langchain.utilities import GoogleSerperAPIWrapper
 from healthfirstai_prototype.advice_tools import read_pdf
+from healthfirstai_prototype.advice_chains import (
+    load_chain,
+    query_based_similarity_search,
+)
+from healthfirstai_prototype.advice_tools import (
+    load_prerequisites_for_vector_search,
+    read_pdf,
+)
 
 """
 this agent is created for a number of goals/functions. the primary goal for this file is to provide a way to process user queries which require
@@ -22,6 +26,41 @@ load_dotenv()
 # Load API keys
 COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
 SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
+
+
+def faiss_vector_search(query: str) -> str:
+    """
+    This function is used to load the chain and sets it up for the agent to use
+
+    Params:
+        query (str) : The user's query / question
+        reader (PdfReader) : The PDF file in the PDFReader format
+
+    Returns:
+        The response from the LLM chain object
+    """
+    reader = read_pdf()
+    chain = load_chain()
+    docsearch = load_prerequisites_for_vector_search(reader)
+    response = query_based_similarity_search(query, docsearch, chain)
+    return response
+
+
+def serp_api_search(query: str) -> str:
+    """
+    This function is used to search through the internet (SerpAPI)
+    for nutrition/exercise information in case it doesn't require further clarification,
+    but a simple univocal answer.
+
+    Params:
+        query (str) : The user's query / question
+
+    Returns:
+        The response from the SerpAPI's query to Google
+    """
+    search = GoogleSerperAPIWrapper(serper_api_key=SERPER_API_KEY)
+    response = search.run(query)
+    return response
 
 
 # testing the functions and putting them up together

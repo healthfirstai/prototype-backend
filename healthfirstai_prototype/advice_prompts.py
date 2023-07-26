@@ -8,7 +8,10 @@ from langchain.schema import BaseMessage
 from langchain.llms import Cohere
 from langchain.chains import LLMChain
 
-from healthfirstai_prototype.advice_agent import COHERE_API_KEY
+import os
+
+COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
+SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
 
 
 # NOTE: this function is not used yet
