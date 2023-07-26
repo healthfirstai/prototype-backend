@@ -1,6 +1,6 @@
 from healthfirstai_prototype.nutrition_chains import edit_diet_plan_json
 from healthfirstai_prototype.util_models import MealNames
-from healthfirstai_prototype.nutrition_utils import (
+from healthfirstai_prototype.nutrition_logic import (
     get_user_info_dict,
     get_user_meal_plans_as_json,
     get_user_info_for_json_agent,

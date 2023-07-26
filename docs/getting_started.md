@@ -80,7 +80,7 @@ Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db
 6. Save to requirements.txt
 
    ```sh
-   poetry export -f requirements.txt --output requirements.txt
+   poetry export --without-hashes --format=requirements.txt > requirements.txt
    ```
 
 ### CLI Usage

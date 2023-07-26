@@ -16,7 +16,7 @@ from pgvector.sqlalchemy import Vector
 Base = declarative_base()
 
 
-class Nutrition_Vector(Base):
+class NutritionVector(Base):
     __tablename__ = "nutrition_vector"
     food_id = Column("food_id", Integer, primary_key=True)
     embedding = Column("embedding", Vector(95))

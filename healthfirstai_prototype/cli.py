@@ -1,6 +1,11 @@
+"""CLI for HealthFirstAI Prototype
+
+This module contains the CLI for the HealthFirstAI prototype
+
+"""
 from typing_extensions import Annotated
 from healthfirstai_prototype.nutrition_chains import edit_diet_plan_json
-from healthfirstai_prototype.nutrition_utils import (
+from healthfirstai_prototype.nutrition_logic import (
     get_user_meal_plans_as_json,
     get_user_info_for_json_agent,
     get_user_meal_info_json,
@@ -9,7 +14,7 @@ from healthfirstai_prototype.nutrition_utils import (
     cache_diet_plan_redis,
     get_cached_plan_json,
 )
-from healthfirstai_prototype.nutrition_agent import (
+from healthfirstai_prototype.chat_agent import (
     start_nutrition_temp_agent,
     init_agent,
     init_new_agent,
@@ -17,7 +22,7 @@ from healthfirstai_prototype.nutrition_agent import (
 )
 from healthfirstai_prototype.advice_agent import faiss_vector_search, serp_api_search
 from healthfirstai_prototype.util_models import MealNames, MealChoice
-from healthfirstai_prototype.transform import (
+from healthfirstai_prototype.nutrition_vector_ops import (
     delete_all_vectors,
     get_all_foods,
     insert_all_vectors,

@@ -1,10 +1,19 @@
+"""Nutrition Feature Logic
+
+This module contains the logic for the nutrition feature.
+
+Todo:
+    * Change create_new_custom_daily_meal_plan so that base_daily_meal_plan_id is not hard-coded
+    * Store tool name and description embedding in a vector database
+    * Refactor get_user_meal_plans_as_json because it is too long
+
+"""
 import json
 from typing import Any
 from datetime import date
-import redis
 
 from healthfirstai_prototype.database import SessionLocal
-from healthfirstai_prototype.datatypes import (
+from healthfirstai_prototype.data_models import (
     Food,
     BaseDailyMealPlan,
     CustomDailyMealPlan,
@@ -21,14 +30,20 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 from healthfirstai_prototype.util_models import MealChoice, ModelName, MealNames
 
-from healthfirstai_prototype.utils import (
+from healthfirstai_prototype.util_funcs import (
     get_model,
     get_embedding_model,
     connect_to_redis,
 )
 
 
-def create_new_custom_daily_meal_plan():
+def create_new_custom_daily_meal_plan() -> None:
+    """
+    Create a new custom_daily_meal_plan row in the database
+
+    Raises:
+        ValueError: If no base_daily_meal_plan row is found
+    """
     # connect to the database
     session = SessionLocal()
     custom_daily_meal_plan = CustomDailyMealPlan()
@@ -37,23 +52,25 @@ def create_new_custom_daily_meal_plan():
     base_daily_meal_plan_row = session.query(BaseDailyMealPlan).filter_by(id=1).first()
 
     if base_daily_meal_plan_row is None:
-        print("Error: No base_daily_meal_plan row found.")
-        return
+        raise ValueError("No base_daily_meal_plan row found.")
 
     custom_daily_meal_plan.name = base_daily_meal_plan_row.name
     custom_daily_meal_plan.description = base_daily_meal_plan_row.description
 
     session.add(custom_daily_meal_plan)
     session.commit()
-    return custom_daily_meal_plan.id
 
 
 def insert_into_relationship_table(
-    custom_daily_meal_plan_id: int = 1,
-    base_daily_meal_plan_id: int = 1,
-):
+        custom_daily_meal_plan_id: int = 1,
+        base_daily_meal_plan_id: int = 1,
+) -> None:
     """
     Insert into many-to-many relationship table for custom_daily_meal_plan and meal
+
+    Args:
+        custom_daily_meal_plan_id: The ID of the newly created custom_daily_meal_plan row
+        base_daily_meal_plan_id: The ID of the base_daily_meal_plan row
     """
     session = SessionLocal()
 
@@ -71,12 +88,16 @@ def insert_into_relationship_table(
         session.add(item)
         session.commit()
 
-    return custom_daily_meal_plan_id
-
 
 def get_user_info_dict(user_id: int) -> dict[str, Any]:
     """
-    Given a user ID, query the database and return all of the user's information
+    Given a user ID, query the database and return the user's information in a dictionary
+
+    Args:
+        user_id: The ID of the user
+
+    Returns:
+        A dictionary containing the user's information
     """
     session = SessionLocal()
     user_info = session.query(User).filter_by(id=user_id).first()
@@ -90,7 +111,14 @@ def get_user_info_dict(user_id: int) -> dict[str, Any]:
 
 def get_user_info_for_json_agent(user_id: int) -> str:
     """
-    Given a user ID, query the database and return the user's information in a more human-readable format for the JSON agent
+    Given a user ID, query the database and return the user's information in a JSON string
+
+    Args:
+        user_id: The ID of the user
+
+    Returns:
+        str: A JSON string containing the user's information
+
     """
     session = SessionLocal()
     o = (
@@ -117,8 +145,8 @@ def get_user_info_for_json_agent(user_id: int) -> str:
         "last_name": user.last_name,
         "city_of_residence": user_city.name,
         "age": date.today().year
-        - user.dob.year
-        - ((date.today().month, date.today().day) < (user.dob.month, user.dob.day)),
+               - user.dob.year
+               - ((date.today().month, date.today().day) < (user.dob.month, user.dob.day)),
         "gender": user.gender,
         "height": f"{str(user.height)}CM",
         "weight": f"{str(user.weight)}KG",
@@ -129,9 +157,15 @@ def get_user_info_for_json_agent(user_id: int) -> str:
     return json.dumps(user_dict, indent=2)
 
 
-def insert_into_personalized_daily_meal_plan(user_id: int):
+def insert_into_personalized_daily_meal_plan(user_id: int) -> None:
     """
-    Given a user ID, insert a row into the personalized_daily_meal_plan table.
+    Insert into personalized_daily_meal_plan table
+
+    Args:
+        user_id: The ID of the user
+
+    Returns:
+        None
     """
     session = SessionLocal()
     personalized_daily_meal_plan = PersonalizedDailyMealPlan(
@@ -145,16 +179,23 @@ def insert_into_personalized_daily_meal_plan(user_id: int):
     session.commit()
     session.close()
 
-    return personalized_daily_meal_plan
 
-
+# TODO: Refactor this function
 def get_user_meal_plans_as_json(
-    user_id: int,
-    include_ingredients: bool = True,
-    meal_choice: str = "",
+        user_id: int,
+        include_ingredients: bool = True,
+        meal_choice: str = "",
 ) -> str:
     """
-    Given a user ID, query the database and return the user's meal plan as a JSON object.
+    Given a user ID, query the database and return the user's meal plans in a JSON string
+
+    Args:
+        user_id: The ID of the user
+        include_ingredients: Whether to include the ingredients in the JSON string
+        meal_choice: The meal choice (breakfast, lunch, dinner, snack)
+
+    Returns:
+        str: A JSON string containing the user's meal plans
     """
     session = SessionLocal()
     personalized_daily_meal_plans = (
@@ -169,8 +210,8 @@ def get_user_meal_plans_as_json(
 
     meal_plan_dict = {}
     for (
-        personalized_daily_meal_plan,
-        custom_daily_meal_plan,
+            personalized_daily_meal_plan,
+            custom_daily_meal_plan,
     ) in personalized_daily_meal_plans:
         meal_ids = (
             session.query(CustomDailyMealPlanAndMeal.meal_id)
@@ -219,8 +260,6 @@ def get_user_meal_plans_as_json(
             },
         )
     session.close()
-    # Choose whether to include key nutrients
-    # Choose a meal type
     if meal_choice == MealNames.breakfast:
         meal_plan_dict = meal_plan_dict[0]["custom_daily_meal_plan"][
             MealNames.breakfast
@@ -238,7 +277,13 @@ def get_user_meal_plans_as_json(
     return json.dumps(meal_plan_dict, indent=2)
 
 
-def cache_diet_plan_redis(user_id: int):
+def cache_diet_plan_redis(user_id: int) -> None:
+    """
+    Cache the user's diet plan in Redis
+
+    Args:
+        user_id: The ID of the user
+    """
     r = connect_to_redis()
     r.hset(f"my-diet-plan:{user_id}", "diet_plan", get_user_meal_plans_as_json(user_id))
 
@@ -249,9 +294,9 @@ def store_new_diet_plan(user_id: int, new_diet_plan: str):
 
 
 def store_meal(
-    user_id: int,
-    new_meal: str,
-    meal_type: MealNames,
+        user_id: int,
+        new_meal: str,
+        meal_type: MealNames,
 ):
     r = connect_to_redis()
     if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
@@ -263,9 +308,9 @@ def store_meal(
 
 
 def get_cached_plan_json(
-    user_id: int,
-    include_ingredients: bool = True,
-    meal_choice: MealNames = MealNames.all,
+        user_id: int,
+        include_ingredients: bool = True,
+        meal_choice: MealNames = MealNames.all,
 ):
     r = connect_to_redis()
     if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
@@ -304,14 +349,24 @@ def rank_tools(user_input: str, tools: list):
 
 
 def get_user_meal_info_json(
-    user_id: int,
-    include_ingredients: bool,
-    include_nutrients: bool,
-    meal_choice: MealNames,
-    cached: bool = False,
-):
+        user_id: int,
+        include_ingredients: bool,
+        include_nutrients: bool,
+        meal_choice: MealNames,
+        cached: bool = False,
+) -> str:
     """
     Given a user ID, query the database and return the user's diet plan.
+
+    Args:
+        user_id: 
+        include_ingredients: 
+        include_nutrients: 
+        meal_choice: 
+        cached: 
+
+    Returns:
+        object: 
     """
     if not cached:
         meal_json = get_user_meal_plans_as_json(

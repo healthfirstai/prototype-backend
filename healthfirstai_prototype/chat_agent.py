@@ -1,3 +1,8 @@
+"""Chat Agent
+
+This module contains the functions for initializing the chat agent and the PlanAndExecute object for editing a user's diet plan.
+
+"""
 import json
 from langchain.experimental.plan_and_execute import (
     PlanAndExecute,
@@ -27,8 +32,8 @@ from healthfirstai_prototype.nutrition_tools import (
     LunchTool,
     DinnerTool,
 )
-from healthfirstai_prototype.utils import get_model
-from healthfirstai_prototype.nutrition_utils import rank_tools
+from healthfirstai_prototype.util_funcs import get_model
+from healthfirstai_prototype.nutrition_logic import rank_tools
 from healthfirstai_prototype.util_models import ModelName
 from healthfirstai_prototype.nutrition_templates import (
     SYSTEM_PROMPT,

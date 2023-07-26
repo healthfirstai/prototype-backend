@@ -1,3 +1,8 @@
+"""Nutrition Tools
+
+Tools used in agents for the nutrition feature.
+
+"""
 from typing import Type
 from pydantic import BaseModel
 from langchain.tools import BaseTool
