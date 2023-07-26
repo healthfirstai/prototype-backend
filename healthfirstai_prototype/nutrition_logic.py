@@ -62,8 +62,8 @@ def create_new_custom_daily_meal_plan() -> None:
 
 
 def insert_into_relationship_table(
-        custom_daily_meal_plan_id: int = 1,
-        base_daily_meal_plan_id: int = 1,
+    custom_daily_meal_plan_id: int = 1,
+    base_daily_meal_plan_id: int = 1,
 ) -> None:
     """
     Insert into many-to-many relationship table for custom_daily_meal_plan and meal
@@ -145,8 +145,8 @@ def get_user_info_for_json_agent(user_id: int) -> str:
         "last_name": user.last_name,
         "city_of_residence": user_city.name,
         "age": date.today().year
-               - user.dob.year
-               - ((date.today().month, date.today().day) < (user.dob.month, user.dob.day)),
+        - user.dob.year
+        - ((date.today().month, date.today().day) < (user.dob.month, user.dob.day)),
         "gender": user.gender,
         "height": f"{str(user.height)}CM",
         "weight": f"{str(user.weight)}KG",
@@ -182,9 +182,9 @@ def insert_into_personalized_daily_meal_plan(user_id: int) -> None:
 
 # TODO: Refactor this function
 def get_user_meal_plans_as_json(
-        user_id: int,
-        include_ingredients: bool = True,
-        meal_choice: str = "",
+    user_id: int,
+    include_ingredients: bool = True,
+    meal_choice: str = "",
 ) -> str:
     """
     Given a user ID, query the database and return the user's meal plans in a JSON string
@@ -210,8 +210,8 @@ def get_user_meal_plans_as_json(
 
     meal_plan_dict = {}
     for (
-            personalized_daily_meal_plan,
-            custom_daily_meal_plan,
+        personalized_daily_meal_plan,
+        custom_daily_meal_plan,
     ) in personalized_daily_meal_plans:
         meal_ids = (
             session.query(CustomDailyMealPlanAndMeal.meal_id)
@@ -294,9 +294,9 @@ def store_new_diet_plan(user_id: int, new_diet_plan: str):
 
 
 def store_meal(
-        user_id: int,
-        new_meal: str,
-        meal_type: MealNames,
+    user_id: int,
+    new_meal: str,
+    meal_type: MealNames,
 ):
     r = connect_to_redis()
     if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
@@ -308,9 +308,9 @@ def store_meal(
 
 
 def get_cached_plan_json(
-        user_id: int,
-        include_ingredients: bool = True,
-        meal_choice: MealNames = MealNames.all,
+    user_id: int,
+    include_ingredients: bool = True,
+    meal_choice: MealNames = MealNames.all,
 ):
     r = connect_to_redis()
     if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
@@ -348,105 +348,144 @@ def rank_tools(user_input: str, tools: list):
     return [tools[d.metadata["index"]] for d in docs]
 
 
+def format_nutrients_with_units(nutrients: dict[str, int]) -> dict[str, str]:
+    """
+    Format the nutrients by adding the units.
+
+    Args:
+        nutrients: A dictionary of the nutrients and their amounts.
+
+    Returns:
+        A dictionary of the nutrients with their units.
+    """
+    return {
+        "calories": str(nutrients["calories"]) + " kcal",
+        "fat": str(nutrients["fat"]) + " g",
+        "cholesterol": str(nutrients["cholesterol"]) + " mg",
+        "sodium": str(nutrients["sodium"]) + " mg",
+        "carbs": str(nutrients["carbs"]) + " g",
+        "fiber": str(nutrients["fiber"]) + " g",
+        "sugar": str(nutrients["sugar"]) + " g",
+        "protein": str(nutrients["protein"]) + " g",
+        "vitamin_a": str(nutrients["vitamin_a"]) + " IU",
+        "vitamin_c": str(nutrients["vitamin_c"]) + " mg",
+        "calcium": str(nutrients["calcium"]) + " mg",
+        "iron": str(nutrients["iron"]) + " mg",
+    }
+
+
+def create_nutrient_dict() -> dict[str, int]:
+    """
+    Create a dictionary of selected key nutrients and initialize their values to 0.
+
+    Returns:
+        A dictionary of the nutrients and their values.
+    """
+    return {
+        "calories": 0,
+        "fat": 0,
+        "cholesterol": 0,
+        "sodium": 0,
+        "carbs": 0,
+        "fiber": 0,
+        "sugar": 0,
+        "protein": 0,
+        "vitamin_a": 0,
+        "vitamin_c": 0,
+        "calcium": 0,
+        "iron": 0,
+    }
+
+
+def update_nutrient_values(
+    food: dict[str, Any],
+    nutrients: dict[str, int],
+) -> dict[str, int]:
+    """
+    Update nutrient values based on the information in the food item.
+
+    Args:
+        food: A dictionary representing a food item with nutrient information.
+        nutrients: The current nutrient values.
+
+    Returns:
+        The updated nutrient values.
+    """
+    nutrient_names = [
+        ("Calories", "calories"),
+        ("Fat_g", "fat"),
+        ("Cholesterol_mg", "cholesterol"),
+        ("Sodium_mg", "sodium"),
+        ("Carbohydrate_g", "carbs"),
+        ("Fiber_g", "fiber"),
+        ("Sugars_g", "sugar"),
+        ("Protein_g", "protein"),
+        ("Vitamin_A_IU_IU", "vitamin_a"),
+        ("Vitamin_C_mg", "vitamin_c"),
+        ("Calcium_mg", "calcium"),
+        ("Iron_Fe_mg", "iron"),
+    ]
+    for food_key, nutrient_key in nutrient_names:
+        nutrient_value = food.get(food_key)
+        nutrients[nutrient_key] += int(nutrient_value) if nutrient_value else 0
+
+    return nutrients
+
+
 def get_user_meal_info_json(
-        user_id: int,
-        include_ingredients: bool,
-        include_nutrients: bool,
-        meal_choice: MealNames,
-        cached: bool = False,
+    user_id: int,
+    include_ingredients: bool,
+    include_nutrients: bool,
+    meal_choice: MealNames,
+    cached: bool = False,
 ) -> str:
     """
     Given a user ID, query the database and return the user's diet plan.
 
     Args:
-        user_id: 
-        include_ingredients: 
-        include_nutrients: 
-        meal_choice: 
-        cached: 
+        user_id: The ID of the user
+        include_ingredients: Whether to include the ingredients in the response
+        include_nutrients: Whether to include the nutrients in the response
+        meal_choice: The meal to return
+        cached: Whether to use the cached plan
 
     Returns:
-        object: 
+        object:
     """
-    if not cached:
-        meal_json = get_user_meal_plans_as_json(
-            user_id,
-            include_ingredients=True,
-            meal_choice=meal_choice,
-        )
-    else:
-        meal_json = get_cached_plan_json(
-            user_id,
-            include_ingredients=True,
-            meal_choice=meal_choice,
-        )
+    get_meal_func = get_cached_plan_json if cached else get_user_meal_plans_as_json
+    meal_json = get_meal_func(
+        user_id,
+        include_ingredients=include_ingredients,
+        meal_choice=meal_choice,
+    )
     meal_dict = json.loads(meal_json)
-    session = SessionLocal()
     if include_nutrients:
-        nutrients = {
-            "calories": 0,
-            "fat": 0,
-            "cholesterol": 0,
-            "sodium": 0,
-            "carbs": 0,
-            "fiber": 0,
-            "sugar": 0,
-            "protein": 0,
-            "vitamin_a": 0,
-            "vitamin_c": 0,
-            "calcium": 0,
-            "iron": 0,
-        }
+        nutrients = create_nutrient_dict()
         for ingredient in meal_dict["ingredients"]:
-            food = (
-                session.query(Food)
-                .filter(Food.id == ingredient["ingredient_id"])
-                .all()[0]
-                .__dict__
-            )
-            # set values even if they do not exist
-            nutrients["calories"] += int(food["Calories"]) if food["Calories"] else 0
-            nutrients["fat"] += int(food["Fat_g"]) if food["Fat_g"] else 0
-            nutrients["cholesterol"] += (
-                int(food["Cholesterol_mg"]) if food["Cholesterol_mg"] else 0
-            )
-            nutrients["sodium"] += int(food["Sodium_mg"]) if food["Sodium_mg"] else 0
-            nutrients["carbs"] += (
-                int(food["Carbohydrate_g"]) if food["Carbohydrate_g"] else 0
-            )
-            nutrients["fiber"] += int(food["Fiber_g"]) if food["Fiber_g"] else 0
-            nutrients["sugar"] += int(food["Sugars_g"]) if food["Sugars_g"] else 0
-            nutrients["protein"] += int(food["Protein_g"]) if food["Protein_g"] else 0
-            nutrients["vitamin_a"] += (
-                int(food["Vitamin_A_IU_IU"]) if food["Vitamin_A_IU_IU"] else 0
-            )
-            nutrients["vitamin_c"] += (
-                int(food["Vitamin_C_mg"]) if food["Vitamin_C_mg"] else 0
-            )
-            nutrients["calcium"] += int(food["Calcium_mg"]) if food["Calcium_mg"] else 0
-            nutrients["iron"] += int(food["Iron_Fe_mg"]) if food["Iron_Fe_mg"] else 0
-
-        # Add the convert the nutrition values to strings and add the proper units
-        nutrients_with_units = {
-            "calories": str(nutrients["calories"]) + " kcal",
-            "fat": str(nutrients["fat"]) + " g",
-            "cholesterol": str(nutrients["cholesterol"]) + " mg",
-            "sodium": str(nutrients["sodium"]) + " mg",
-            "carbs": str(nutrients["carbs"]) + " g",
-            "fiber": str(nutrients["fiber"]) + " g",
-            "sugar": str(nutrients["sugar"]) + " g",
-            "protein": str(nutrients["protein"]) + " g",
-            "vitamin_a": str(nutrients["vitamin_a"]) + " IU",
-            "vitamin_c": str(nutrients["vitamin_c"]) + " mg",
-            "calcium": str(nutrients["calcium"]) + " mg",
-            "iron": str(nutrients["iron"]) + " mg",
-        }
-        meal_dict["nutrients"] = nutrients_with_units
-    session.close()
+            food = get_food_by_ingredient_id(ingredient["ingredient_id"])
+            nutrients = update_nutrient_values(food, nutrients)
+        meal_dict["nutrients"] = format_nutrients_with_units(nutrients)
     if not include_ingredients:
         del meal_dict["ingredients"]
     meal_json = json.dumps(meal_dict, indent=2)
     return meal_json
+
+
+def get_food_by_ingredient_id(ingredient_id: int) -> dict:
+    """
+    Query the database to get food by ingredient_id.
+
+    Args:
+        ingredient_id: The ID of the ingredient
+        session: The session for database query
+
+    Returns:
+        A dict of food information.
+    """
+    session = SessionLocal()
+    output = session.query(Food).filter(Food.id == ingredient_id).first().__dict__
+    session.close()
+    return output
 
 
 def main():
