@@ -39,5 +39,13 @@ nav:
   - Toolkits:
       - Nutrition Tools: nutrition-tools-reference.md
       - Exercise Tools: exercise-tools-reference.md
+  - Agent Feature Logic:
+      - Nutrition Feature Logic: nutrition-feature-logic.md
+      - Exercise Feature Logic: exercise-feature-logic.md
+      - Advice Feature Logic: exercise-feature-logic.md
+  - Utilities:
+      - Utility Functions: util-functions-reference.md
+      - Utility Models: utils-models-reference.md
+  - Extract, Transform, Load (ETL):
+      - Nutrition Vector Operations: nutrition-vector-ops-reference.md
   - Command Line Interface: cli.md
-  - Utility Functions: utils.md
