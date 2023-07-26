@@ -37,7 +37,7 @@ COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
 SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
 
 # location of the pdf file/files.
-path_to_pdf = "../notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf"
+path_to_pdf = "./notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf"
 reader = PdfReader(path_to_pdf)
 
 
