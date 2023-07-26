@@ -1,12 +1,6 @@
 """Nutrition Feature Logic
 
 This module contains the logic for the nutrition feature.
-
-Todo:
-    * Change create_new_custom_daily_meal_plan so that base_daily_meal_plan_id is not hard-coded
-    * Store tool name and description embedding in a vector database
-    * Refactor get_user_meal_plans_as_json because it is too long
-
 """
 import json
 from typing import Any
@@ -43,12 +37,14 @@ def create_new_custom_daily_meal_plan() -> None:
 
     Raises:
         ValueError: If no base_daily_meal_plan row is found
+
+    Todo:
+        Change this so that we get the base_daily_meal_plan_id through an algorithm
     """
     # connect to the database
     session = SessionLocal()
     custom_daily_meal_plan = CustomDailyMealPlan()
 
-    # TODO: Change this so that we get the base_daily_meal_plan_id through an algorithm
     base_daily_meal_plan_row = session.query(BaseDailyMealPlan).filter_by(id=1).first()
 
     if base_daily_meal_plan_row is None:
@@ -117,7 +113,7 @@ def get_user_info_for_json_agent(user_id: int) -> str:
         user_id: The ID of the user
 
     Returns:
-        str: A JSON string containing the user's information
+        A JSON string containing the user's information
 
     """
     session = SessionLocal()
@@ -288,22 +284,32 @@ def cache_diet_plan_redis(user_id: int) -> None:
     r.hset(f"my-diet-plan:{user_id}", "diet_plan", get_user_meal_plans_as_json(user_id))
 
 
-def store_new_diet_plan(user_id: int, new_diet_plan: str):
+def store_new_diet_plan(user_id: int, new_diet_plan: str) -> None:
+    """
+    Store a new diet plan for the user
+
+    Args:
+        user_id: The ID of the user
+        new_diet_plan: The new diet plan JSON string to store
+    """
     r = connect_to_redis()
     r.hset(f"my-diet-plan:{user_id}", "diet_plan", new_diet_plan)
 
 
-def store_meal(
-    user_id: int,
-    new_meal: str,
-    meal_type: MealNames,
-):
+def store_meal(user_id: int, new_meal: str, meal_type: MealNames) -> None:
+    """
+    Store a new meal in the user's diet plan
+
+    Args:
+        user_id: The ID of the user
+        new_meal: The new meal to store
+        meal_type: The type of meal (breakfast, lunch, dinner, snack)
+    """
     r = connect_to_redis()
     if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
         raise ValueError("No cached plan found for this user.")
-    # NOTE: The following two lines will throw an error if the plan + meal is not valid JSON
-    cached_plan_dict = json.loads(cached_plan)
-    cached_plan_dict[meal_type] = json.loads(new_meal)
+    cached_plan_dict = json.loads(cached_plan)  # Throws error if not valid JSON
+    cached_plan_dict[meal_type] = json.loads(new_meal)  # Throws error if not valid JSON
     r.hset(f"my-diet-plan:{user_id}", "diet_plan", json.dumps(cached_plan_dict))
 
 
@@ -312,22 +318,23 @@ def get_cached_plan_json(
     include_ingredients: bool = True,
     meal_choice: MealNames = MealNames.all,
 ):
+    """
+    Get the cached diet plan for the user
+
+    Args:
+        user_id: The ID of the user
+        include_ingredients: Whether to include the ingredients in the response
+        meal_choice: The meal to return (breakfast, lunch, dinner, snack, all)
+    """
     r = connect_to_redis()
     if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
         raise ValueError("No cached plan found for this user.")
 
     cached_plan_dict = json.loads(cached_plan)
     if not include_ingredients:
-        if MealNames.breakfast in cached_plan_dict:
-            cached_plan_dict[MealNames.breakfast].pop("ingredients", None)
-        if MealNames.lunch in cached_plan_dict:
-            cached_plan_dict[MealNames.lunch].pop("ingredients", None)
-        if MealNames.dinner in cached_plan_dict:
-            cached_plan_dict[MealNames.dinner].pop("ingredients", None)
-        if MealNames.snack in cached_plan_dict:
-            cached_plan_dict[MealNames.snack].pop("ingredients", None)
-        if MealNames.drink in cached_plan_dict:
-            cached_plan_dict[MealNames.drink].pop("ingredients", None)
+        for meal in MealNames:
+            if meal in cached_plan_dict:
+                cached_plan_dict[meal].pop("ingredients", None)
 
     if not meal_choice:
         return json.dumps(cached_plan_dict, indent=2)
@@ -335,8 +342,17 @@ def get_cached_plan_json(
         return json.dumps(cached_plan_dict[meal_choice], indent=2)
 
 
-# TODO: Store these ranked tools somewhere else. Don't create the vector store every time.
-def rank_tools(user_input: str, tools: list):
+def rank_tools(user_input: str, tools: list, k=3) -> list:
+    """
+    Rank the tools tools list based on the user's input.
+    Returns the top k tools as a list for the agent
+
+    Returns:
+        A list of the top k tools.
+
+    Todo:
+        * Store the vector store somewhere else. Don't create it every time.
+    """
     vector_store = FAISS.from_documents(
         [
             Document(page_content=t.description, metadata={"index": i})
@@ -344,7 +360,7 @@ def rank_tools(user_input: str, tools: list):
         ],
         get_embedding_model(ModelName.text_embedding_ada_002),
     )
-    docs = vector_store.similarity_search(user_input, k=3)
+    docs = vector_store.similarity_search(user_input, k=k)
     return [tools[d.metadata["index"]] for d in docs]
 
 
@@ -450,7 +466,10 @@ def get_user_meal_info_json(
         cached: Whether to use the cached plan
 
     Returns:
-        object:
+        A JSON string representing the user's diet plan
+
+    Todo:
+        * Break this up into smaller functions in a project-wide refactor
     """
     get_meal_func = get_cached_plan_json if cached else get_user_meal_plans_as_json
     meal_json = get_meal_func(
@@ -471,7 +490,7 @@ def get_user_meal_info_json(
     return meal_json
 
 
-def get_food_by_ingredient_id(ingredient_id: int) -> dict:
+def get_food_by_ingredient_id(ingredient_id: int) -> dict[str, Any]:
     """
     Query the database to get food by ingredient_id.
 
