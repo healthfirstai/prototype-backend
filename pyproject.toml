@@ -40,6 +40,7 @@ mkdocstrings = {extras = ["python"], version = "^0.22.0"}
 typer-cli = {extras = ["all"], version = "^0.0.13"}
 rich = "^13.4.2"
 uvicorn = "^0.23.1"
+weaviate-client = "^3.22.1"
 
 
 [tool.poetry.group.dev.dependencies]
