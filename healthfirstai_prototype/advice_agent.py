@@ -248,11 +248,51 @@ def serp_api_search(query: str) -> str:
     return response
 
 
+# def scoring_with_faiss(query, faiss_search_result, google_search_result):
+#     evaluator = load_evaluator("pairwise_string", requires_reference=True)
+
+#     evaluator.evaluate_string_pairs(
+#         prediction="there are three dogs",
+#         prediction_b="4",
+#         input="how many dogs are in the park?",
+#         reference="four",
+#     )
+
+
 # testing the functions and putting them up together
 def main():
     query = "What is the best time to eat before exercise?"
     faiss_search = faiss_vector_search(query)
     google_search = serp_api_search(query)
+    print("--------------------------------------")
+    print("Query: ", query)
+    print("--------------------------------------")
+    print("KB response: ", faiss_search)
+    print("--------------------------------------")
+    print("Google Search: ", google_search)
+    print("--------------------------------------")
+    print("Assessing search results...")
+    print(template_to_assess_search_results(google_search, faiss_search, query))
+    print("--------------------------------------")
+    print("Running assessment chain...")
+    print(
+        run_assessment_chain(
+            template_to_assess_search_results(google_search, faiss_search, query)
+        )
+    )
+    print("--------------------------------------")
+    print("Finished testing advice agent.")
+
+    # parsed_user_info = parse_user_info(get_user_info(1))
+    # print(parsed_user_info)
+
+    # height = parsed_user_info["height"]
+    # weight = parsed_user_info["weight"]
+    # gender = parsed_user_info["gender"]
+    # age = parsed_user_info["age"]
+
+    # template = set_template(height, weight, gender, age)
+    # print(template)
 
 
 if __name__ == "__main__":
