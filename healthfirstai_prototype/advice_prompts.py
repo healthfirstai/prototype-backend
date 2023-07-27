@@ -74,7 +74,7 @@ def template_to_assess_search_results():
     You are a helpful assistant which helps to assess the relevance of the option A and option B search results.
     Here is the prompt: {input}. 
     Here is the option A: {google_search_result}; 
-    And here is the option B: {faiss_search_result};
+    And here is the option B: {kb_search_result};
     
     Please evaluate both of the search results regarding the prompt I gave you, and return to me the most relevant result which makes more sense. 
     If you think they are both good enough, please return a single letter "B", otherwise return a single letter "A" as a default response. 
@@ -83,7 +83,7 @@ def template_to_assess_search_results():
     """
 
     system_message_prompt = PromptTemplate(
-        input_variables=["input", "google_search_result", "faiss_search_result"],
+        input_variables=["input", "google_search_result", "kb_search_result"],
         template=system_message_template,
     )
 
@@ -93,7 +93,7 @@ def template_to_assess_search_results():
 def run_assessment_chain(
     prompt_template,
     google_search_result: str = "",
-    faiss_search_result: str = "",
+    kb_search_result: str = "",
     input_from_the_user: str = "",
 ):
     """
@@ -104,7 +104,7 @@ def run_assessment_chain(
     Params:
         prompt_template (str): The template for the assessment chain will use
         google_search_result (str, optional) : The response from the SerpAPI's query to Google
-        faiss_search_result (str, optional) : The response from the LLM chain object
+        kb_search_result (str, optional) : The response from the LLM chain object
         input_from_the_user (str, optional) : The user's query / question
 
     Returns:
@@ -124,7 +124,7 @@ def run_assessment_chain(
         {
             "input": input_from_the_user,
             "google_search_result": google_search_result,
-            "faiss_search_result": faiss_search_result,
+            "kb_search_result": kb_search_result,
         }
     )
     return response
@@ -136,15 +136,25 @@ def main():
     print("___________________________")
     print("TEMPLATE: ", template)
     print("___________________________")
+
+    input_from_the_user = "How many hours a day is a normal amount of time a human being is supposed to sleep?"
+    google_search_result = "I don't know."
+    kb_search_result = (
+        "8 hours a day is a normal amount of time a human being is supposed to sleep."
+    )
+
     response = run_assessment_chain(
         template,
-        input_from_the_user="How many hours a day is a normal amount of time a human being is supposed to sleep?",
-        google_search_result="Eat fish all the time.",
-        faiss_search_result="8 hours a day is a normal amount of time a human being is supposed to sleep.",
-    )
-    print("FINAL RESPONSE: ", response)
-    print("___________________________")
+        input_from_the_user=input_from_the_user,
+        google_search_result=google_search_result,
+        kb_search_result=kb_search_result,
+    )["text"]
+
+    if response == "B":
+        return kb_search_result
+    else:
+        return google_search_result
 
 
 if __name__ == "__main__":
-    main()
+    print(main())
