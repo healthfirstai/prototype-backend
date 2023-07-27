@@ -65,10 +65,10 @@ def serp_api_search(query: str) -> str:
 
 # testing the functions and putting them up together
 def main():
-    query = "What is the best time to eat before exercise?"
-    pdf_reader = read_pdf()
+    query = "How many hours a day should I have?"
     google_search_results = serp_api_search(query)
-    faiss_search_results = faiss_vector_search(query, pdf_reader)
+    faiss_search_results = faiss_vector_search(query)
+
     print("--------------------------------------")
     print("Query: ", query)
     print("--------------------------------------")
