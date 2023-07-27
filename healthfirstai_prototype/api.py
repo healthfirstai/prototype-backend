@@ -6,7 +6,6 @@ This file contains the FastAPI server for the HealthFirstAI prototype. It provid
 - POST /chat_agent/: Returns a JSON object with the response from the chat agent.
 
 """
-from enum import Enum
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from healthfirstai_prototype.chat_agent import init_agent

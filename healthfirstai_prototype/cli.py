@@ -9,16 +9,12 @@ from healthfirstai_prototype.nutrition_logic import (
     get_user_meal_plans_as_json,
     get_user_info_for_json_agent,
     get_user_meal_info_json,
-    get_user_info_dict,
     get_cached_plan_json,
     cache_diet_plan_redis,
     get_cached_plan_json,
 )
 from healthfirstai_prototype.chat_agent import (
-    start_nutrition_temp_agent,
     init_agent,
-    init_new_agent,
-    init_plan_and_execute_diet_agent,
 )
 from healthfirstai_prototype.advice_agent import faiss_vector_search, serp_api_search
 from healthfirstai_prototype.util_models import MealNames, MealChoice

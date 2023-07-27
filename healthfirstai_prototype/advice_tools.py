@@ -5,7 +5,6 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
 
 # NOTE: Use this class in the future to implement the evaluation techniques
-from langchain.evaluation import QAEvalChain
 import os
 
 COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""

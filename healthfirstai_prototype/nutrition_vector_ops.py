@@ -133,8 +133,8 @@ def normalize_vector(vector: NDArray) -> NDArray:
     Returns:
         The normalized nutrition vector
     """
-    magnitude = np.linalg.norm(vector) # Calculate the magnitude of the vector
-    return vector / magnitude # Divide each element by the magnitude to normalize
+    magnitude = np.linalg.norm(vector)  # Calculate the magnitude of the vector
+    return vector / magnitude  # Divide each element by the magnitude to normalize
 
 
 def add_vector_weights(v_normalized: NDArray) -> NDArray:
@@ -162,7 +162,7 @@ def add_vector_weights(v_normalized: NDArray) -> NDArray:
     weights[1] = 100  # Protein
     weights[2] = 100  # Carbohydrates
     weights[3] = 100  # Fat
-    return v_normalized * weights # Multiply the normalized vector by the weights
+    return v_normalized * weights  # Multiply the normalized vector by the weights
 
 
 def delete_all_vectors() -> None:

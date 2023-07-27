@@ -23,7 +23,6 @@ from healthfirstai_prototype.nutrition_tool_service import (
     edit_entire_diet_plan,
     edit_meal,
     get_meal,
-    get_user_meal_info_json,
     get_diet_plan,
     get_user_info,
 )

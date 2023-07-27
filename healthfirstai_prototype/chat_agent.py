@@ -16,7 +16,6 @@ from langchain.memory import (
 from langchain.agents import AgentExecutor, OpenAIFunctionsAgent
 from langchain.schema import SystemMessage
 from langchain.agents.agent_toolkits.json.prompt import JSON_PREFIX, JSON_SUFFIX
-from langchain.agents.mrkl.prompt import FORMAT_INSTRUCTIONS
 from langchain.agents import create_json_agent
 from langchain.agents.agent_toolkits import JsonToolkit
 from langchain.llms.openai import OpenAI
@@ -46,7 +45,7 @@ from langchain.prompts import MessagesPlaceholder
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 
-langchain.debug = False
+langchain.debug = True
 
 
 def init_agent(
@@ -83,9 +82,10 @@ def init_agent(
     memory = ConversationTokenBufferMemory(
         llm=get_model(ModelName.gpt_3_5_turbo_0613),
         chat_memory=message_history,
-        max_token_limit=1000,
+        max_token_limit=500,
     )
 
+    # TODO: Remove {"input": user_input} and see if it still works (it should)
     history = memory.load_memory_variables({"input": user_input}).get("history")
     prompt = OpenAIFunctionsAgent.create_prompt(
         SystemMessage(

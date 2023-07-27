@@ -1,8 +1,6 @@
 from healthfirstai_prototype.nutrition_chains import edit_diet_plan_json
 from healthfirstai_prototype.util_models import MealNames
 from healthfirstai_prototype.nutrition_logic import (
-    get_user_info_dict,
-    get_user_meal_plans_as_json,
     get_user_info_for_json_agent,
     get_cached_plan_json,
     get_user_meal_info_json,
@@ -20,7 +18,7 @@ def get_diet_plan(user_id: int, include_ingredients: bool):
     """
     Given a user ID, query the database and return the user's diet plan.
     """
-    return get_user_meal_plans_as_json(user_id, include_ingredients)
+    return get_cached_plan_json(user_id, include_ingredients)
 
 
 def get_meal(
@@ -65,7 +63,7 @@ def edit_meal(
     """
     Takes a user diet plan and edits it based on the agent input
     """
-    edit_diet_plan_json(
+    return edit_diet_plan_json(
         agent_input,
         user_id,
         meal_choice=meal_choice,
