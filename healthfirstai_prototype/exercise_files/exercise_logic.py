@@ -97,7 +97,7 @@ def generate_schedule_json(user_id):
                 schedule_json[schedule_id] = schedule_info
 
                 # Write the JSON data to a file
-        with open('user_schedule.json', 'w') as json_file:
+        with open('../user_schedule.json', 'w') as json_file:
             json.dump(schedule_json, json_file, indent=4)
 
         print("Schedule JSON file generated successfully!")
