@@ -63,38 +63,39 @@ def set_template(
     ).to_messages()
 
 
-def template_to_assess_search_results(
-    google_search_result: str = "",
-    faiss_search_result: str = "",
-    prompt: str = "",
-) -> str:
+def template_to_assess_search_results():
     """
     This function is used to assess the outputs from the two search engines
 
-    Params:
-        google_search_result (str, optional) : The response from the SerpAPI's query to Google
-        faiss_search_result (str, optional) : The response from the LLM chain object
-        prompt (str, optional) : The user's query / question
-
     Returns:
-        a list of messages using the formatted prompt
+        (str): The prompt string for the assessment chain
     """
     system_message_template = """\
-    You are a helpful assistant which helps to assess the relevance of the Google search result: {google_search_result}, and the knowledge base search result: {faiss_search_result} regarding the following prompt / question: {prompt}. 
-    Please look at both of the search results regarding the prompt I gave you, and return to me that particular result without modifying it. If you think they are both good enough, please return the knowledge base search result, otherwise return the Google search result. 
+    You are a helpful assistant which helps to assess the relevance of the option A and option B search results.
+    Here is the prompt: {input}. 
+    Here is the option A: {google_search_result}; 
+    And here is the option B: {faiss_search_result};
+    
+    Please evaluate both of the search results regarding the prompt I gave you, and return to me the most relevant result which makes more sense. 
+    If you think they are both good enough, please return a single letter "B", otherwise return a single letter "A" as a default response. 
+    
     Do not make anything up.
     """
 
-    system_message_prompt = PromptTemplate.from_template(system_message_template)
-
-    return system_message_prompt.format(
-        google_search_result=google_search_result,
-        faiss_search_result=faiss_search_result,
-        prompt=prompt,
+    system_message_prompt = PromptTemplate(
+        input_variables=["input", "google_search_result", "faiss_search_result"],
+        template=system_message_template,
     )
 
+    return system_message_prompt
 
-def run_assessment_chain(prompt_template: str) -> str:
+
+def run_assessment_chain(
+    prompt_template,
+    google_search_result: str = "",
+    faiss_search_result: str = "",
+    input_from_the_user: str = "",
+):
     """
     This function is used to run the assessment chain which is simply a single chain object powered
     by the LLM which is supposed to check the relevance of the search results from the two different search methods
@@ -102,6 +103,9 @@ def run_assessment_chain(prompt_template: str) -> str:
 
     Params:
         prompt_template (str): The template for the assessment chain will use
+        google_search_result (str, optional) : The response from the SerpAPI's query to Google
+        faiss_search_result (str, optional) : The response from the LLM chain object
+        input_from_the_user (str, optional) : The user's query / question
 
     Returns:
         (str): The response from the LLM chain object
@@ -112,6 +116,35 @@ def run_assessment_chain(prompt_template: str) -> str:
         verbose=False,
         model="command-light",
     )  # type: ignore
-    llm_chain = LLMChain(prompt=prompt_template, llm=llm)  # type: ignore
-    response = llm_chain.run()
+    llm_chain = LLMChain(
+        llm=llm,
+        prompt=prompt_template,
+    )
+    response = llm_chain(
+        {
+            "input": input_from_the_user,
+            "google_search_result": google_search_result,
+            "faiss_search_result": faiss_search_result,
+        }
+    )
     return response
+
+
+# testing the functions and putting them up together
+def main():
+    template = template_to_assess_search_results()
+    print("___________________________")
+    print("TEMPLATE: ", template)
+    print("___________________________")
+    response = run_assessment_chain(
+        template,
+        input_from_the_user="How many hours a day is a normal amount of time a human being is supposed to sleep?",
+        google_search_result="Eat fish all the time.",
+        faiss_search_result="8 hours a day is a normal amount of time a human being is supposed to sleep.",
+    )
+    print("FINAL RESPONSE: ", response)
+    print("___________________________")
+
+
+if __name__ == "__main__":
+    main()
