@@ -1,4 +1,15 @@
-# Yan is working on this
+import os
+from dotenv import load_dotenv
+from langchain.utilities import GoogleSerperAPIWrapper
+from healthfirstai_prototype.advice_tools import read_pdf
+from healthfirstai_prototype.advice_chains import (
+    load_chain,
+    query_based_similarity_search,
+)
+from healthfirstai_prototype.advice_tools import (
+    load_prerequisites_for_vector_search,
+    read_pdf,
+)
 
 """
 this agent is created for a number of goals/functions. the primary goal for this file is to provide a way to process user queries which require
@@ -9,36 +20,6 @@ information about nutrition and exercise. so, this is more of a knowledge base/a
 3. get user's personal information NOTE: this function is not used yet
 """
 
-import os
-import re
-import pprint
-import requests
-import json
-from dotenv import load_dotenv
-from PyPDF2 import PdfReader
-from healthfirstai_prototype.data_models import User
-from langchain.embeddings.cohere import CohereEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
-from langchain.vectorstores import FAISS
-from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import Cohere
-from langchain.utilities import GoogleSerperAPIWrapper
-from langchain.prompts import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
-
-# NOTE: Use this class in the future to implement the evaluation techniques
-from langchain.evaluation import QAEvalChain
-
-"""
-Facebook AI Similarity Search (Faiss) is a library for efficient similarity search and clustering of dense vectors. It contains algorithms 
-that search in sets of vectors of any size, up to ones that possibly do not fit in RAM. It also contains supporting code for evaluation 
-and parameter tuning.
-"""
-
 # Load env file
 load_dotenv()
 
@@ -46,161 +27,19 @@ load_dotenv()
 COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
 SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
 
-# location of the pdf file/files.
-path_to_pdf = "./notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf"
-reader = PdfReader(path_to_pdf)
-
-
-def parse_user_info(user_data) -> dict[str, str]:
-    """
-    this function is used to parse the user's personal information
-    :param user_data: the user's personal information
-    :return: a dictionary containing the user's personal information
-    NOTE: this function is not used yet
-    """
-    return {
-        "height": str(user_data.height),
-        "weight": str(user_data.weight),
-        "gender": str(user_data.gender),
-        "age": str(user_data.age),
-        "city_id": str(user_data.city_id),
-        "country_id": str(user_data.country_id),
-    }
-
-
-def set_template(
-    height: str,
-    weight: str,
-    gender: str,
-    age: str,
-    height_unit: str = "cm",
-    weight_unit: str = "kg",
-):
-    """
-    this function is setting the template for the chat to use given user's personal information
-    NOTE: this function is not used yet
-    :param height: user's height
-    :param weight: user's weight
-    :param gender: user's gender
-    :param age: user's age
-    :param height_unit: user's height unit
-    :param weight_unit: user's weight unit
-    :return: a list of messages using the formatted prompt
-    """
-    system_message_template = "You are a helpful nutrition and exercise assistant that takes into the considerations user's height as {user_height}, user weight as {user_weight}, user's gender as {user_gender}, and user's {user_age} to provide a user with answers to their questions."
-    system_message_prompt = SystemMessagePromptTemplate.from_template(
-        system_message_template
-    )
-
-    human_template = "{text}"
-    human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
-
-    chat_prompt = ChatPromptTemplate.from_messages(
-        [system_message_prompt, human_message_prompt]
-    )
-
-    return chat_prompt.format_prompt(
-        user_height=height + " " + height_unit,
-        user_weight=weight + " " + weight_unit,
-        user_gender=gender,
-        user_age=age + " years old",
-    ).to_messages()
-
-
-def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
-    """
-    this function is used to collect raw text from the PDF file
-    :param reader: the PDF file in the PDFReader format
-    :return: raw text collected from PDF file
-    """
-    raw_text = ""
-    for i, page in enumerate(reader.pages):
-        text = page.extract_text()
-        if text:
-            raw_text += text
-    print("Raw text collected from PDF file...")
-    return raw_text
-
-
-def split_text(raw_text: str) -> list[str]:
-    """
-    this function is used to split the raw text into chunks
-    :param raw_text: raw text collected from the PDF file
-    :return: a list of text chunks
-    """
-    text_splitter = CharacterTextSplitter(
-        separator="\n",
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len,
-    )
-
-    return text_splitter.split_text(raw_text)
-
-
-# FIXME: think of how this function's output could be stored in Redis DB
-def embed_text(texts: list[str]) -> FAISS:
-    """
-    this function is embedding the text using the Cohere embedding + FAISS library
-    :param texts: a list of text chunks
-    :return: FAISS wrapper from raw documents
-    """
-    # Download embeddings from Cohere
-    embeddings = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
-    # Construct FAISS wrapper from raw documents
-    docsearch = FAISS.from_texts(texts, embeddings)  # type: ignore
-
-    return docsearch
-
-
-def load_prerequisites_for_vector_search(reader: PdfReader) -> FAISS:
-    """
-    this function is used to load the prerequisites for the agent to use
-    :param reader: the PDF file in the PDFReader format
-    :return: FAISS wrapper from raw documents
-    """
-    raw_text = collect_raw_text_from_pdf_data(reader)
-    texts = split_text(raw_text)
-    docsearch = embed_text(texts)
-    return docsearch
-
-
-def load_chain(chain_type: str = "map_reduce") -> BaseCombineDocumentsChain:
-    """
-    this function is loading the chain and sets it up for the agent to use
-    :param chain_type: the type of chain to use
-    :return: the LLM chain object
-    """
-    chain = load_qa_chain(
-        Cohere(cohere_api_key=COHERE_API_KEY, verbose=True),  # type: ignore
-        chain_type=chain_type,
-        # Setting verbose to True will print out some internal states of the Chain object while it is being ran.
-        verbose=True,
-    )
-    return chain
-
-
-def query_based_similarity_search(
-    query: str, docsearch: FAISS, chain: BaseCombineDocumentsChain
-) -> str:
-    """
-    this function is used to search through the knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
-    :param query: the user's query / question
-    :param docsearch: FAISS wrapper from raw documents to search from based on the similarity search algos
-    :param chain: the LLM chain object
-    :return: the response from the LLM chain object
-    """
-    docs = docsearch.similarity_search(query)
-    response = chain.run(input_documents=docs, question=query)
-    return response
-
 
 def faiss_vector_search(query: str) -> str:
     """
-    this function is used to load the chain and sets it up for the agent to use
-    :param query: the user's query / question
-    :return: the response from the LLM chain object
+    This function is used to load the chain and sets it up for the agent to use
+
+    Params:
+        query (str) : The user's query / question
+        reader (PdfReader) : The PDF file in the PDFReader format
+
+    Returns:
+        The response from the LLM chain object
     """
+    reader = read_pdf()
     chain = load_chain()
     docsearch = load_prerequisites_for_vector_search(reader)
     response = query_based_similarity_search(query, docsearch, chain)
@@ -209,11 +48,15 @@ def faiss_vector_search(query: str) -> str:
 
 def serp_api_search(query: str) -> str:
     """
-    this function is used to search through the internet (SerpAPI)
+    This function is used to search through the internet (SerpAPI)
     for nutrition/exercise information in case it doesn't require further clarification,
     but a simple univocal answer.
-    :param query: the user's query / question
-    :return: the response from the SerpAPI's query to Google
+
+    Params:
+        query (str) : The user's query / question
+
+    Returns:
+        The response from the SerpAPI's query to Google
     """
     search = GoogleSerperAPIWrapper(serper_api_key=SERPER_API_KEY)
     response = search.run(query)
@@ -222,11 +65,17 @@ def serp_api_search(query: str) -> str:
 
 # testing the functions and putting them up together
 def main():
-    query = "What is the best time to eat before exercise?"
-    faiss_search = faiss_vector_search(query)
-    google_search = serp_api_search(query)
-    print("KB response: ", faiss_search)
-    print("Google Search: ", google_search)
+    query = "How many hours a day should I have?"
+    google_search_results = serp_api_search(query)
+    faiss_search_results = faiss_vector_search(query)
+
+    print("--------------------------------------")
+    print("Query: ", query)
+    print("--------------------------------------")
+    print("KB response: ", faiss_search_results)
+    print("--------------------------------------")
+    print("Google Search: ", google_search_results)
+    print("--------------------------------------")
 
 
 if __name__ == "__main__":

@@ -40,6 +40,8 @@ rich = "^13.4.2"
 uvicorn = "^0.23.1"
 streamlit = "^1.25.0"
 watchdog = "^3.0.0"
+weaviate-client = "^3.22.1"
+
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.23.3"

@@ -28,6 +28,11 @@ from healthfirstai_prototype.nutrition_vector_ops import (
     insert_all_vectors,
 )
 
+
+from healthfirstai_prototype.advice_prompts import (
+    run_assessment_chain,
+    template_to_assess_search_results,
+)
 import typer
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -246,14 +251,29 @@ def test_advice_agent():
     """
     typer.echo("Testing advice agent...")
     query = input("Enter a query: ")
-    faiss_response = faiss_vector_search(query)
+    kb_response = faiss_vector_search(query)
     google_response = serp_api_search(query)
     typer.echo("Finished search. Wait for the results below:")
-    typer.echo(f"K-Base search response: {faiss_response}")
+    typer.echo(f"K-Base search response: {kb_response}")
     typer.echo("------------------------------------------")
     typer.echo(f"Google search response: {google_response}")
     typer.echo("------------------------------------------")
-    typer.echo("Finished testing advice agent.")
+
+    template = template_to_assess_search_results()
+    response = run_assessment_chain(
+        prompt_template=template,
+        input_from_the_user=query,
+        google_search_result=google_response,
+        kb_search_result=kb_response,
+    )["text"]
+
+    typer.echo("------------------------------------------")
+    typer.echo("Most relevant response after evaluation: ")
+    if response == "B":
+        typer.echo(kb_response)
+    else:
+        typer.echo(google_response)
+    typer.echo("------------------------------------------")
 
 
 if __name__ == "__main__":
