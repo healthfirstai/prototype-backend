@@ -91,10 +91,10 @@ def template_to_assess_search_results():
 
 
 def run_assessment_chain(
-    prompt_template,
-    google_search_result: str = "",
-    kb_search_result: str = "",
-    input_from_the_user: str = "",
+    prompt_template: PromptTemplate,
+    google_search_result: str,
+    kb_search_result: str,
+    input_from_the_user: str,
 ):
     """
     This function is used to run the assessment chain which is simply a single chain object powered
