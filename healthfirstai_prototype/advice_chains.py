@@ -8,25 +8,6 @@ COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
 SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
 
 
-def load_chain(chain_type: str = "map_reduce") -> BaseCombineDocumentsChain:
-    """
-    This function is loading the chain and sets it up for the agent to use
-
-    Params:
-        chain_type (str, optional) : The type of chain to use
-
-    Returns:
-        The LLM chain object
-    """
-    chain = load_qa_chain(
-        Cohere(cohere_api_key=COHERE_API_KEY, verbose=False),  # type: ignore
-        chain_type=chain_type,
-        # Setting verbose to True will print out the internal state of the Chain object while it is running.
-        verbose=True,
-    )
-    return chain
-
-
 def query_based_similarity_search(
     query: str, docsearch: FAISS, chain: BaseCombineDocumentsChain
 ) -> str:
