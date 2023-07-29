@@ -29,13 +29,21 @@ CREATE TABLE city
 
 CREATE TABLE "user"
 (
-    id SERIAL PRIMARY KEY,
-    height NUMERIC(5, 2) NOT NULL,
-    weight NUMERIC(5, 2) NOT NULL,
-    gender VARCHAR(10) NOT NULL CHECK (gender IN ('Male', 'Female', 'Other')),
-    age INT NOT NULL,
-    country_id INT NOT NULL,
-    city_id INT NOT NULL,
+    id         serial PRIMARY KEY,
+    height     numeric(5, 2) NOT NULL,
+    weight     numeric(5, 2) NOT NULL,
+    gender     varchar(10)   NOT NULL
+        CONSTRAINT user_gender_check
+            CHECK ((gender)::text = ANY
+                   (ARRAY [('Male'::character varying)::text, ('Female'::character varying)::text, ('Other'::character varying)::text])),
+    country_id integer       NOT NULL,
+    city_id    integer       NOT NULL,
+    first_name varchar(50),
+    last_name  varchar(50),
+    username   varchar(50),
+    password   varchar(100),
+    dob        date
+
     FOREIGN KEY (country_id) REFERENCES country (id) ON DELETE CASCADE,
     FOREIGN KEY (city_id) REFERENCES city (id) ON DELETE CASCADE
 );
