@@ -1,5 +1,5 @@
 from langchain.callbacks import StreamlitCallbackHandler
-from healthfirstai_prototype.chat_agent import init_agent
+from healthfirstai_prototype.chat_agent import init_chat_agent
 import streamlit as st
 
 st.set_page_config(page_title="AI Coach Chat", page_icon="❤️")
@@ -21,7 +21,7 @@ if prompt := st.chat_input(placeholder="Type something..."):
 
     with st.chat_message("assistant"):
         st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=True)
-        diet_agent = init_agent(
+        diet_agent = init_chat_agent(
             user_input=st.session_state.messages[-1]["content"],
             user_id=1,
             session_id="streamlit-session",
