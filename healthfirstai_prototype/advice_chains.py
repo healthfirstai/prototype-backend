@@ -1,19 +1,18 @@
+import os
+from langchain.llms import Cohere
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import Cohere
-from langchain.vectorstores import FAISS
-import os
+from healthfirstai_prototype.advice_tools import query_pinecone_index
 
 COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
-SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
 
 
-def load_chain(chain_type: str = "map_reduce") -> BaseCombineDocumentsChain:
+def load_chain(chain_type: str = "stuff") -> BaseCombineDocumentsChain:
     """
     This function is loading the chain and sets it up for the agent to use
 
     Params:
-        chain_type (str, optional) : The type of chain to use
+        chain_type (str, optional) : The type of chain to use ("stuff" or "map_reduce")
 
     Returns:
         The LLM chain object
@@ -27,20 +26,17 @@ def load_chain(chain_type: str = "map_reduce") -> BaseCombineDocumentsChain:
     return chain
 
 
-def query_based_similarity_search(
-    query: str, docsearch: FAISS, chain: BaseCombineDocumentsChain
-) -> str:
+def query_based_similarity_search(query: str, chain: BaseCombineDocumentsChain) -> str:
     """
     This function is used to search through the knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
 
     Params:
-        query (str) : The user's query / question
-        docsearch (FAISS) : FAISS wrapper from raw documents to search from based on the similarity search algos
+        query (str): The user's query / question
         chain (BaseCombineDocumentsChain) : The LLM chain object
 
     Returns:
         The response from the LLM chain object
     """
-    docs = docsearch.similarity_search(query)
+    docs = query_pinecone_index(query)
     response = chain.run(input_documents=docs, question=query)
     return response
