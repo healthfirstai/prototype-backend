@@ -156,9 +156,14 @@ def store_new_workout_schedule_json(user_id: int, new_schedule: str) -> None:
     r.hset(f"my-workout-schedule:{user_id}", "workout_schedule", new_schedule)
 
 
-def get_cached_schedule_json(
-        user_id: int,
-):
+def get_workout_schedule(user_id: int):
+    """
+        Given a user ID, query the database and return the user's workout schedule.
+    """
+    return get_cached_schedule_json(user_id)
+
+
+def get_cached_schedule_json(user_id: int):
     """
     Get the cached workout schedule for the user
 
@@ -174,11 +179,7 @@ def get_cached_schedule_json(
     return json.dumps(cached_schedule_dict, indent=4)
 
 
-def edit_workout_schedule_json(
-        agent_input: str,
-        user_id: int,
-        store_in_redis: bool = True,
-) -> str:
+def edit_workout_schedule_json(agent_input: str, user_id: int, store_in_redis: bool = True) -> str:
     """
     Run the Edit JSON chain with the provided agent's input and the user's ID.
 
