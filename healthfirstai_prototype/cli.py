@@ -232,11 +232,19 @@ def edit_cached_meal(
     typer.echo("Finished editing plan")
 
 
-@app.callback()
-def cli():
+@app.command()
+def build_docs():
     """
-    HealthFirstAI Prototype CLI
+    Runs a chain of functions to build the documentation
     """
+    shell_exec = (
+        "mkdocs build && cp README.md docs/index.md && "
+        "typer healthfirstai_prototype/cli.py utils docs --output docs/cli.md && "
+        "cp README.md docs/index.md &&"
+        "leasot --reporter markdown healthfirstai_prototype/*.py > docs/todo.md | prettier --write docs/todo.md"
+    )
+
+    os.system(shell_exec)
 
 
 @app.command()
@@ -269,6 +277,13 @@ def test_advice_agent():
     else:
         typer.echo(google_response)
     typer.echo("------------------------------------------")
+
+
+@app.callback()
+def cli():
+    """
+    HealthFirstAI Prototype CLI
+    """
 
 
 if __name__ == "__main__":
