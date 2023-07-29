@@ -5,9 +5,11 @@ from langchain.embeddings.cohere import CohereEmbeddings
 from langchain.vectorstores import Pinecone
 from langchain.document_loaders import PyPDFDirectoryLoader
 from langchain.text_splitter import CharacterTextSplitter
+from dotenv import load_dotenv
 
+# Load env file
+load_dotenv()
 COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
-SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY") or ""
 PINECONE_ENV_NAME = os.getenv("PINECONE_ENV_NAME") or ""
 
@@ -63,7 +65,7 @@ def pinecone_init(
     indexname: str = "pinecone-knowledge-base", vector_dimension: int = 4096
 ):
     """
-    This function is used to initialize the Pinecone index. It should be run only once.
+    This function is used to initialize the Pinecone index.
 
     Params:
         indexname (str, optional): The name of the index (or simople the name of the database we are creating)
@@ -121,6 +123,7 @@ def query_pinecone_index(query: str, indexname: str = "pinecone-knowledge-base")
     Returns:
         response (list[Document]): The response object from the Pinecone index
     """
+    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
     embedding_function = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
     docsearch = Pinecone.from_existing_index(indexname, embedding_function)
     response = docsearch.similarity_search(query)
@@ -155,3 +158,16 @@ def parse_user_info(user_data: User) -> dict[str, str]:
         "city_id": str(user_data.city_id),
         "country_id": str(user_data.country_id),
     }
+
+
+def main():
+    query = "How many hours a day should I have?"
+
+    print("--------------------------------------")
+    print("Query: ", query)
+    print("--------------------------------------")
+    print(query_pinecone_index(query))
+
+
+if __name__ == "__main__":
+    main()

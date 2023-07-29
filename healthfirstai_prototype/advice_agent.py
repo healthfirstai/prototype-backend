@@ -1,14 +1,9 @@
 import os
 from dotenv import load_dotenv
 from langchain.utilities import GoogleSerperAPIWrapper
-from healthfirstai_prototype.advice_tools import read_pdf
 from healthfirstai_prototype.advice_chains import (
     load_chain,
     query_based_similarity_search,
-)
-from healthfirstai_prototype.advice_tools import (
-    load_prerequisites_for_vector_search,
-    read_pdf,
 )
 
 """
@@ -26,23 +21,21 @@ load_dotenv()
 # Load API keys
 COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
 SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY") or ""
 
 
-def faiss_vector_search(query: str) -> str:
+def kb_vector_search(query: str) -> str:
     """
     This function is used to load the chain and sets it up for the agent to use
 
     Params:
         query (str) : The user's query / question
-        reader (PdfReader) : The PDF file in the PDFReader format
 
     Returns:
         The response from the LLM chain object
     """
-    reader = read_pdf()
     chain = load_chain()
-    docsearch = load_prerequisites_for_vector_search(reader)
-    response = query_based_similarity_search(query, docsearch, chain)
+    response = query_based_similarity_search(query, chain)
     return response
 
 
@@ -67,12 +60,12 @@ def serp_api_search(query: str) -> str:
 def main():
     query = "How many hours a day should I have?"
     google_search_results = serp_api_search(query)
-    faiss_search_results = faiss_vector_search(query)
+    kb_search_results = kb_vector_search(query)
 
     print("--------------------------------------")
     print("Query: ", query)
     print("--------------------------------------")
-    print("KB response: ", faiss_search_results)
+    print("KB response: ", kb_search_results)
     print("--------------------------------------")
     print("Google Search: ", google_search_results)
     print("--------------------------------------")
