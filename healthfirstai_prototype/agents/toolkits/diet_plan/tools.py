@@ -1,4 +1,4 @@
-"""Nutrition Tools
+"""Diet Plan Tools
 
 Tools used in agents for the nutrition feature.
 
