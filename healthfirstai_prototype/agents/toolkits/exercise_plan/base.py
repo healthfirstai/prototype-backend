@@ -1,13 +1,11 @@
-# NOTE: This is where the main application logic is implemented for the exercise agent
-import json
-
 import openai
 from langchain import SQLDatabaseChain, SQLDatabase
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from healthfirstai_prototype.utils import get_model
+from healthfirstai_prototype.enums.openai_enums import ModelName
+from .utils import generate_schedule_json
 from dotenv import load_dotenv
 import os
 
@@ -18,7 +16,7 @@ DB_PASSWORD = os.getenv("POSTGRES_PASSWORD") or ""
 DB_HOST = os.getenv("POSTGRES_HOST") or ""
 DB_NAME = os.getenv("POSTGRES_DATABASE") or ""
 DB_PORT = os.getenv("POSTGRES_PORT") or ""
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key = f"{OPENAI_API_KEY}"
 
 
@@ -28,8 +26,8 @@ def get_prompt():
     while True:
         prompt = input("Enter a prompt: ")
 
-        if prompt.lower() == 'exit':
-            print('Exiting...')
+        if prompt.lower() == "exit":
+            print("Exiting...")
             break
         else:
             try:
@@ -39,17 +37,14 @@ def get_prompt():
                 print(e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_schedule_json(1)
-    llm = ChatOpenAI(temperature=0, openai_api_key=OPENAI_API_KEY, model_name='gpt-3.5-turbo')
+    llm = get_model(ModelName.gpt_3_5_turbo)
     db = SQLDatabase.from_uri(
         f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
 
-    conversation = ConversationChain(
-        llm=llm,
-        memory=ConversationBufferMemory()
-    )
+    conversation = ConversationChain(llm=llm, memory=ConversationBufferMemory())
 
     # Create query instruction
     QUERY = """
