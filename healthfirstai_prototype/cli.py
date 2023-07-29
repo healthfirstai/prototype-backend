@@ -3,25 +3,28 @@
 This module contains the CLI for the HealthFirstAI prototype
 
 """
+import os
+from langchain.callbacks import get_openai_callback
 from typing_extensions import Annotated
-from healthfirstai_prototype.nutrition_chains import edit_diet_plan_json
-from healthfirstai_prototype.nutrition_logic import (
+from .agents.toolkits.diet_plan.utils import (
+    edit_diet_plan_json,
     get_user_meal_plans_as_json,
     get_user_info_for_json_agent,
     get_user_meal_info_json,
     get_cached_plan_json,
     cache_diet_plan_redis,
 )
-from healthfirstai_prototype.chat_agent import (
-    init_agent,
+from .agents.chat_agent import (
+    init_chat_agent,
 )
-from healthfirstai_prototype.advice_agent import serp_api_search
-from healthfirstai_prototype.util_models import MealNames, MealChoice
-from healthfirstai_prototype.nutrition_vector_ops import (
+from .agents.toolkits.advice.advice_agent import serp_api_search
+from .enums.meal_enums import MealChoice, MealNames
+from .controller.nutrition_vector_operations import (
     delete_all_vectors,
     get_all_foods,
     insert_all_vectors,
 )
+from .agents.chat_agent import init_sql_agent, init_openai_func_sql_agent
 
 
 from healthfirstai_prototype.advice_prompts import (
@@ -147,7 +150,7 @@ def get_meal(
 
 
 @app.command()
-def test_agent(
+def test_chat_agent(
     input: str,
     uid: int = 1,
     session_id="my-session",
@@ -155,8 +158,36 @@ def test_agent(
     """
     Test ReAct Diet Plan Agent
     """
-    diet_agent = init_agent(input, uid, session_id)
-    diet_agent(input)
+    diet_agent = init_chat_agent(input, uid, session_id)
+    with get_openai_callback() as cb:
+        diet_agent(input)
+        print(cb)
+
+
+@app.command()
+def test_std_sql_agent(
+    input: str,
+):
+    """
+    Test ReAct Diet Plan Agent
+    """
+    sql_agent = init_sql_agent()
+    with get_openai_callback() as cb:
+        sql_agent(input)
+        print(cb)
+
+
+@app.command()
+def test_openai_func_sql_agent(
+    input: str,
+):
+    """
+    Test OpenAI Function SQL Agent
+    """
+    diet_agent = init_openai_func_sql_agent()
+    with get_openai_callback() as cb:
+        diet_agent(input)
+        print(cb)
 
 
 @app.command()
@@ -254,7 +285,9 @@ def test_advice_agent():
     """
     typer.echo("Testing advice agent...")
     query = input("Enter a query: ")
-    kb_response = "" # FIX: Yan, function faiss_vector_search(query) does not exist anymore
+    kb_response = (
+        ""  # FIX: Yan, function faiss_vector_search(query) does not exist anymore
+    )
     google_response = serp_api_search(query)
     typer.echo("Finished search. Wait for the results below:")
     typer.echo(f"K-Base search response: {kb_response}")

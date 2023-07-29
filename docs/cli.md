@@ -24,7 +24,9 @@ $ cli [OPTIONS] COMMAND [ARGS]...
 * `get-user-info`: Get user info from the database
 * `reinsert-vectors`: Delete all vectors in nutrition_vectors...
 * `test-advice-agent`: Test the core functionality of the advice...
-* `test-agent`: Test ReAct Diet Plan Agent
+* `test-chat-agent`: Test ReAct Diet Plan Agent
+* `test-openai-func-sql-agent`: Test OpenAI Function SQL Agent
+* `test-std-sql-agent`: Test ReAct Diet Plan Agent
 
 ## `cli build-docs`
 
@@ -188,14 +190,14 @@ $ cli test-advice-agent [OPTIONS]
 
 * `--help`: Show this message and exit.
 
-## `cli test-agent`
+## `cli test-chat-agent`
 
 Test ReAct Diet Plan Agent
 
 **Usage**:
 
 ```console
-$ cli test-agent [OPTIONS] INPUT
+$ cli test-chat-agent [OPTIONS] INPUT
 ```
 
 **Arguments**:
@@ -206,4 +208,40 @@ $ cli test-agent [OPTIONS] INPUT
 
 * `--uid INTEGER`: [default: 1]
 * `--session-id TEXT`: [default: my-session]
+* `--help`: Show this message and exit.
+
+## `cli test-openai-func-sql-agent`
+
+Test OpenAI Function SQL Agent
+
+**Usage**:
+
+```console
+$ cli test-openai-func-sql-agent [OPTIONS] INPUT
+```
+
+**Arguments**:
+
+* `INPUT`: [required]
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## `cli test-std-sql-agent`
+
+Test ReAct Diet Plan Agent
+
+**Usage**:
+
+```console
+$ cli test-std-sql-agent [OPTIONS] INPUT
+```
+
+**Arguments**:
+
+* `INPUT`: [required]
+
+**Options**:
+
 * `--help`: Show this message and exit.
