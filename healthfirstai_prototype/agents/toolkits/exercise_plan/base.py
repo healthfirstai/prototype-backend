@@ -3,6 +3,9 @@ from langchain import SQLDatabaseChain, SQLDatabase
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
+from healthfirstai_prototype.utils import get_model
+from healthfirstai_prototype.enums.openai_enums import ModelName
+from .utils import generate_schedule_json
 from dotenv import load_dotenv
 import os
 
@@ -36,9 +39,7 @@ def get_prompt():
 
 if __name__ == "__main__":
     generate_schedule_json(1)
-    llm = ChatOpenAI(
-        temperature=0, openai_api_key=OPENAI_API_KEY, model_name="gpt-3.5-turbo"
-    )
+    llm = get_model(ModelName.gpt_3_5_turbo)
     db = SQLDatabase.from_uri(
         f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
