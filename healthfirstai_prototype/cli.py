@@ -11,12 +11,11 @@ from healthfirstai_prototype.nutrition_logic import (
     get_user_meal_info_json,
     get_cached_plan_json,
     cache_diet_plan_redis,
-    get_cached_plan_json,
 )
 from healthfirstai_prototype.chat_agent import (
     init_agent,
 )
-from healthfirstai_prototype.advice_agent import faiss_vector_search, serp_api_search
+from healthfirstai_prototype.advice_agent import serp_api_search
 from healthfirstai_prototype.util_models import MealNames, MealChoice
 from healthfirstai_prototype.nutrition_vector_ops import (
     delete_all_vectors,
@@ -247,7 +246,7 @@ def test_advice_agent():
     """
     typer.echo("Testing advice agent...")
     query = input("Enter a query: ")
-    kb_response = faiss_vector_search(query)
+    kb_response = "" # FIX: Yan, function faiss_vector_search(query) does not exist anymore
     google_response = serp_api_search(query)
     typer.echo("Finished search. Wait for the results below:")
     typer.echo(f"K-Base search response: {kb_response}")
