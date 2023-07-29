@@ -16,19 +16,12 @@ from healthfirstai_prototype.utils import get_model
 from healthfirstai_prototype.enums.openai_enums import ModelName
 from healthfirstai_prototype.models.database import sql_agent_db
 from langchain.schema import SystemMessage
-from .toolkits.diet_plan.tools import (
-    GetUserInfoTool,
-    DietPlanTool,
-    EditDietPlanTool,
-    EditBreakfastTool,
-    EditLunchTool,
-    EditDinnerTool,
-    BreakfastTool,
-    LunchTool,
-    DinnerTool,
-)
+from .toolkits.diet_plan.toolkit import DietPlanToolkit
+from .toolkits.user_info.toolkit import UserInfoToolkit
 from .toolkits.diet_plan.utils import rank_tools
-from .toolkits.diet_plan.prompts import DIET_AGENT_PROMPT_TEMPLATE # TODO: Make this a general template used by the chat_agent
+
+# TODO: Make this a general template used by the chat_agent
+from .toolkits.diet_plan.prompts import DIET_AGENT_PROMPT_TEMPLATE
 import langchain
 
 
@@ -53,17 +46,7 @@ def init_chat_agent(
         AgentExecutor: An instance of the conversation agent executor ready to handle user interactions.
     """
     # NOTE: Hook into callbacks in the future with callbacks=[HumanApprovalCallbackHandler()]
-    tools = [
-        DietPlanTool(),
-        GetUserInfoTool(),
-        EditDietPlanTool(),
-        EditBreakfastTool(),
-        EditLunchTool(),
-        EditDinnerTool(),
-        BreakfastTool(),
-        LunchTool(),
-        DinnerTool(),
-    ]
+    tools = DietPlanToolkit().get_tools() + UserInfoToolkit().get_tools()
     tools = rank_tools(user_input, tools)
     message_history = RedisChatMessageHistory(session_id=session_id)
 

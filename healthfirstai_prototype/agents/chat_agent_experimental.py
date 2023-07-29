@@ -22,11 +22,8 @@ from langchain.experimental.plan_and_execute import (
     load_chat_planner,
 )
 
-from .toolkits.diet_plan.tools import (
-    GetUserInfoTool,
-    DietPlanTool,
-    EditDietPlanTool,
-)
+from .toolkits.user_info.tools import GetUserInfoTool
+from .toolkits.diet_plan.tools import DietPlanTool, EditDietPlanTool
 from .prompts import SYSTEM_PROMPT
 from healthfirstai_prototype.enums.openai_enums import ModelName
 from healthfirstai_prototype.utils import get_model

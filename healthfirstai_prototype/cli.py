@@ -6,10 +6,10 @@ This module contains the CLI for the HealthFirstAI prototype
 import os
 from langchain.callbacks import get_openai_callback
 from typing_extensions import Annotated
+from .agents.toolkits.user_info.utils import get_user_info_for_json_agent
 from .agents.toolkits.diet_plan.utils import (
     edit_diet_plan_json,
     get_user_meal_plans_as_json,
-    get_user_info_for_json_agent,
     get_user_meal_info_json,
     get_cached_plan_json,
     cache_diet_plan_redis,

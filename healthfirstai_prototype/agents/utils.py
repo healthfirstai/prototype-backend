@@ -4,7 +4,7 @@ This module contains utility functions used by the chat agent. These functions
 May be used inside the chat agent toolkits
 
 """
-from .toolkits.diet_plan.utils import get_user_info_for_json_agent
+from .toolkits.user_info.utils import get_user_info_for_json_agent
 
 
 # TODO: This is a duplicated function. In the future, refactor and remove the other one in utils.py
