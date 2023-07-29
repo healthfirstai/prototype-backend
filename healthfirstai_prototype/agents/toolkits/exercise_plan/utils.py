@@ -1,4 +1,7 @@
 import json
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from exercise_data_models import (
     ExerciseType,
     BodyPart,
@@ -9,11 +12,26 @@ from exercise_data_models import (
     Workout,
     WorkoutExercise,
 )
-from healthfirstai_prototype.database import SessionLocal
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+DB_USER = os.getenv("POSTGRES_USER") or ""
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD") or ""
+DB_HOST = os.getenv("POSTGRES_HOST") or ""
+DB_NAME = os.getenv("POSTGRES_DATABASE") or ""
+DB_PORT = os.getenv("POSTGRES_PORT") or ""
 
 
-def get_schedule_json(user_id):
-    session = SessionLocal()
+def generate_schedule_json(user_id):
+    # change echo to see the SQL statements
+    engine = create_engine(
+        f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
     try:
         # Query to fetch the user's schedule along with workout details
@@ -102,7 +120,10 @@ def get_schedule_json(user_id):
         with open("../user_schedule.json", "w") as json_file:
             json.dump(schedule_json, json_file, indent=4)
 
-        return json.dumps(schedule_json, indent=4)
+        print("Schedule JSON file generated successfully!")
+
+    except Exception as e:
+        print("Error occurred while generating schedule JSON file: ", e)
 
     finally:
         # Close the session when done
