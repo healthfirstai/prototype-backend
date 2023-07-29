@@ -14,6 +14,12 @@ from .agents.toolkits.diet_plan.utils import (
     get_cached_plan_json,
     cache_diet_plan_redis,
 )
+from .agents.toolkits.exercise_plan.utils import (
+    get_workout_schedule_json,
+    cache_workout_schedule_redis,
+    get_cached_schedule_json,
+    edit_workout_schedule_json,
+)
 from .agents.chat_agent import (
     init_chat_agent,
 )
@@ -24,8 +30,6 @@ from .controller.nutrition_vector_operations import (
     get_all_foods,
     insert_all_vectors,
 )
-from .agents.chat_agent import init_sql_agent, init_openai_func_sql_agent
-
 
 from healthfirstai_prototype.advice_prompts import (
     run_assessment_chain,
@@ -47,6 +51,19 @@ def get_diet_plan(
     typer.echo("Getting meal plan")
     meal_plan = get_user_meal_plans_as_json(uid, include_ingredients)
     typer.echo(meal_plan)
+    typer.echo("Finished search")
+
+
+@app.command()
+def get_workout_schedule(
+    uid: int = 1,
+):
+    """
+    Get a workout schedule from the database
+    """
+    typer.echo("Getting workout schedule")
+    workout_schedule = get_workout_schedule_json(uid)
+    typer.echo(workout_schedule)
     typer.echo("Finished search")
 
 
@@ -165,32 +182,6 @@ def test_chat_agent(
 
 
 @app.command()
-def test_std_sql_agent(
-    input: str,
-):
-    """
-    Test ReAct Diet Plan Agent
-    """
-    sql_agent = init_sql_agent()
-    with get_openai_callback() as cb:
-        sql_agent(input)
-        print(cb)
-
-
-@app.command()
-def test_openai_func_sql_agent(
-    input: str,
-):
-    """
-    Test OpenAI Function SQL Agent
-    """
-    diet_agent = init_openai_func_sql_agent()
-    with get_openai_callback() as cb:
-        diet_agent(input)
-        print(cb)
-
-
-@app.command()
 def get_user_info(uid: int = 1):
     """
     Get user info from the database
@@ -227,6 +218,16 @@ def cache_diet_plan(uid: int = 1):
 
 
 @app.command()
+def cache_workout_schedule(uid: int = 1):
+    """
+    Stores workout schedule as it is in the SQL database in Redis
+    """
+    typer.echo("Storing schedule")
+    cache_workout_schedule_redis(uid)
+    typer.echo("Finished storing schedule")
+
+
+@app.command()
 def get_cached_plan(
     uid: int = 1,
     include_ingredients: bool = True,
@@ -238,6 +239,19 @@ def get_cached_plan(
     plan = get_cached_plan_json(uid, include_ingredients)
     typer.echo(plan)
     typer.echo("Finished getting plan")
+
+
+@app.command()
+def get_cached_schedule(
+    uid: int = 1,
+):
+    """
+    Get workout schedule from Redis
+    """
+    typer.echo("Getting schedule")
+    schedule = get_cached_schedule_json(uid)
+    typer.echo(schedule)
+    typer.echo("Finished getting schedule")
 
 
 @app.command()
@@ -261,6 +275,25 @@ def edit_cached_meal(
     )
     typer.echo(new_plan)
     typer.echo("Finished editing plan")
+
+
+@app.command()
+def edit_cached_workout(
+    agent_input: str,
+    user_id: int = 1,
+    store_in_cache: bool = False,
+):
+    """
+    Get workout schedule from Redis
+    """
+    typer.echo("Editing schedule")
+    new_schedule = edit_workout_schedule_json(
+        agent_input,
+        user_id,
+        store_in_cache,
+    )
+    typer.echo(new_schedule)
+    typer.echo("Finished editing schedule")
 
 
 @app.command()

@@ -8,6 +8,7 @@ Todo:
 
 import json
 from typing import Any
+from datetime import date
 
 from langchain.agents.tools import BaseTool
 
@@ -126,8 +127,8 @@ def insert_into_personalized_daily_meal_plan(user_id: int) -> None:
     personalized_daily_meal_plan = PersonalizedDailyMealPlan(
         user_id=user_id,
         custom_daily_meal_plan=1,
-        start_date="2020-01-01",
-        end_date="2021-02-01",
+        start_date=date(2021, 1, 1),
+        end_date=date(2020, 1, 1),
         goal_id=1,
     )
     session.add(personalized_daily_meal_plan)
