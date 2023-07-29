@@ -101,26 +101,26 @@ Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db
 
 - Save dependencies to requirements.txt
 
-  ``` sh
+  ```sh
   poetry export --without-hashes --format=requirements.txt > requirements.txt
   ```
 
 - Build and serve documentation
 
-  ``` sh
+  ```sh
   mkdocs build
   mkdocs serve -a localhost:9000 # Runs on port 9000
   ```
 
 - Start Streamlit app
 
-  ``` sh
+  ```sh
   streamlit run healthfirstai_prototype/streamlit_frontend/🏠_Home.py # Runs on port 8501
   ```
 
 - Start FastAPI Development Web Server
 
-  ``` sh
+  ```sh
   uvicorn healthfirstai_prototype.api:app --reload # Runs on port 8000
   ```
 
