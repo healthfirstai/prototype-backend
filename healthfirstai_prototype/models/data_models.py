@@ -10,19 +10,20 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlmodel import SQLModel
 from pgvector.sqlalchemy import Vector
 
 Base = declarative_base()
 
 
-class NutritionVector(Base):
-    __tablename__ = "nutrition_vector"
+class NutritionVector(SQLModel, table=True):
+    __tablename__: str = "nutrition_vector"
     food_id = Column("food_id", Integer, primary_key=True)
     embedding = Column("embedding", Vector(95))
 
 
-class Food(Base):
-    __tablename__ = "food"
+class Food(SQLModel, table=True):
+    __tablename__: str = "food"
 
     id = Column("id", Integer, primary_key=True)
     Name = Column(String)
@@ -148,23 +149,23 @@ class Food(Base):
     Serving_Description_9_g = Column("Serving Description 9 (g)", String)
 
 
-class Country(Base):
-    __tablename__ = "country"
+class Country(SQLModel, table=True):
+    __tablename__: str = "country"
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     continent = Column(String(255), nullable=False)
 
 
-class City(Base):
-    __tablename__ = "city"
+class City(SQLModel, table=True):
+    __tablename__: str = "city"
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     country_id = Column(Integer, ForeignKey("country.id"), nullable=False)
     country = relationship("Country", backref="cities", cascade="all, delete")
 
 
-class User(Base):
-    __tablename__ = "user"
+class User(SQLModel, table=True):
+    __tablename__: str = "user"
     id = Column(Integer, primary_key=True)
     first_name = Column(String(50))
     last_name = Column(String(50))
@@ -187,45 +188,45 @@ class User(Base):
     )
 
 
-class Goal(Base):
-    __tablename__ = "goals"
+class Goal(SQLModel, table=True):
+    __tablename__: str = "goal"
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
 
 
-class BaseWeeklyMealPlan(Base):
-    __tablename__ = "base_weekly_meal_plan"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False)
-    description = Column(Text, nullable=False)
-    link = Column(String(255))
-
-
-class BaseDailyMealPlan(Base):
-    __tablename__ = "base_daily_meal_plan"
+class BaseWeeklyMealPlan(SQLModel, table=True):
+    __tablename__: str = "base_weekly_meal_plan"
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
     link = Column(String(255))
 
 
-class CustomWeeklyMealPlan(Base):
-    __tablename__ = "custom_weekly_meal_plan"
+class BaseDailyMealPlan(SQLModel, table=True):
+    __tablename__: str = "base_daily_meal_plan"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    link = Column(String(255))
+
+
+class CustomWeeklyMealPlan(SQLModel, table=True):
+    __tablename__: str = "custom_weekly_meal_plan"
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
 
 
-class CustomDailyMealPlan(Base):
-    __tablename__ = "custom_daily_meal_plan"
+class CustomDailyMealPlan(SQLModel, table=True):
+    __tablename__: str = "custom_daily_meal_plan"
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
 
 
-class PersonalizedDailyMealPlan(Base):
-    __tablename__ = "personalized_daily_meal_plan"
+class PersonalizedDailyMealPlan(SQLModel, table=True):
+    __tablename__: str = "personalized_daily_meal_plan"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     custom_daily_meal_plan = Column(
@@ -241,8 +242,8 @@ class PersonalizedDailyMealPlan(Base):
     goal = relationship("Goal")
 
 
-class PersonalizedWeeklyMealPlan(Base):
-    __tablename__ = "personalized_weekly_meal_plan"
+class PersonalizedWeeklyMealPlan(SQLModel, table=True):
+    __tablename__: str = "personalized_weekly_meal_plan"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     custom_weekly_meal_plan = Column(
@@ -258,8 +259,8 @@ class PersonalizedWeeklyMealPlan(Base):
     goal = relationship("Goal")
 
 
-class Meal(Base):
-    __tablename__ = "meal"
+class Meal(SQLModel, table=True):
+    __tablename__: str = "meal"
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     meal_type = Column(String(10), nullable=False)
@@ -273,13 +274,13 @@ class Meal(Base):
     )
 
 
-class UnitOfMeasurement(Base):
-    __tablename__ = "unit_of_measurement"
+class UnitOfMeasurement(SQLModel, table=True):
+    __tablename__: str = "unit_of_measurement"
     unit = Column(String(255), primary_key=True)
 
 
-class MealIngredient(Base):
-    __tablename__ = "meal_ingredient"
+class MealIngredient(SQLModel, table=True):
+    __tablename__: str = "meal_ingredient"
     meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
     ingredient_id = Column(Integer, ForeignKey("food.id"), primary_key=True)
     unit_of_measurement = Column(
@@ -288,16 +289,16 @@ class MealIngredient(Base):
     quantity = Column(Float(precision=5), nullable=False)
 
 
-class DailyMealPlanAndMeal(Base):
-    __tablename__ = "daily_meal_plan_and_meal"
+class DailyMealPlanAndMeal(SQLModel, table=True):
+    __tablename__: str = "daily_meal_plan_and_meal"
     base_daily_meal_plan_id = Column(
         Integer, ForeignKey("base_daily_meal_plan.id"), primary_key=True
     )
     meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
 
 
-class WeeklyMealPlanAndDailyMealPlan(Base):
-    __tablename__ = "weekly_meal_plan_and_daily_meal_plan"
+class WeeklyMealPlanAndDailyMealPlan(SQLModel, table=True):
+    __tablename__: str = "weekly_meal_plan_and_daily_meal_plan"
     base_weekly_meal_plan_id = Column(
         Integer, ForeignKey("base_weekly_meal_plan.id"), primary_key=True
     )
@@ -306,16 +307,16 @@ class WeeklyMealPlanAndDailyMealPlan(Base):
     )
 
 
-class CustomDailyMealPlanAndMeal(Base):
-    __tablename__ = "custom_daily_meal_plan_and_meal"
+class CustomDailyMealPlanAndMeal(SQLModel, table=True):
+    __tablename__: str = "custom_daily_meal_plan_and_meal"
     custom_daily_meal_plan_id = Column(
         Integer, ForeignKey("custom_daily_meal_plan.id"), primary_key=True
     )
     meal_id = Column(Integer, ForeignKey("meal.id"), primary_key=True)
 
 
-class CustomWeeklyMealPlanAndCustomDailyMealPlan(Base):
-    __tablename__ = "custom_weekly_meal_plan_and_custom_daily_meal_plan"
+class CustomWeeklyMealPlanAndCustomDailyMealPlan(SQLModel, table=True):
+    __tablename__: str = "custom_weekly_meal_plan_and_custom_daily_meal_plan"
     custom_weekly_meal_plan_id = Column(
         Integer, ForeignKey("custom_weekly_meal_plan.id"), primary_key=True
     )
