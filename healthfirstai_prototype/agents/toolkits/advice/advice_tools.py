@@ -154,7 +154,7 @@ def parse_user_info(user_data: User) -> dict[str, str]:
         "height": str(user_data.height),
         "weight": str(user_data.weight),
         "gender": str(user_data.gender),
-        "age": str(user_data.age),
+        "age": str(user_data.dob),
         "city_id": str(user_data.city_id),
         "country_id": str(user_data.country_id),
     }

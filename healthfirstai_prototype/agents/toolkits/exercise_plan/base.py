@@ -2,7 +2,6 @@ import openai
 from langchain import SQLDatabaseChain, SQLDatabase
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
-from langchain.chat_models import ChatOpenAI
 from healthfirstai_prototype.utils import get_model
 from healthfirstai_prototype.enums.openai_enums import ModelName
 from .utils import generate_schedule_json

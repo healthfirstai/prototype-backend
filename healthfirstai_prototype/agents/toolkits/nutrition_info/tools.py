@@ -6,8 +6,7 @@ Tools used in the nutrition lookup feature
 from typing import Type
 from pydantic import BaseModel
 from langchain.tools import BaseTool
-from .utils import find_similar_foods
-from healthfirstai_prototype.enums.meal_enums import MealNames
+from .utils import nutritional_similarity_search
 from .schemas import FindSimilarFoodsInput
 
 
@@ -30,7 +29,7 @@ class FindSimilarFoodsTool(BaseTool):
     args_schema: Type[BaseModel] = FindSimilarFoodsInput
 
     def _run(self, food_name: str, top_k: int):
-        return find_similar_foods(food_name, top_k)
+        return nutritional_similarity_search(food_name, top_k)
 
     def _arun(self, food_name: str, top_k: int):
         raise NotImplementedError("get_user_info does not support async")
