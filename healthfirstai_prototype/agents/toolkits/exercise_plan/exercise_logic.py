@@ -1,5 +1,5 @@
 import json
-from exercise_data_models import (
+from healthfirstai_prototype.models.exercise_data_models import (
     ExerciseType,
     BodyPart,
     Difficulty,
