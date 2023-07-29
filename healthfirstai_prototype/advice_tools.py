@@ -16,19 +16,20 @@ def read_pdfs(
     folder_path: str = "../notebooks/pdfs/",
 ):
     """
-    This function is simply taking the path to the PDF file and returning the PDFReader object
+    This function is simply taking the path to the PDF file, loading all the PDFs
+    inside the folder and returning them as a List of Documents.
 
     Params:
         folder_path (str, optional): The path to the folder with PDF files
 
     Returns:
-        documents (List[Documents]): The list of documents in the PDFReader format
+        documents (List[Documents]): The list of documents
     """
     loader = PyPDFDirectoryLoader(path=folder_path)
     return loader.load()
 
 
-def split_text(raw_text) -> list[str]:
+def split_documents(documents) -> list[str]:
     """
     This function is used to split the raw text into chunks
 
@@ -43,10 +44,24 @@ def split_text(raw_text) -> list[str]:
         chunk_overlap=200,
     )
 
-    return text_splitter.split_text(raw_text)
+    texts = text_splitter.split_text(documents)
+
+    return texts
 
 
-def pinecone_init(indexname: str = "pinecone-knowledge-base"):
+def prereqs_for_embeds(texts):
+    docs = []
+    metadatas = []
+    for text in texts:
+        docs.append(text.page_content)
+        metadatas.append(text.metadata)
+
+    return {"documents": docs, "metadatas": metadatas}
+
+
+def pinecone_init(
+    indexname: str = "pinecone-knowledge-base", vector_dimension: int = 4096
+):
     """
     This function is used to initialize the Pinecone index. It should be run only once.
 
@@ -63,7 +78,7 @@ def pinecone_init(indexname: str = "pinecone-knowledge-base"):
         pinecone.create_index(
             name=indexname,
             metric="cosine",
-            dimension=4096,  # NOTE: dimension of the vector depends on the embeddings function one is using
+            dimension=vector_dimension,
         )
 
     # connect to the new index
@@ -74,7 +89,7 @@ def pinecone_init(indexname: str = "pinecone-knowledge-base"):
 def pinecone_insert(
     index: pinecone.Index,
     docs,
-    metadatas: list[dict[str, str]],
+    metadatas,
 ):
     """
     This function is used to insert the documents into the Pinecone index. Please give it some
@@ -92,22 +107,33 @@ def pinecone_insert(
     vectorstore = Pinecone(index, embedding_function.embed_query, "text")
     vectorstore.add_texts(docs, metadatas)
 
+    return
 
-def query_existing_pinecone_index(
-    query: str, indexname: str, embedding_function: CohereEmbeddings
-):
+
+def query_pinecone_index(query: str, indexname: str = "pinecone-knowledge-base"):
     """
     This function is used to query the Pinecone index
 
     Params:
         query (str) : The user's query / question
-        index (Pinecone) : Pinecone index object
+        indexname (str) : Name of the Pinecone index object
 
     Returns:
-        The response from the Pinecone index
+        response (list[Document]): The response object from the Pinecone index
     """
+    embedding_function = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
     docsearch = Pinecone.from_existing_index(indexname, embedding_function)
-    return docsearch.similarity_search(query)
+    response = docsearch.similarity_search(query)
+    return response
+
+
+def pinecone_delete(indexname: str = "pinecone-knowledge-base"):
+    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
+
+    if indexname in pinecone.list_indexes():
+        pinecone.delete_index(indexname)
+
+    return
 
 
 # NOTE: this function is not used yet
