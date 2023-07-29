@@ -12,8 +12,11 @@ from healthfirstai_prototype.models.exercise_data_models import (
     Workout,
     WorkoutExercise,
 )
+from .chains import init_edit_schedule_json_chain
 from dotenv import load_dotenv
 import os
+
+from healthfirstai_prototype.utils import connect_to_redis
 
 load_dotenv()
 
@@ -24,7 +27,7 @@ DB_NAME = os.getenv("POSTGRES_DATABASE") or ""
 DB_PORT = os.getenv("POSTGRES_PORT") or ""
 
 
-def generate_schedule_json(user_id):
+def get_workout_schedule_json(user_id):
     # change echo to see the SQL statements
     engine = create_engine(
         f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
@@ -130,5 +133,72 @@ def generate_schedule_json(user_id):
         session.close()
 
 
+def cache_workout_schedule_redis(user_id: int) -> None:
+    """
+    Cache the user's diet plan in Redis
+
+    Args:
+        user_id: The ID of the user
+    """
+    r = connect_to_redis()
+    r.hset(f"my-workout-schedule:{user_id}", "workout_schedule", get_workout_schedule_json(user_id))
+
+
+def store_new_workout_schedule_json(user_id: int, new_schedule: str) -> None:
+    """
+    Store the new workout schedule in Redis
+
+    Args:
+        user_id: The ID of the user
+        new_schedule: The new workout schedule
+    """
+    r = connect_to_redis()
+    r.hset(f"my-workout-schedule:{user_id}", "workout_schedule", new_schedule)
+
+
+def get_cached_schedule_json(
+        user_id: int,
+):
+    """
+    Get the cached workout schedule for the user
+
+    Args:
+        user_id: The ID of the user
+    """
+    r = connect_to_redis()
+    if not (cached_schedule := r.hget(f"my-workout-plan:{user_id}", "workout_schedule")):
+        raise ValueError("No cached schedule found for this user.")
+
+    cached_schedule_dict = json.loads(cached_schedule)
+
+    return json.dumps(cached_schedule_dict, indent=4)
+
+
+def edit_workout_schedule_json(
+        agent_input: str,
+        user_id: int,
+        store_in_redis: bool = True,
+) -> str:
+    """
+    Run the Edit JSON chain with the provided agent's input and the user's ID.
+
+    Args:
+        agent_input: The agent's input text for the conversation.
+        user_id: The ID of the user.
+        store_in_redis: Whether to store the updated schedule in Redis
+
+    Returns:
+        The updated workout schedule
+    """
+    new_schedule = init_edit_schedule_json_chain().predict(
+        agent_input=agent_input,
+        user_exercise_schedule_json=get_cached_schedule_json(user_id)
+    )
+    if store_in_redis:
+        store_new_workout_schedule_json(user_id, new_schedule)
+
+    return "Your workout schedule has been updated! Here is your new schedule:\n\n" + new_schedule
+
+
 if __name__ == "__main__":
-    generate_schedule_json(1)
+    get_workout_schedule_json(1)
