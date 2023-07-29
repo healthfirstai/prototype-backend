@@ -17,6 +17,7 @@ VALUES
     ('Sydney', 5);
 
 -- Fake data for user table
+-- FIXME: update the columns to match the actual table
 INSERT INTO "user" (height, weight, gender, age, country_id, city_id)
 VALUES
     (180.0, 75.0, 'Male', 30, 1, 1),

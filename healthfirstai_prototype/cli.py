@@ -14,6 +14,12 @@ from .agents.toolkits.diet_plan.utils import (
     get_cached_plan_json,
     cache_diet_plan_redis,
 )
+from .agents.toolkits.exercise_plan.utils import (
+    get_workout_schedule_json,
+    cache_workout_schedule_redis,
+    get_cached_schedule_json,
+    edit_workout_schedule_json,
+)
 from .agents.chat_agent import (
     init_chat_agent,
 )
@@ -26,7 +32,6 @@ from .controller.nutrition_vector_operations import (
 )
 from .agents.chat_agent import init_sql_agent, init_openai_func_sql_agent
 
-
 from healthfirstai_prototype.advice_prompts import (
     run_assessment_chain,
     template_to_assess_search_results,
@@ -38,8 +43,8 @@ app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 @app.command()
 def get_diet_plan(
-    uid: int = 1,
-    include_ingredients: bool = True,
+        uid: int = 1,
+        include_ingredients: bool = True,
 ):
     """
     Get a meal plan from the database
@@ -51,11 +56,24 @@ def get_diet_plan(
 
 
 @app.command()
+def get_workout_schedule(
+        uid: int = 1,
+):
+    """
+    Get a workout schedule from the database
+    """
+    typer.echo("Getting workout schedule")
+    workout_schedule = get_workout_schedule_json(uid)
+    typer.echo(workout_schedule)
+    typer.echo("Finished search")
+
+
+@app.command()
 def get_cached_meal(
-    meal_choice: MealChoice = MealChoice.breakfast,
-    uid: int = 1,
-    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
-    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+        meal_choice: MealChoice = MealChoice.breakfast,
+        uid: int = 1,
+        include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+        include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
 ):
     """
     Get meal from the Redis Cache given meal name
@@ -102,10 +120,10 @@ def get_cached_meal(
 
 @app.command()
 def get_meal(
-    meal_choice: MealChoice = MealChoice.breakfast,
-    uid: int = 1,
-    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
-    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+        meal_choice: MealChoice = MealChoice.breakfast,
+        uid: int = 1,
+        include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+        include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
 ):
     """
     Get meal from the SQL database given meal name
@@ -151,9 +169,9 @@ def get_meal(
 
 @app.command()
 def test_chat_agent(
-    input: str,
-    uid: int = 1,
-    session_id="my-session",
+        input: str,
+        uid: int = 1,
+        session_id="my-session",
 ):
     """
     Test ReAct Diet Plan Agent
@@ -166,7 +184,7 @@ def test_chat_agent(
 
 @app.command()
 def test_std_sql_agent(
-    input: str,
+        input: str,
 ):
     """
     Test ReAct Diet Plan Agent
@@ -179,7 +197,7 @@ def test_std_sql_agent(
 
 @app.command()
 def test_openai_func_sql_agent(
-    input: str,
+        input: str,
 ):
     """
     Test OpenAI Function SQL Agent
@@ -227,9 +245,19 @@ def cache_diet_plan(uid: int = 1):
 
 
 @app.command()
+def cache_workout_schedule(uid: int = 1):
+    """
+    Stores workout schedule as it is in the SQL database in Redis
+    """
+    typer.echo("Storing schedule")
+    cache_workout_schedule_redis(uid)
+    typer.echo("Finished storing schedule")
+
+
+@app.command()
 def get_cached_plan(
-    uid: int = 1,
-    include_ingredients: bool = True,
+        uid: int = 1,
+        include_ingredients: bool = True,
 ):
     """
     Get diet plan from Redis
@@ -241,12 +269,25 @@ def get_cached_plan(
 
 
 @app.command()
+def get_cached_schedule(
+        uid: int = 1,
+):
+    """
+    Get workout schedule from Redis
+    """
+    typer.echo("Getting schedule")
+    schedule = get_cached_schedule_json(uid)
+    typer.echo(schedule)
+    typer.echo("Finished getting schedule")
+
+
+@app.command()
 def edit_cached_meal(
-    agent_input: str,
-    meal_choice: MealNames,
-    user_id: int = 1,
-    include_ingredients: bool = False,
-    store_in_cache: bool = False,
+        agent_input: str,
+        meal_choice: MealNames,
+        user_id: int = 1,
+        include_ingredients: bool = False,
+        store_in_cache: bool = False,
 ):
     """
     Get diet plan from Redis
@@ -261,6 +302,25 @@ def edit_cached_meal(
     )
     typer.echo(new_plan)
     typer.echo("Finished editing plan")
+
+
+@app.command()
+def edit_cached_workout(
+        agent_input: str,
+        user_id: int = 1,
+        store_in_cache: bool = False,
+):
+    """
+    Get workout schedule from Redis
+    """
+    typer.echo("Editing schedule")
+    new_schedule = edit_workout_schedule_json(
+        agent_input,
+        user_id,
+        store_in_cache,
+    )
+    typer.echo(new_schedule)
+    typer.echo("Finished editing schedule")
 
 
 @app.command()
