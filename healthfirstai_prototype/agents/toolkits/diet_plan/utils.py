@@ -1,4 +1,4 @@
-"""Nutrition Feature Logic
+"""Diet Plan Utility Functions
 
 This module contains the logic for the nutrition feature.
 

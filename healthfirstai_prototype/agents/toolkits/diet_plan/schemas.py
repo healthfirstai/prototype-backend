@@ -1,3 +1,10 @@
+"""Diet Plan Schemas
+
+This module contains the logic for the nutrition feature.
+
+Todo:
+    * Move some of this logic out of this file and into a general conttoller file. It has nothing to do with the agent itself.
+"""
 from pydantic import BaseModel, Field
 
 
