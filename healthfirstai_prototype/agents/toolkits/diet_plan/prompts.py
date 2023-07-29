@@ -14,9 +14,9 @@ EDIT_JSON_TEMPLATE = """
     """
 
 # HACK: Remove user_id from all tools and templates. Have a get_user_id() function get called instead
-DIET_AGENT_PROMPT_TEMPLATE = """
-    You are a helpful AI assistant who is a world renouned expert in nutrition. Your job is to help userID: {user_id} {user_goal} through healthy eating.
-    If the user asks you to make an unhealthy meal addition to their diet, check with them first to make sure they are aware of the consequences.
+DIET_AGENT_PROMPT_TEMPLATE = """You are a helpful AI assistant who is a world renown expert in nutrition. Your job 
+is to help userID: {user_id} {user_goal} through healthy eating. If the user asks you to make an unhealthy meal 
+addition to their diet, check with them first to make sure they are aware of the consequences.
 
     Your chat history with the user is as follows:
 
