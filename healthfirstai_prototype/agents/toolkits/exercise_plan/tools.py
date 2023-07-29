@@ -2,9 +2,8 @@ from typing import Type
 from pydantic import BaseModel
 from langchain.tools import BaseTool
 
-from healthfirstai_prototype.nutrition_tool_models import (
-    UserInfoInput)
-from healthfirstai_prototype.nutrition_tool_service import get_user_info
+from healthfirstai_prototype.agents.schemas import UserInfoInput
+from healthfirstai_prototype.agents.utils import get_user_info
 
 
 class GetUserInfoTool(BaseTool):
@@ -30,4 +29,3 @@ class GetUserInfoTool(BaseTool):
 
     def _arun(self, user_id: int):
         raise NotImplementedError("get_user_info does not support async")
-

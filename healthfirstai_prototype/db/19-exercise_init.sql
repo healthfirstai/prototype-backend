@@ -1,5 +1,3 @@
-\c healthfirstai;
-
 DROP TABLE IF EXISTS user_workout_schedule;
 DROP TABLE IF EXISTS workout_exercise;
 DROP TABLE IF EXISTS exercise;
