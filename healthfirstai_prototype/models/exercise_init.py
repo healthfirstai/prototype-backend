@@ -50,21 +50,26 @@ exercise_type_id_query = (
 # Add data to exercise table with corresponding IDs from other tables
 for index, row in df.iterrows():
     cursor.execute(exercise_type_id_query, [row["Type"]])
-    exercise_type_id = cursor.fetchone()[0]
+
+    cursor_output = cursor.fetchone()
+    if cursor_output is None:
+        raise Exception(f"Exercise type {row['Type']} not found in database")
+
+    exercise_type_id = cursor_output[0]
 
     body_part_id_query = "SELECT bodypart_id FROM body_parts WHERE bodypart_name = %s"
     cursor.execute(body_part_id_query, [row["BodyPart"]])
-    body_part_id = cursor.fetchone()[0]
+    body_part_id = cursor_output[0]
 
     equipment_id_query = "SELECT equipment_id FROM equipment WHERE equipment_name = %s"
     cursor.execute(equipment_id_query, [row["Equipment"]])
-    equipment_id = cursor.fetchone()[0]
+    equipment_id = cursor_output[0]
 
     difficulty_id_query = (
         "SELECT difficulty_id FROM difficulty WHERE difficulty_name = %s"
     )
     cursor.execute(difficulty_id_query, [row["Level"]])
-    difficulty_id = cursor.fetchone()[0]
+    difficulty_id = cursor_output[0]
 
     insert_data(
         "exercise",
