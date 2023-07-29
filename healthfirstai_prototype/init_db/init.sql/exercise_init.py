@@ -56,9 +56,7 @@ for index, row in df.iterrows():
     cursor.execute(body_part_id_query, [row["BodyPart"]])
     body_part_id = cursor.fetchone()[0]
 
-    equipment_id_query = (
-        "SELECT equipment_id FROM equipment WHERE equipment_name = %s"
-    )
+    equipment_id_query = "SELECT equipment_id FROM equipment WHERE equipment_name = %s"
     cursor.execute(equipment_id_query, [row["Equipment"]])
     equipment_id = cursor.fetchone()[0]
 

@@ -3,24 +3,12 @@
 This module contains the functions for initializing the chat agent and the PlanAndExecute object for editing a user's diet plan.
 
 """
-import json
-from langchain.experimental.plan_and_execute import (
-    PlanAndExecute,
-    load_agent_executor,
-    load_chat_planner,
-)
 from langchain.memory import (
     RedisChatMessageHistory,
     ConversationTokenBufferMemory,
 )
 from langchain.agents import AgentExecutor, OpenAIFunctionsAgent
 from langchain.schema import SystemMessage
-from langchain.agents.agent_toolkits.json.prompt import JSON_PREFIX, JSON_SUFFIX
-from langchain.agents.mrkl.prompt import FORMAT_INSTRUCTIONS
-from langchain.agents import create_json_agent
-from langchain.agents.agent_toolkits import JsonToolkit
-from langchain.llms.openai import OpenAI
-from langchain.tools.json.tool import JsonSpec
 from healthfirstai_prototype.nutrition_tools import (
     GetUserInfoTool,
     DietPlanTool,
@@ -35,21 +23,14 @@ from healthfirstai_prototype.nutrition_tools import (
 from healthfirstai_prototype.util_funcs import get_model
 from healthfirstai_prototype.nutrition_logic import rank_tools
 from healthfirstai_prototype.util_models import ModelName
-from healthfirstai_prototype.nutrition_templates import (
-    SYSTEM_PROMPT,
-    DIET_AGENT_PROMPT_TEMPLATE,
-)
+from healthfirstai_prototype.nutrition_templates import DIET_AGENT_PROMPT_TEMPLATE
 import langchain
 
-# NOTE: Imports for new agent
-from langchain.prompts import MessagesPlaceholder
-from langchain.agents import initialize_agent
-from langchain.agents import AgentType
 
 langchain.debug = False
 
 
-def init_agent(
+def init_chat_agent(
     user_input: str,
     user_id: int = 1,
     session_id="my-session",
@@ -66,6 +47,7 @@ def init_agent(
     Returns:
         AgentExecutor: An instance of the conversation agent executor ready to handle user interactions.
     """
+    # NOTE: Hook into callbacks in the future with callbacks=[HumanApprovalCallbackHandler()]
     tools = [
         DietPlanTool(),
         GetUserInfoTool(),
@@ -83,7 +65,7 @@ def init_agent(
     memory = ConversationTokenBufferMemory(
         llm=get_model(ModelName.gpt_3_5_turbo_0613),
         chat_memory=message_history,
-        max_token_limit=1000,
+        max_token_limit=500,
     )
 
     history = memory.load_memory_variables({"input": user_input}).get("history")
@@ -92,6 +74,7 @@ def init_agent(
             content=DIET_AGENT_PROMPT_TEMPLATE.format(
                 history=history,
                 user_id=user_id,
+                user_goal="lose weight",  # TODO: Parameterize this in the future
             )
         )
     )
@@ -108,77 +91,5 @@ def init_agent(
     )
 
 
-def init_new_agent(user_input: str, session_id="other-session", user_id: int = 1):
-    agent_kwargs = {
-        "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
-    }
-    message_history = RedisChatMessageHistory(session_id=session_id)
-    memory = ConversationTokenBufferMemory(
-        llm=get_model(ModelName.gpt_3_5_turbo_0613),
-        memory_key="memory",
-        chat_memory=message_history,
-        max_token_limit=2000,
-        return_messages=True,
-    )
-
-    llm = get_model(ModelName.gpt_3_5_turbo_0613)
-    tools = [
-        DietPlanTool(),
-        GetUserInfoTool(),
-        EditDietPlanTool(),
-    ]
-    return initialize_agent(
-        tools,
-        llm,
-        agent=AgentType.OPENAI_FUNCTIONS,
-        verbose=True,
-        agent_kwargs=agent_kwargs,
-        memory=memory,
-    )
-
-
-# NOTE: We will likely not use this
-def init_plan_and_execute_diet_agent():
-    """
-    Return a PlanAndExecute object for editing a user's diet plan
-    """
-    planner = load_chat_planner(
-        llm=get_model(ModelName.gpt_3_5_turbo),
-        system_prompt=SYSTEM_PROMPT,
-    )
-
-    executor = load_agent_executor(
-        llm=get_model(ModelName.gpt_3_5_turbo_0613),
-        tools=[
-            GetUserInfoTool(),
-            DietPlanTool(),
-            EditDietPlanTool(),
-        ],
-        verbose=True,
-        include_task_in_prompt=True,
-    )
-
-    return PlanAndExecute(
-        planner=planner,
-        executor=executor,
-        verbose=True,
-    )
-
-
-# NOTE: Using this JSON agent is if the JSON object does not fit in the token window
-def start_nutrition_temp_agent(json_string):
-    json_dict = json.loads(json_string)[0]
-    json_spec = JsonSpec(dict_=json_dict, max_value_length=4000)
-    json_toolkit = JsonToolkit(spec=json_spec)
-
-    return create_json_agent(
-        llm=OpenAI(
-            client=None,
-            model="text-davinci-003",
-            temperature=0,
-        ),
-        prefix=JSON_PREFIX,
-        suffix=JSON_SUFFIX,
-        toolkit=json_toolkit,
-        verbose=True,
-    )
+# TODO: Add the ability to track the token usage of the agent and the corresponding cost
+# Tally this and track it for a conversation

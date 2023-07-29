@@ -6,9 +6,14 @@ Prototype for our HealthFirst AI web app.
 
 ## Pre-requisites
 
+Project Dependencies
 - Docker
 - Poetry
 - Supabase CLI
+
+Additional Project Documentation Dependencies
+- [leasot](https://github.com/pgilad/leasot) 
+- [prettier](https://prettier.io/) 
 
 ## Setting up Supabase local development
 
@@ -117,4 +122,16 @@ Reference the [Supabase Doc](https://supabase.com/docs/reference/cli/supabase-db
 
   ```sh
   uvicorn healthfirstai_prototype.api:app --reload # Runs on port 8000
+  ```
+
+- Export TODOs to Markdown
+
+  ```sh
+  leasot --reporter markdown healthfirstai_prototype/*.py > docs/todo.md | prettier --write docs/todo.md
+  ```
+
+- Build CLI Docs
+
+  ``` sh
+  typer healthfirstai_prototype/cli.py utils docs --output docs/cli.md
   ```

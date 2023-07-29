@@ -9,18 +9,13 @@ from healthfirstai_prototype.nutrition_logic import (
     get_user_meal_plans_as_json,
     get_user_info_for_json_agent,
     get_user_meal_info_json,
-    get_user_info_dict,
     get_cached_plan_json,
     cache_diet_plan_redis,
-    get_cached_plan_json,
 )
 from healthfirstai_prototype.chat_agent import (
-    start_nutrition_temp_agent,
     init_agent,
-    init_new_agent,
-    init_plan_and_execute_diet_agent,
 )
-from healthfirstai_prototype.advice_agent import faiss_vector_search, serp_api_search
+from healthfirstai_prototype.advice_agent import serp_api_search
 from healthfirstai_prototype.util_models import MealNames, MealChoice
 from healthfirstai_prototype.nutrition_vector_ops import (
     delete_all_vectors,
@@ -237,11 +232,19 @@ def edit_cached_meal(
     typer.echo("Finished editing plan")
 
 
-@app.callback()
-def cli():
+@app.command()
+def build_docs():
     """
-    HealthFirstAI Prototype CLI
+    Runs a chain of functions to build the documentation
     """
+    shell_exec = (
+        "mkdocs build && cp README.md docs/index.md && "
+        "typer healthfirstai_prototype/cli.py utils docs --output docs/cli.md && "
+        "cp README.md docs/index.md &&"
+        "leasot --reporter markdown healthfirstai_prototype/*.py > docs/todo.md | prettier --write docs/todo.md"
+    )
+
+    os.system(shell_exec)
 
 
 @app.command()
@@ -251,7 +254,7 @@ def test_advice_agent():
     """
     typer.echo("Testing advice agent...")
     query = input("Enter a query: ")
-    kb_response = faiss_vector_search(query)
+    kb_response = "" # FIX: Yan, function faiss_vector_search(query) does not exist anymore
     google_response = serp_api_search(query)
     typer.echo("Finished search. Wait for the results below:")
     typer.echo(f"K-Base search response: {kb_response}")
@@ -274,6 +277,13 @@ def test_advice_agent():
     else:
         typer.echo(google_response)
     typer.echo("------------------------------------------")
+
+
+@app.callback()
+def cli():
+    """
+    HealthFirstAI Prototype CLI
+    """
 
 
 if __name__ == "__main__":

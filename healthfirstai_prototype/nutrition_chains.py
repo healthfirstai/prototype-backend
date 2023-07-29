@@ -7,7 +7,7 @@ Todo:
     * Return conversational string that continues confo in edit_diet_plan_json
 """
 
-from langchain import PromptTemplate, OpenAI, LLMChain
+from langchain import PromptTemplate, LLMChain
 from healthfirstai_prototype.util_models import ModelName, MealNames
 from healthfirstai_prototype.util_funcs import get_model
 from healthfirstai_prototype.nutrition_templates import EDIT_JSON_TEMPLATE

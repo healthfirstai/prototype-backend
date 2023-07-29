@@ -6,10 +6,9 @@ This file contains the FastAPI server for the HealthFirstAI prototype. It provid
 - POST /chat_agent/: Returns a JSON object with the response from the chat agent.
 
 """
-from enum import Enum
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
-from healthfirstai_prototype.chat_agent import init_agent
+from healthfirstai_prototype.chat_agent import init_chat_agent
 
 app = FastAPI()
 
@@ -48,7 +47,7 @@ async def chat_agent(user_input: UserInput):
     if not user_input.session_id:
         raise HTTPException(status_code=404, detail="Session ID not provided")
 
-    agent_object = init_agent(
+    agent_object = init_chat_agent(
         user_input.user_input,
         user_input.uid,
         user_input.session_id,

@@ -22,10 +22,9 @@ from healthfirstai_prototype.data_models import (
 )
 from langchain.vectorstores import FAISS
 from langchain.schema import Document
-from healthfirstai_prototype.util_models import MealChoice, ModelName, MealNames
+from healthfirstai_prototype.util_models import ModelName, MealNames
 
 from healthfirstai_prototype.util_funcs import (
-    get_model,
     get_embedding_model,
     connect_to_redis,
 )
@@ -474,7 +473,7 @@ def get_user_meal_info_json(
     get_meal_func = get_cached_plan_json if cached else get_user_meal_plans_as_json
     meal_json = get_meal_func(
         user_id,
-        include_ingredients=include_ingredients,
+        include_ingredients=True,
         meal_choice=meal_choice,
     )
     meal_dict = json.loads(meal_json)
