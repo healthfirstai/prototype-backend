@@ -1,30 +1,113 @@
-from PyPDF2 import PdfReader
+import os
+import pinecone
 from healthfirstai_prototype.data_models import User
 from langchain.embeddings.cohere import CohereEmbeddings
+from langchain.vectorstores import Pinecone
+from langchain.document_loaders import PyPDFDirectoryLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import FAISS
-
-# NOTE: Use this class in the future to implement the evaluation techniques
-from langchain.evaluation import QAEvalChain
-import os
 
 COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
 SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY") or ""
+PINECONE_ENV_NAME = os.getenv("PINECONE_ENV_NAME") or ""
 
 
-def read_pdf(
-    path_to_pdf: str = "../notebooks/pdfs/Sports-And-Exercise-Nutrition.pdf",
-) -> PdfReader:
+def read_pdfs(
+    folder_path: str = "../notebooks/pdfs/",
+):
     """
     This function is simply taking the path to the PDF file and returning the PDFReader object
 
     Params:
-        path_to_pdf (str, optional) : The path to the PDF file
+        folder_path (str, optional): The path to the folder with PDF files
 
     Returns:
-        The PDF file in the PDFReader format
+        documents (List[Documents]): The list of documents in the PDFReader format
     """
-    return PdfReader(path_to_pdf)
+    loader = PyPDFDirectoryLoader(path=folder_path)
+    return loader.load()
+
+
+def split_text(raw_text) -> list[str]:
+    """
+    This function is used to split the raw text into chunks
+
+    Params:
+        raw_text (str) : raw text collected from the PDF file
+
+    Returns:
+        texts (List[str]): a list of text chunks
+    """
+    text_splitter = CharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200,
+    )
+
+    return text_splitter.split_text(raw_text)
+
+
+def pinecone_init(indexname: str = "pinecone-knowledge-base"):
+    """
+    This function is used to initialize the Pinecone index. It should be run only once.
+
+    Params:
+        indexname (str, optional): The name of the index (or simople the name of the database we are creating)
+
+    Returns:
+        index (Index): client for interacting with a Pinecone index via REST API
+    """
+    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
+
+    if indexname not in pinecone.list_indexes():
+        # we create a new index if not exists
+        pinecone.create_index(
+            name=indexname,
+            metric="cosine",
+            dimension=4096,  # NOTE: dimension of the vector depends on the embeddings function one is using
+        )
+
+    # connect to the new index
+    index = pinecone.Index(indexname)
+    return index
+
+
+def pinecone_insert(
+    index: pinecone.Index,
+    docs,
+    metadatas: list[dict[str, str]],
+):
+    """
+    This function is used to insert the documents into the Pinecone index. Please give it some
+    time to index the documents before querying it.
+
+    Params:
+        index (Pinecone) : Pinecone index object
+        docs (list[str]) : a list of text chunks
+        metadatas (list[dict['str': 'str']]) : a list of metadata for each text chunk
+
+    Returns:
+        None
+    """
+    embedding_function = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
+    vectorstore = Pinecone(index, embedding_function.embed_query, "text")
+    vectorstore.add_texts(docs, metadatas)
+
+
+def query_existing_pinecone_index(
+    query: str, indexname: str, embedding_function: CohereEmbeddings
+):
+    """
+    This function is used to query the Pinecone index
+
+    Params:
+        query (str) : The user's query / question
+        index (Pinecone) : Pinecone index object
+
+    Returns:
+        The response from the Pinecone index
+    """
+    docsearch = Pinecone.from_existing_index(indexname, embedding_function)
+    return docsearch.similarity_search(query)
 
 
 # NOTE: this function is not used yet
@@ -46,87 +129,3 @@ def parse_user_info(user_data: User) -> dict[str, str]:
         "city_id": str(user_data.city_id),
         "country_id": str(user_data.country_id),
     }
-
-
-def collect_raw_text_from_pdf_data(reader: PdfReader) -> str:
-    """
-    This function is used to collect raw text from the PDF file
-
-    Params:
-        reader (PdfReader) : The PDF file in the PDFReader format
-
-    Returns:
-        raw text collected from PDF file
-    """
-    raw_text = ""
-    for i, page in enumerate(reader.pages):
-        text = page.extract_text()
-        if text:
-            raw_text += text
-    return raw_text
-
-
-def split_text(raw_text: str) -> list[str]:
-    """
-    This function is used to split the raw text into chunks
-
-    Params:
-        raw_text (str) : raw text collected from the PDF file
-
-    Returns:
-        a list of text chunks
-    """
-    text_splitter = CharacterTextSplitter(
-        separator="\n",
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len,
-    )
-
-    return text_splitter.split_text(raw_text)
-
-
-# NOTE: think of how this fucntion's output could be stored in Weaviate
-def embed_text(texts: list[str]) -> FAISS:
-    """
-    This function is embedding the text using the Cohere embedding + FAISS library
-
-    Params:
-        texts (list[str]) : a list of text chunks
-
-    Returns:
-        FAISS wrapper from raw documents
-    """
-    # Download embeddings from Cohere
-    embeddings = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
-    # Construct FAISS wrapper from raw documents
-    docsearch = FAISS.from_texts(texts, embeddings)  # type: ignore
-
-    return docsearch
-
-
-def load_prerequisites_for_vector_search(reader: PdfReader) -> FAISS:
-    """
-    This function is used to load the prerequisites for the agent to use
-
-    Params:
-        reader (PdfReader) : The PDF file in the PDFReader format
-
-    Returns:
-        FAISS wrapper from raw documents
-    """
-    raw_text = collect_raw_text_from_pdf_data(reader)
-    texts = split_text(raw_text)
-    docsearch = embed_text(texts)
-    return docsearch
-
-
-# def scoring_with_faiss(query, faiss_search_result, google_search_result):
-#     evaluator = load_evaluator("pairwise_string", requires_reference=True)
-
-#     evaluator.evaluate_string_pairs(
-#         prediction="there are three dogs",
-#         prediction_b="4",
-#         input="how many dogs are in the park?",
-#         reference="four",
-#     )
