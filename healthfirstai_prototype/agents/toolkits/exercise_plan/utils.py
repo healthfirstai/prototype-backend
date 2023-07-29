@@ -156,13 +156,6 @@ def store_new_workout_schedule_json(user_id: int, new_schedule: str) -> None:
     r.hset(f"my-workout-schedule:{user_id}", "workout_schedule", new_schedule)
 
 
-def get_workout_schedule(user_id: int):
-    """
-        Given a user ID, query the database and return the user's workout schedule.
-    """
-    return get_cached_schedule_json(user_id)
-
-
 def get_cached_schedule_json(user_id: int):
     """
     Get the cached workout schedule for the user

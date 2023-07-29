@@ -17,7 +17,9 @@ class EditWorkoutScheduleInput(BaseModel):
     Inputs for edit_workout_schedule
 
     Attributes:
+        agent_input: The input from the user
         user_id: User ID of the user
     """
 
+    agent_input: str = Field(description="The input from the user")
     user_id: int = Field(description="User ID of the user")
