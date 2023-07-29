@@ -27,7 +27,7 @@ from .toolkits.diet_plan.tools import (
     DietPlanTool,
     EditDietPlanTool,
 )
-from .toolkits.diet_plan.prompts import SYSTEM_PROMPT
+from .prompts import SYSTEM_PROMPT
 from healthfirstai_prototype.enums.openai_enums import ModelName
 from healthfirstai_prototype.utils import get_model
 
