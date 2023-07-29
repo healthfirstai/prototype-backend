@@ -27,7 +27,6 @@ faiss-cpu = "^1.7.4"
 pymysql = "^1.1.0"
 fastapi = "^0.100.0"
 redis = "^4.6.0"
-sqlalchemy = "^2.0.18"
 cryptography = "^41.0.2"
 pgvector = "^0.1.8"
 psycopg2-binary = "^2.9.6"
@@ -41,6 +40,8 @@ uvicorn = "^0.23.1"
 streamlit = "^1.25.0"
 watchdog = "^3.0.0"
 weaviate-client = "^3.22.1"
+sqlmodel = "^0.0.8"
+pinecone-client = "^2.2.2"
 
 
 [tool.poetry.group.dev.dependencies]

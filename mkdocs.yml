@@ -28,8 +28,18 @@ plugins:
   - search
   - mkdocstrings
 
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+# FIXME: Update the documentation so that it points to the right files
 nav:
-  - Getting Started: getting_started.md
+  - Getting Started: index.md
   - Agents:
       - Nutrition Agent: nutrition-agent-reference.md
       - Exercise Agent: exercise-agent-reference.md
@@ -49,3 +59,4 @@ nav:
   - Extract, Transform, Load (ETL):
       - Nutrition Vector Operations: nutrition-vector-ops-reference.md
   - Command Line Interface: cli.md
+  - Todos: todo.md
