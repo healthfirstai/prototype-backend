@@ -33,7 +33,7 @@ def query_pinecone_index(
     pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
     embedding_function = CohereEmbeddings(client=None)
     docsearch = Pinecone.from_existing_index(indexname, embedding_function)
-    return docsearch.similarity_search(query)
+    return docsearch.similarity_search(query, k=1)
 
 
 def query_based_similarity_search(
