@@ -5,6 +5,7 @@ This file contains the enums used for meals.
 """
 from enum import Enum
 
+
 class MealNames(str, Enum):
     """
     Enum for model names
