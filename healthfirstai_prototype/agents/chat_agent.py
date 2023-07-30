@@ -14,6 +14,7 @@ from healthfirstai_prototype.enums.openai_enums import ModelName
 from langchain.schema import SystemMessage
 from .toolkits.diet_plan.toolkit import DietPlanToolkit
 from .toolkits.user_info.toolkit import UserInfoToolkit
+from .toolkits.advice.toolkit import AdviceToolkit
 from .toolkits.diet_plan.utils import rank_tools
 
 # TODO: Make this a general template used by the chat_agent
@@ -42,7 +43,11 @@ def init_chat_agent(
         AgentExecutor: An instance of the conversation agent executor ready to handle user interactions.
     """
     # NOTE: Hook into callbacks in the future with callbacks=[HumanApprovalCallbackHandler()]
-    tools = DietPlanToolkit().get_tools() + UserInfoToolkit().get_tools()
+    tools = (
+        DietPlanToolkit().get_tools()
+        + UserInfoToolkit().get_tools()
+        + AdviceToolkit().get_tools()
+    )
     tools = rank_tools(user_input, tools)
     message_history = RedisChatMessageHistory(session_id=session_id)
 

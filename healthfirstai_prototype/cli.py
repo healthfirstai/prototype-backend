@@ -24,15 +24,15 @@ from .agents.toolkits.exercise_plan.utils import (
 from .agents.chat_agent import (
     init_chat_agent,
 )
-from .agents.toolkits.advice.advice_agent import kb_vector_search, serp_api_search
+from .agents.toolkits.advice.utils import search_internet, knowledge_base_search
 from .enums.meal_enums import MealChoice, MealNames
-from .controller.nutrition_vector_operations import (
+from .controller.pg_vector_db import (
     delete_all_vectors,
     get_all_foods,
     insert_all_vectors,
 )
 
-from healthfirstai_prototype.advice_prompts import (
+from healthfirstai_prototype.agents.toolkits.advice.prompts import (
     run_assessment_chain,
     template_to_assess_search_results,
 )
@@ -332,8 +332,8 @@ def test_advice_agent():
     """
     typer.echo("Testing advice agent...")
     query = input("Enter a query: ")
-    kb_response = kb_vector_search(query)
-    google_response = serp_api_search(query)
+    kb_response = knowledge_base_search(query)
+    google_response = search_internet(query)
     typer.echo("Finished search. Wait for the results below:")
     typer.echo(f"K-Base search response: {kb_response}")
     typer.echo("------------------------------------------")

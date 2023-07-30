@@ -1,0 +1,70 @@
+{
+  "1": {
+    "schedule_day": "Monday",
+    "schedule_time": "09:00:00",
+    "workout_name": "Full Body Workout",
+    "workout_description": "A comprehensive workout targeting all muscle groups",
+    "exercises": [
+      {
+        "exercise_id": 1,
+        "name": "Partner plank band row",
+        "description": "The partner plank band row is an abdominal exercise where two partners perform single-arm planks while pulling on the opposite ends of an exercise band. This technique can be done for time or reps in any ab-focused workout.",
+        "exercise_type": "Strength",
+        "equipment": "Bands",
+        "difficulty": "Intermediate",
+        "body_part": "Abdominals",
+        "reps": 10,
+        "sets": 3
+      },
+      {
+        "exercise_id": 2,
+        "name": "Banded crunch isometric hold",
+        "description": "The banded crunch isometric hold is an exercise targeting the abdominal muscles, particularly the rectus abdominis or \"six-pack\" muscles. The band adds resistance and continuous tension to this popular exercise.",
+        "exercise_type": "Strength",
+        "equipment": "Bands",
+        "difficulty": "Intermediate",
+        "body_part": "Abdominals",
+        "reps": 12,
+        "sets": 4
+      }
+    ]
+  },
+  "2": {
+    "schedule_day": "Wednesday",
+    "schedule_time": "15:30:00",
+    "workout_name": "Leg Day",
+    "workout_description": "Focused on leg exercises",
+    "exercises": [
+      {
+        "exercise_id": 2,
+        "name": "Banded crunch isometric hold",
+        "description": "The banded crunch isometric hold is an exercise targeting the abdominal muscles, particularly the rectus abdominis or \"six-pack\" muscles. The band adds resistance and continuous tension to this popular exercise.",
+        "exercise_type": "Strength",
+        "equipment": "Bands",
+        "difficulty": "Intermediate",
+        "body_part": "Abdominals",
+        "reps": 8,
+        "sets": 5
+      }
+    ]
+  },
+  "3": {
+    "schedule_day": "Friday",
+    "schedule_time": "07:45:00",
+    "workout_name": "Cardio Blast",
+    "workout_description": "High-intensity cardio workout",
+    "exercises": [
+      {
+        "exercise_id": 3,
+        "name": "FYR Banded Plank Jack",
+        "description": "The banded plank jack is a variation on the plank that involves moving the legs in and out for repetitions. Having a band around the thighs forces the lower body to work harder, particularly the hips and glutes. The plank jack is commonly performed as part of a bodyweight circuit, or as part of a dynamic warm-up.",
+        "exercise_type": "Strength",
+        "equipment": "Bands",
+        "difficulty": "Intermediate",
+        "body_part": "Abdominals",
+        "reps": 4,
+        "sets": 3
+      }
+    ]
+  }
+}

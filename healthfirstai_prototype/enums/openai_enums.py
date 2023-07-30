@@ -21,4 +21,3 @@ class ModelName(str, Enum):
     gpt_3_5_turbo_0613 = "gpt-3.5-turbo-0613"
     text_davinci_003 = "text-davinci-003"
     text_embedding_ada_002 = "text-embedding-ada-002"
-

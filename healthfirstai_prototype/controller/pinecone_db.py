@@ -1,17 +1,26 @@
-import os
+"""Pinecone Knowledge Base Search
+
+This module facilitates the processing and handling of a document repository by applying vector embedding techniques to PDF files for efficient querying of relevant data.
+
+It consists of the following functionalities:
+
+    read_pdfs: Takes in a path to a folder containing PDF files, reads them and returns a list of documents.
+    split_documents: Splits the raw text from the documents into chunks for further processing.
+    prereqs_for_embeds: Prepares the prerequisites for the embedding function by extracting the documents' content and metadata.
+    pinecone_init: Initializes a Pinecone index which is a vector database for embedding and querying the documents.
+    pinecone_insert: Inserts the processed text and metadata into the Pinecone index using an embedding function.
+    query_pinecone_index: Queries the Pinecone index to find relevant documents based on user queries.
+    pinecone_delete: Deletes a Pinecone index when no longer needed.
+
+The module uses Pinecone for efficient similarity search and retrieval of documents based on user queries. It also uses CohereEmbeddings for creating vector representations of the documents, and PyPDFDirectoryLoader for reading PDF documents from a specified directory.
+
+Please note that parse_user_info is currently not being used and may be integrated in future versions for more personalized responses.
+"""
 import pinecone
-from healthfirstai_prototype.models.data_models import User
 from langchain.embeddings.cohere import CohereEmbeddings
 from langchain.vectorstores import Pinecone
 from langchain.document_loaders import PyPDFDirectoryLoader
 from langchain.text_splitter import CharacterTextSplitter
-from dotenv import load_dotenv
-
-# Load env file
-load_dotenv()
-COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY") or ""
-PINECONE_ENV_NAME = os.getenv("PINECONE_ENV_NAME") or ""
 
 
 def read_pdfs(
@@ -46,9 +55,7 @@ def split_documents(documents) -> list[str]:
         chunk_overlap=200,
     )
 
-    texts = text_splitter.split_text(documents)
-
-    return texts
+    return text_splitter.split_text(documents)
 
 
 def prereqs_for_embeds(texts):
@@ -73,7 +80,7 @@ def pinecone_init(
     Returns:
         index (Index): client for interacting with a Pinecone index via REST API
     """
-    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
+    pinecone.init()
 
     if indexname not in pinecone.list_indexes():
         # we create a new index if not exists
@@ -83,9 +90,7 @@ def pinecone_init(
             dimension=vector_dimension,
         )
 
-    # connect to the new index
-    index = pinecone.Index(indexname)
-    return index
+    return pinecone.Index(indexname)
 
 
 def pinecone_insert(
@@ -105,69 +110,20 @@ def pinecone_insert(
     Returns:
         None
     """
-    embedding_function = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
+    embedding_function = CohereEmbeddings()  # type: ignore
     vectorstore = Pinecone(index, embedding_function.embed_query, "text")
     vectorstore.add_texts(docs, metadatas)
 
     return
 
 
-def query_pinecone_index(query: str, indexname: str = "pinecone-knowledge-base"):
-    """
-    This function is used to query the Pinecone index
-
-    Params:
-        query (str) : The user's query / question
-        indexname (str) : Name of the Pinecone index object
-
-    Returns:
-        response (list[Document]): The response object from the Pinecone index
-    """
-    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
-    embedding_function = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)  # type: ignore
-    docsearch = Pinecone.from_existing_index(indexname, embedding_function)
-    response = docsearch.similarity_search(query)
-    return response
-
-
 def pinecone_delete(indexname: str = "pinecone-knowledge-base"):
-    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
+    """
+    This function is used to delete the Pinecone index given its name
+    """
+    pinecone.init()
 
     if indexname in pinecone.list_indexes():
         pinecone.delete_index(indexname)
 
     return
-
-
-# NOTE: this function is not used yet
-def parse_user_info(user_data: User) -> dict[str, str]:
-    """
-    This function is used to parse the user's personal information
-
-    Params:
-        user_data (int) : User's personal information
-
-    Returns:
-        a dictionary containing the user's personal information
-    """
-    return {
-        "height": str(user_data.height),
-        "weight": str(user_data.weight),
-        "gender": str(user_data.gender),
-        "age": str(user_data.dob),
-        "city_id": str(user_data.city_id),
-        "country_id": str(user_data.country_id),
-    }
-
-
-def main():
-    query = "How many hours a day should I have?"
-
-    print("--------------------------------------")
-    print("Query: ", query)
-    print("--------------------------------------")
-    print(query_pinecone_index(query))
-
-
-if __name__ == "__main__":
-    main()
