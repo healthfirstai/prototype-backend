@@ -23,15 +23,15 @@ from .agents.toolkits.exercise_plan.utils import (
 from .agents.chat_agent import (
     init_chat_agent,
 )
-from .agents.toolkits.advice.advice_agent import serp_api_search
+from .agents.toolkits.advice.utils import search_internet, knowledge_base_search
 from .enums.meal_enums import MealChoice, MealNames
-from .controller.nutrition_vector_operations import (
+from .controller.pg_vector_db import (
     delete_all_vectors,
     get_all_foods,
     insert_all_vectors,
 )
 
-from healthfirstai_prototype.advice_prompts import (
+from healthfirstai_prototype.agents.toolkits.advice.prompts import (
     run_assessment_chain,
     template_to_assess_search_results,
 )
@@ -42,8 +42,8 @@ app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 @app.command()
 def get_diet_plan(
-        uid: int = 1,
-        include_ingredients: bool = True,
+    uid: int = 1,
+    include_ingredients: bool = True,
 ):
     """
     Get a meal plan from the database
@@ -69,10 +69,10 @@ def get_workout_schedule(
 
 @app.command()
 def get_cached_meal(
-        meal_choice: MealChoice = MealChoice.breakfast,
-        uid: int = 1,
-        include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
-        include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+    meal_choice: MealChoice = MealChoice.breakfast,
+    uid: int = 1,
+    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
 ):
     """
     Get meal from the Redis Cache given meal name
@@ -119,10 +119,10 @@ def get_cached_meal(
 
 @app.command()
 def get_meal(
-        meal_choice: MealChoice = MealChoice.breakfast,
-        uid: int = 1,
-        include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
-        include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+    meal_choice: MealChoice = MealChoice.breakfast,
+    uid: int = 1,
+    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
 ):
     """
     Get meal from the SQL database given meal name
@@ -168,9 +168,9 @@ def get_meal(
 
 @app.command()
 def test_chat_agent(
-        input: str,
-        uid: int = 1,
-        session_id="my-session",
+    input: str,
+    uid: int = 1,
+    session_id="my-session",
 ):
     """
     Test ReAct Diet Plan Agent
@@ -229,8 +229,8 @@ def cache_workout_schedule(uid: int = 1):
 
 @app.command()
 def get_cached_plan(
-        uid: int = 1,
-        include_ingredients: bool = True,
+    uid: int = 1,
+    include_ingredients: bool = True,
 ):
     """
     Get diet plan from Redis
@@ -256,11 +256,11 @@ def get_cached_schedule(
 
 @app.command()
 def edit_cached_meal(
-        agent_input: str,
-        meal_choice: MealNames,
-        user_id: int = 1,
-        include_ingredients: bool = False,
-        store_in_cache: bool = False,
+    agent_input: str,
+    meal_choice: MealNames,
+    user_id: int = 1,
+    include_ingredients: bool = False,
+    store_in_cache: bool = False,
 ):
     """
     Get diet plan from Redis
@@ -318,10 +318,8 @@ def test_advice_agent():
     """
     typer.echo("Testing advice agent...")
     query = input("Enter a query: ")
-    kb_response = (
-        ""  # FIX: Yan, function faiss_vector_search(query) does not exist anymore
-    )
-    google_response = serp_api_search(query)
+    kb_response = knowledge_base_search(query)
+    google_response = search_internet(query)
     typer.echo("Finished search. Wait for the results below:")
     typer.echo(f"K-Base search response: {kb_response}")
     typer.echo("------------------------------------------")

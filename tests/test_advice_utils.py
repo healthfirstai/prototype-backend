@@ -4,9 +4,6 @@ Unit tests for the advice utils module
 
 """
 
-import os
-from typing import List
-from langchain.docstore.document import Document
 from healthfirstai_prototype.agents.toolkits.advice.utils import (
     query_pinecone_index,
     knowledge_base_search,

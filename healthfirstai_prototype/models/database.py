@@ -6,7 +6,10 @@ import os
 load_dotenv()
 
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY") or ""
-os.environ["SERP_API_KEY"] = os.getenv("SERP_API_KEY") or ""
+os.environ["COHERE_API_KEY"] = os.getenv("COHERE_API_KEY") or ""
+os.environ["PINECONE_API_KEY"] = os.getenv("PINECONE_API_KEY") or ""
+os.environ["PINECONE_ENV_NAME"] = os.getenv("PINECONE_ENV_NAME") or ""
+os.environ["SERPER_API_KEY"] = os.getenv("SERPER_API_KEY") or ""
 
 DB_USER = os.getenv("POSTGRES_USER") or ""
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD") or ""
