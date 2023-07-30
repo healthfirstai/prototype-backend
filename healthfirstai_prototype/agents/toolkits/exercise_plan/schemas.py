@@ -10,6 +10,7 @@ class WorkoutScheduleInput(BaseModel):
     """
 
     user_id: int = Field(description="User ID of the user")
+    # TODO: Add more fields like include_descriptions, include_links, etc
 
 
 class EditWorkoutScheduleInput(BaseModel):

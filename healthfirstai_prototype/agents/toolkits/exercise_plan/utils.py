@@ -1,7 +1,5 @@
 import json
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from healthfirstai_prototype.models.exercise_data_models import (
     ExerciseType,
     BodyPart,
@@ -13,18 +11,9 @@ from healthfirstai_prototype.models.exercise_data_models import (
     WorkoutExercise,
 )
 from .chains import init_edit_schedule_json_chain
-from dotenv import load_dotenv
-import os
+from healthfirstai_prototype.models.database import SessionLocal
 
 from healthfirstai_prototype.utils import connect_to_redis
-
-load_dotenv()
-
-DB_USER = os.getenv("POSTGRES_USER") or ""
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD") or ""
-DB_HOST = os.getenv("POSTGRES_HOST") or ""
-DB_NAME = os.getenv("POSTGRES_DATABASE") or ""
-DB_PORT = os.getenv("POSTGRES_PORT") or ""
 
 
 def get_workout_schedule_json(user_id: int) -> str:
@@ -37,109 +26,100 @@ def get_workout_schedule_json(user_id: int) -> str:
     Returns:
         The user's workout schedule in JSON format
     """
-    # change echo to see the SQL statements
-    engine = create_engine(
-        f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    )
-
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = SessionLocal()
 
     try:
-        # Query to fetch the user's schedule along with workout details
-        user_schedules = (
-            session.query(UserWorkoutSchedule).filter_by(user_id=user_id).all()
-        )
-
-        # Initialize the schedule dictionary
-        schedule_json = {}
-
-        for user_schedule in user_schedules:
-            schedule_id = user_schedule.schedule_id
-            schedule_day = user_schedule.schedule_day
-            schedule_time = user_schedule.schedule_time
-            workout_id = user_schedule.workout_id
-            workout = session.query(Workout).filter_by(workout_id=workout_id).first()
-
-            exercise_dict = {}
-            workout_exercises = (
-                session.query(WorkoutExercise)
-                .filter_by(workout_id=workout_id)
-                .join(Exercise)
-                .join(ExerciseType)
-                .join(BodyPart)
-                .all()
-            )
-            if workout is None:
-                raise ValueError(
-                    f"Exercise with exercise_id {workout_id} does not exist"
-                )
-
-            for workout_exercise in workout_exercises:
-                exercise_id = workout_exercise.exercise_id
-                exercise = (
-                    session.query(Exercise).filter_by(exercise_id=exercise_id).first()
-                )
-                if exercise is None:
-                    raise ValueError(
-                        f"Exercise with exercise_id {exercise_id} does not exist"
-                    )
-                exercise_type = (
-                    session.query(ExerciseType.exercise_type)
-                    .filter_by(exercise_type_id=exercise.exercise_type_id)
-                    .scalar()
-                )
-                body_parts = (
-                    session.query(BodyPart.bodypart_name)
-                    .filter_by(bodypart_id=exercise.bodypart_id)
-                    .scalar()
-                )
-                difficulty = (
-                    session.query(Difficulty.difficulty_name)
-                    .filter_by(difficulty_id=exercise.difficulty_id)
-                    .scalar()
-                )
-                equipment = (
-                    session.query(Equipment.equipment_name)
-                    .filter_by(equipment_id=exercise.equipment_id)
-                    .scalar()
-                )
-
-                exercise_info = {
-                    "exercise_id": exercise_id,
-                    "name": exercise.name,
-                    "description": exercise.description,
-                    "exercise_type": exercise_type,
-                    "equipment": equipment,
-                    "difficulty": difficulty,
-                    "body_part": body_parts,
-                    "reps": workout_exercise.reps,
-                    "sets": workout_exercise.sets,
-                }
-                exercise_dict[exercise_id] = exercise_info
-
-                schedule_info = {
-                    "schedule_day": schedule_day,
-                    "schedule_time": str(schedule_time),
-                    "workout_name": workout.workout_name,
-                    "workout_description": workout.workout_description,
-                    "exercises": list(exercise_dict.values()),
-                }
-
-                schedule_json[schedule_id] = schedule_info
-
-                # Write the JSON data to a file
-        with open("../user_schedule.json", "w") as json_file:
-            json.dump(schedule_json, json_file, indent=4)
-        print("Schedule JSON file generated successfully!")
-        return json.dumps(schedule_json, indent=4)
-
+        return extract_workout_data(session, user_id)
     except Exception as e:
         raise e
 
     finally:
         # Close the session when done
         session.close()
+
+
+def extract_workout_data(session, user_id: int) -> str:
+    """
+    Extract the user's workout schedule data from the database
+    """
+    # Query to fetch the user's schedule along with workout details
+    user_schedules = session.query(UserWorkoutSchedule).filter_by(user_id=user_id).all()
+
+    # Initialize the schedule dictionary
+    schedule_json = {}
+
+    for user_schedule in user_schedules:
+        schedule_id = user_schedule.schedule_id
+        schedule_day = user_schedule.schedule_day
+        schedule_time = user_schedule.schedule_time
+        workout_id = user_schedule.workout_id
+        workout = session.query(Workout).filter_by(workout_id=workout_id).first()
+
+        exercise_dict = {}
+        workout_exercises = (
+            session.query(WorkoutExercise)
+            .filter_by(workout_id=workout_id)
+            .join(Exercise)
+            .join(ExerciseType)
+            .join(BodyPart)
+            .all()
+        )
+        if workout is None:
+            raise ValueError(f"Exercise with exercise_id {workout_id} does not exist")
+
+        for workout_exercise in workout_exercises:
+            exercise_id = workout_exercise.exercise_id
+            exercise = (
+                session.query(Exercise).filter_by(exercise_id=exercise_id).first()
+            )
+            if exercise is None:
+                raise ValueError(
+                    f"Exercise with exercise_id {exercise_id} does not exist"
+                )
+            exercise_type = (
+                session.query(ExerciseType.exercise_type)
+                .filter_by(exercise_type_id=exercise.exercise_type_id)
+                .scalar()
+            )
+            body_parts = (
+                session.query(BodyPart.bodypart_name)
+                .filter_by(bodypart_id=exercise.bodypart_id)
+                .scalar()
+            )
+            difficulty = (
+                session.query(Difficulty.difficulty_name)
+                .filter_by(difficulty_id=exercise.difficulty_id)
+                .scalar()
+            )
+            equipment = (
+                session.query(Equipment.equipment_name)
+                .filter_by(equipment_id=exercise.equipment_id)
+                .scalar()
+            )
+
+            exercise_info = {
+                "exercise_id": exercise_id,
+                "name": exercise.name,
+                "description": exercise.description,
+                "exercise_type": exercise_type,
+                "equipment": equipment,
+                "difficulty": difficulty,
+                "body_part": body_parts,
+                "reps": workout_exercise.reps,
+                "sets": workout_exercise.sets,
+            }
+            exercise_dict[exercise_id] = exercise_info
+
+            schedule_info = {
+                "schedule_day": schedule_day,
+                "schedule_time": str(schedule_time),
+                "workout_name": workout.workout_name,
+                "workout_description": workout.workout_description,
+                "exercises": list(exercise_dict.values()),
+            }
+
+            schedule_json[schedule_id] = schedule_info
+    return json.dumps(schedule_json, indent=2)
 
 
 def cache_workout_schedule_redis(user_id: int) -> None:
@@ -180,13 +160,13 @@ def get_cached_schedule_json(
     """
     r = connect_to_redis()
     if not (
-        cached_schedule := r.hget(f"my-workout-plan:{user_id}", "workout_schedule")
+        cached_schedule := r.hget(f"my-workout-schedule:{user_id}", "workout_schedule")
     ):
         raise ValueError("No cached schedule found for this user.")
 
     cached_schedule_dict = json.loads(cached_schedule)
 
-    return json.dumps(cached_schedule_dict, indent=4)
+    return json.dumps(cached_schedule_dict, indent=2)
 
 
 def edit_workout_schedule_json(
@@ -216,7 +196,3 @@ def edit_workout_schedule_json(
         "Your workout schedule has been updated! Here is your new schedule:\n\n"
         + new_schedule
     )
-
-
-if __name__ == "__main__":
-    get_workout_schedule_json(1)
