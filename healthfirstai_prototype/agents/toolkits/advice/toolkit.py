@@ -26,6 +26,6 @@ class AdviceToolkit(BaseToolkit):
     def get_tools(self) -> List[BaseTool]:
         """Get the tools in the toolkit."""
         return [
-            KnowledgeBaseSearchTool(),
+            # KnowledgeBaseSearchTool(),
             InternetSearchTool(),
         ]

@@ -1,4 +1,3 @@
-from langchain.llms import Cohere
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 from langchain.chains.question_answering import load_qa_chain
 from healthfirstai_prototype.enums.openai_enums import ModelName
@@ -16,6 +15,7 @@ def load_chain(chain_type: str = "stuff") -> BaseCombineDocumentsChain:
     Returns:
         The LLM chain object
     """
+    # NOTE: Updated chain model to be gpt 3 5 turbo
     return load_qa_chain(
         llm=get_model(ModelName.gpt_3_5_turbo),
         chain_type=chain_type,

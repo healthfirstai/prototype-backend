@@ -2,8 +2,6 @@ from typing import List
 from langchain.docstore.document import Document
 import pinecone
 from healthfirstai_prototype.models.data_models import User
-from healthfirstai_prototype.utils import get_embedding_model
-from healthfirstai_prototype.enums.openai_enums import ModelName
 from langchain.vectorstores import Pinecone
 from langchain.utilities import GoogleSerperAPIWrapper
 from langchain.embeddings.cohere import CohereEmbeddings
@@ -56,6 +54,8 @@ def query_based_similarity_search(
     return chain.run(input_documents=docs, question=query)
 
 
+# FIX: Knowledge base search is currently not working
+# It's sending back too many search results for one query
 def knowledge_base_search(query: str) -> str:
     """
     This function is used to load the chain and sets it up for the agent to use

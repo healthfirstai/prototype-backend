@@ -1,3 +1,12 @@
+"""Prompts for the advice toolkit to use
+
+Todo: 
+    * Develop this more and integrate this with other parts of the application
+
+Note:
+    * This is not used yet
+
+"""
 from langchain.prompts import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
@@ -9,8 +18,6 @@ from langchain.llms import Cohere
 from langchain.chains import LLMChain
 
 
-
-# NOTE: this function is not used yet
 def set_template(
     height: str,
     weight: str,

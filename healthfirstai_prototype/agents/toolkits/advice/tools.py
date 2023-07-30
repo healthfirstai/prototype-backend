@@ -31,7 +31,7 @@ class KnowledgeBaseSearchTool(BaseTool):
 
     name = "knowledge_base_search"
     description = """
-        Must be used when the user's query is related to nutrition or exercise.
+        Must be used when the user's query is related to topics related to sports and exercise nutrition
         You should pass the user's query
         """
     args_schema: Type[BaseModel] = KnowledgeBaseSearchInput
@@ -64,9 +64,14 @@ class InternetSearchTool(BaseTool):
 
     name = "search_internet"
     description = """
-        Useful when none of your other tools can answer the user's query.
+        Should be used when whenever the user wants to see pricing information for a food item
         You should pass the user's query to this tool and it will return
         """
+    # description = """
+    #     Should be used when the user's query is related to general nutrition topics such as food, calories, vitamins, minerals, etc.
+    #     Should be used when the user's query is related to general exercise topics such as lifting weights, running, etc.
+    #     You should pass the user's query to this tool and it will return
+    #     """
     args_schema: Type[BaseModel] = InternetSearchInput
 
     def _run(
