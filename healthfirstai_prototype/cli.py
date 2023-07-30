@@ -13,6 +13,7 @@ from .agents.toolkits.diet_plan.utils import (
     get_user_meal_info_json,
     get_cached_plan_json,
     cache_diet_plan_redis,
+    meal_to_nutrition_mapping,
 )
 from .agents.toolkits.exercise_plan.utils import (
     get_workout_schedule_json,
@@ -52,6 +53,19 @@ def get_diet_plan(
     meal_plan = get_user_meal_plans_as_json(uid, include_ingredients)
     typer.echo(meal_plan)
     typer.echo("Finished search")
+
+
+@app.command()
+def get_nutritional_value_for_diet_plan(
+    uid: int = 1,
+):
+    """
+    Get a meal plan from the database with the detailed nutritional information
+    """
+    meal_plan = get_user_meal_plans_as_json(uid, True, MealNames.breakfast)
+    meal_nutritional_composition = meal_to_nutrition_mapping(meal_plan)
+    typer.echo("Here is your meal's nutritional composition:")
+    typer.echo(meal_nutritional_composition)
 
 
 @app.command()
