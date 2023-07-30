@@ -1,10 +1,9 @@
-import os
 from langchain.llms import Cohere
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 from langchain.chains.question_answering import load_qa_chain
-from .advice_tools import query_pinecone_index
+from healthfirstai_prototype.enums.openai_enums import ModelName
 
-COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
+from healthfirstai_prototype.utils import get_model
 
 
 def load_chain(chain_type: str = "stuff") -> BaseCombineDocumentsChain:
@@ -18,23 +17,7 @@ def load_chain(chain_type: str = "stuff") -> BaseCombineDocumentsChain:
         The LLM chain object
     """
     return load_qa_chain(
-        Cohere(cohere_api_key=COHERE_API_KEY, verbose=False),  # type: ignore
+        llm=get_model(ModelName.gpt_3_5_turbo),
         chain_type=chain_type,
-        # Setting verbose to True will print out the internal state of the Chain object while it is running.
         verbose=True,
     )
-
-
-def query_based_similarity_search(query: str, chain: BaseCombineDocumentsChain) -> str:
-    """
-    This function is used to search through the knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
-
-    Params:
-        query (str): The user's query / question
-        chain (BaseCombineDocumentsChain) : The LLM chain object
-
-    Returns:
-        The response from the LLM chain object
-    """
-    docs = query_pinecone_index(query)
-    return chain.run(input_documents=docs, question=query)

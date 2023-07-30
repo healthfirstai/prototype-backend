@@ -1,12 +1,23 @@
 from pydantic import BaseModel, Field
 
 
-class UserInfoInput(BaseModel):
+class KnowledgeBaseSearchInput(BaseModel):
     """
-    Inputs for get_user_info
+    Inputs for knowledge_base_search
 
     Attributes:
-        user_id: User ID of the user
+        query: The user's query / question
     """
 
-    user_id: int = Field(description="User ID of the user")
+    query: str = Field(description="The user's health or fitness related query")
+
+
+class InternetSearchInput(BaseModel):
+    """
+    Inputs for internet_search
+
+    Attributes:
+        query: The user's query / question
+    """
+
+    query: str = Field(description="The user's health or fitness related query")

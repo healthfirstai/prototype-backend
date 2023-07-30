@@ -1,106 +1,27 @@
+from typing import List
+from langchain.docstore.document import Document
 import pinecone
 from healthfirstai_prototype.models.data_models import User
-from langchain.embeddings.cohere import CohereEmbeddings
+from healthfirstai_prototype.utils import get_embedding_model
+from healthfirstai_prototype.enums.openai_enums import ModelName
 from langchain.vectorstores import Pinecone
-from langchain.document_loaders import PyPDFDirectoryLoader
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.utilities import GoogleSerperAPIWrapper
+from langchain.embeddings.cohere import CohereEmbeddings
+from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
+from .chains import load_chain
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY") or ""
+PINECONE_ENV_NAME = os.getenv("PINECONE_ENV_NAME") or ""
 
 
-def read_pdfs(
-    folder_path: str = "../notebooks/pdfs/",
-):
-    """
-    This function is simply taking the path to the PDF file, loading all the PDFs
-    inside the folder and returning them as a List of Documents.
-
-    Params:
-        folder_path (str, optional): The path to the folder with PDF files
-
-    Returns:
-        documents (List[Documents]): The list of documents
-    """
-    loader = PyPDFDirectoryLoader(path=folder_path)
-    return loader.load()
-
-
-def split_documents(documents) -> list[str]:
-    """
-    This function is used to split the raw text into chunks
-
-    Params:
-        raw_text (str) : raw text collected from the PDF file
-
-    Returns:
-        texts (List[str]): a list of text chunks
-    """
-    text_splitter = CharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200,
-    )
-
-    return text_splitter.split_text(documents)
-
-
-def prereqs_for_embeds(texts):
-    docs = []
-    metadatas = []
-    for text in texts:
-        docs.append(text.page_content)
-        metadatas.append(text.metadata)
-
-    return {"documents": docs, "metadatas": metadatas}
-
-
-def pinecone_init(
-    indexname: str = "pinecone-knowledge-base", vector_dimension: int = 4096
-):
-    """
-    This function is used to initialize the Pinecone index.
-
-    Params:
-        indexname (str, optional): The name of the index (or simople the name of the database we are creating)
-
-    Returns:
-        index (Index): client for interacting with a Pinecone index via REST API
-    """
-    pinecone.init()
-
-    if indexname not in pinecone.list_indexes():
-        # we create a new index if not exists
-        pinecone.create_index(
-            name=indexname,
-            metric="cosine",
-            dimension=vector_dimension,
-        )
-
-    return pinecone.Index(indexname)
-
-
-def pinecone_insert(
-    index: pinecone.Index,
-    docs,
-    metadatas,
-):
-    """
-    This function is used to insert the documents into the Pinecone index. Please give it some
-    time to index the documents before querying it.
-
-    Params:
-        index (Pinecone) : Pinecone index object
-        docs (list[str]) : a list of text chunks
-        metadatas (list[dict['str': 'str']]) : a list of metadata for each text chunk
-
-    Returns:
-        None
-    """
-    embedding_function = CohereEmbeddings()  # type: ignore
-    vectorstore = Pinecone(index, embedding_function.embed_query, "text")
-    vectorstore.add_texts(docs, metadatas)
-
-    return
-
-
-def query_pinecone_index(query: str, indexname: str = "pinecone-knowledge-base"):
+def query_pinecone_index(
+    query: str,
+    indexname: str = "pinecone-knowledge-base",
+) -> List[Document]:
     """
     This function is used to query the Pinecone index
 
@@ -111,22 +32,61 @@ def query_pinecone_index(query: str, indexname: str = "pinecone-knowledge-base")
     Returns:
         response (list[Document]): The response object from the Pinecone index
     """
-    pinecone.init()
-    embedding_function = CohereEmbeddings()  # type: ignore
+    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
+    embedding_function = CohereEmbeddings(client=None)
     docsearch = Pinecone.from_existing_index(indexname, embedding_function)
     return docsearch.similarity_search(query)
 
 
-def pinecone_delete(indexname: str = "pinecone-knowledge-base"):
-    pinecone.init()
+def query_based_similarity_search(
+    query: str,
+    chain: BaseCombineDocumentsChain,
+) -> str:
+    """
+    This function is used to search through the knowledge base (aka book stored in the PDF file under the notebooks/pdfs/ folder)
 
-    if indexname in pinecone.list_indexes():
-        pinecone.delete_index(indexname)
+    Params:
+        query (str): The user's query / question
+        chain (BaseCombineDocumentsChain) : The LLM chain object
 
-    return
+    Returns:
+        The response from the LLM chain object
+    """
+    docs = query_pinecone_index(query)
+    return chain.run(input_documents=docs, question=query)
 
 
-# NOTE: this function is not used yet
+def knowledge_base_search(query: str) -> str:
+    """
+    This function is used to load the chain and sets it up for the agent to use
+
+    Params:
+        query (str) : The user's query / question
+
+    Returns:
+        The response from the LLM chain object
+    """
+    chain = load_chain()
+    return query_based_similarity_search(query, chain)
+
+
+def search_internet(query: str) -> str:
+    """
+    This function is used to search through the internet (SerpAPI)
+    for nutrition/exercise information in case it doesn't require further clarification,
+    but a simple univocal answer.
+
+    Params:
+        query (str) : The user's query / question
+
+    Returns:
+        The response from the SerpAPI's query to Google
+    """
+    search = GoogleSerperAPIWrapper()
+    return search.run(query)
+
+
+# NOTE: This function is not yet finished
 def parse_user_info(user_data: User) -> dict[str, str]:
     """
     This function is used to parse the user's personal information

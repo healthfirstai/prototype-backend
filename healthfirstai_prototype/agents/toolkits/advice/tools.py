@@ -6,37 +6,21 @@ information about nutrition and exercise. so, this is more of a knowledge base/a
 2. to provide a gateway for the user to search through the internet (SerpAPI) for nutrition/exercise information 
 3. get user's personal information NOTE: this function is not used yet
 """
-from langchain.utilities import GoogleSerperAPIWrapper
-from .chains import (
-    load_chain,
-    query_based_similarity_search,
-)
 from typing import Type
 from pydantic import BaseModel
 from langchain.tools import BaseTool
-from healthfirstai_prototype.enums.meal_enums import MealNames
 
-from .schemas import (
-    BreakfastInput,
-    LunchInput,
-    DinnerInput,
-    DietPlanInput,
-    EditDietPlanInput,
-    EditBreakfastInput,
-    EditLunchInput,
-    EditDinnerInput,
-)
-from .utils import (
-    edit_entire_diet_plan,
-    edit_meal,
-    get_meal,
-    get_diet_plan,
+from healthfirstai_prototype.agents.toolkits.advice.utils import (
+    knowledge_base_search,
+    search_internet,
 )
 
+from .schemas import KnowledgeBaseSearchInput, InternetSearchInput
 
-def kb_vector_search(query: str) -> str:
+
+class KnowledgeBaseSearchTool(BaseTool):
     """
-    This function is used to load the chain and sets it up for the agent to use
+    This tool is used to search through a knowledge base full of nutrition and exercise information
 
     Params:
         query (str) : The user's query / question
@@ -44,11 +28,28 @@ def kb_vector_search(query: str) -> str:
     Returns:
         The response from the LLM chain object
     """
-    chain = load_chain()
-    return query_based_similarity_search(query, chain)
+
+    name = "knowledge_base_search"
+    description = """
+        Must be used when the user's query is related to nutrition or exercise.
+        You should pass the user's query
+        """
+    args_schema: Type[BaseModel] = KnowledgeBaseSearchInput
+
+    def _run(
+        self,
+        query: str,
+    ):
+        return knowledge_base_search(query)
+
+    def _arun(
+        self,
+        query: str,
+    ):
+        raise NotImplementedError("knowledge_base_search does not support async")
 
 
-def serp_api_search(query: str) -> str:
+class InternetSearchTool(BaseTool):
     """
     This function is used to search through the internet (SerpAPI)
     for nutrition/exercise information in case it doesn't require further clarification,
@@ -60,51 +61,22 @@ def serp_api_search(query: str) -> str:
     Returns:
         The response from the SerpAPI's query to Google
     """
-    search = GoogleSerperAPIWrapper()
-    return search.run(query)
 
-
-
-class BreakfastTool(BaseTool):
-    """
-    Retrieve breakfast details from the user's diet plan in the database.
-
-    Parameters:
-        user_id (int): The ID of the user.
-        include_ingredients (bool): Whether to include breakfast ingredients in the response.
-        include_nutrients (bool): Whether to include the nutrients of the breakfast in the response.
-
-    Returns:
-        user_json (dict): A dictionary containing the details of the user's breakfast.
-    """
-
-    name = "get_breakfast"
+    name = "search_internet"
     description = """
-        Useful when you want to view details of the user's breakfast as it is in their diet plan.
-        You should enter the user id.
-        You choose whether to include the breakfast ingredients in the breakfast description.
-        You choose whether to include the nutrients (macro and micro) of breakfast in the breakfast description.
+        Useful when none of your other tools can answer the user's query.
+        You should pass the user's query to this tool and it will return
         """
-    args_schema: Type[BaseModel] = BreakfastInput
+    args_schema: Type[BaseModel] = InternetSearchInput
 
     def _run(
         self,
-        user_id: int,
-        include_ingredients: bool,
-        include_nutrients: bool,
+        query: str,
     ):
-        return get_meal(
-            user_id,
-            include_ingredients,
-            include_nutrients,
-            MealNames.breakfast,
-            cached=True,
-        )
+        return search_internet(query)
 
     def _arun(
         self,
-        user_id: int,
-        include_ingredients: bool,
-        include_nutrients: bool,
+        query: str,
     ):
-        raise NotImplementedError("get_lunch does not support async")
+        raise NotImplementedError("search_internet does not support async")
