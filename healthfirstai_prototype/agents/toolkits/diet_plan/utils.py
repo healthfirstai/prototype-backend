@@ -314,7 +314,7 @@ def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
     # TODO: Find a good place to store the vector store
     try:
         vector_store = FAISS.load_local(
-            "faiss_index",
+            ".faiss",
             get_embedding_model(ModelName.text_embedding_ada_002),
         )
     except RuntimeError:
@@ -325,7 +325,7 @@ def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
             ],
             get_embedding_model(ModelName.text_embedding_ada_002),
         )
-        vector_store.save_local("vector_store")
+        vector_store.save_local(".faiss")
     docs = vector_store.similarity_search(user_input, k=k)
     return [tools[d.metadata["index"]] for d in docs]
 
