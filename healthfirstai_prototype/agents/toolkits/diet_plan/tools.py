@@ -36,7 +36,7 @@ class BreakfastTool(BaseTool):
         include_nutrients (bool): Whether to include the nutrients of the breakfast in the response.
 
     Returns:
-        user_json (dict): A dictionary containing the details of the user's breakfast.
+        str: A dictionary containing the details of the user's breakfast.
     """
 
     name = "get_breakfast"
@@ -81,7 +81,7 @@ class LunchTool(BaseTool):
         include_nutrients (bool): Whether to include the nutrients of the lunch in the response.
 
     Returns:
-        dict: A dictionary containing the details of the user's lunch.
+        str: A JSON string containing the details of the user's lunch.
     """
 
     name = "get_lunch"
@@ -126,7 +126,7 @@ class DinnerTool(BaseTool):
         include_nutrients (bool): Whether to include the nutrients of the dinner in the response.
 
     Returns:
-        dict: A dictionary containing the details of the user's dinner.
+        str: A JSON string containing the details of the user's dinner.
     """
 
     name = "get_dinner"
@@ -170,7 +170,7 @@ class DietPlanTool(BaseTool):
         include_ingredients (bool): Whether to include the ingredients in the meal plan.
 
     Returns:
-        dict: A dictionary containing the details of the user's meal plan.
+        str: A JSON string containing the details of the user's meal plan.
     """
 
     name = "get_diet_plan"
@@ -201,7 +201,7 @@ class EditDietPlanTool(BaseTool):
         user_id (int): The ID of the user.
 
     Returns:
-        dict: A dictionary containing the updated details of the user's diet plan.
+        str: A JSON string containing the updated details of the user's diet plan.
     """
 
     name = "edit_entire_diet_plan"
@@ -229,7 +229,7 @@ class EditBreakfastTool(BaseTool):
         edit_ingredients (bool): Whether to edit the ingredients in the breakfast.
 
     Returns:
-        dict: A dictionary containing the updated details of the user's breakfast.
+        str: A JSON string containing the updated details of the user's breakfast.
     """
 
     name = "edit_breakfast"
@@ -263,7 +263,7 @@ class EditLunchTool(BaseTool):
         edit_ingredients (bool): Whether to edit the ingredients in the lunch.
 
     Returns:
-        dict: A dictionary containing the updated details of the user's lunch.
+        str: A JSON string containing the updated details of the user's lunch.
     """
 
     name = "edit_lunch"
@@ -297,7 +297,7 @@ class EditDinnerTool(BaseTool):
         edit_ingredients (bool): Whether to edit the ingredients in the dinner.
 
     Returns:
-        dict: A dictionary containing the updated details of the user's dinner.
+        str: A JSON string containing the updated details of the user's dinner.
     """
 
     name = "edit_dinner"

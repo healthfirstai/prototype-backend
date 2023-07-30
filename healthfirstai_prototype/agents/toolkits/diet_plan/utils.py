@@ -111,8 +111,6 @@ def get_user_info_dict(user_id: int) -> dict[str, Any]:
     return user_dict
 
 
-
-
 def insert_into_personalized_daily_meal_plan(user_id: int) -> None:
     """
     Insert into personalized_daily_meal_plan table
@@ -469,7 +467,6 @@ def get_food_by_ingredient_id(ingredient_id: int) -> dict[str, Any]:
     return output
 
 
-
 def get_diet_plan(user_id: int, include_ingredients: bool):
     """
     Given a user ID, query the database and return the user's diet plan.
@@ -501,7 +498,7 @@ def edit_entire_diet_plan(agent_input: str, user_id: int):
     Takes a user diet plan and edits it based on the agent input
     """
     # TODO: In the future, decide whether I should or should not include the ingredients
-    edit_diet_plan_json(
+    return edit_diet_plan_json(
         agent_input,
         user_id,
         meal_choice=MealNames.all,
