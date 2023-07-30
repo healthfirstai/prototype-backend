@@ -26,6 +26,3 @@ conn = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 engine = create_engine(conn)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# TODO: Transform SQL tables so that the nutrient names are NOT column names and are instead values in the "nutrient_name column".
-# Adjust corresponding code to reflect this change.

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class FindSimilarFoodsInput(BaseModel):
     """
     Inputs for get_dinner

@@ -10,7 +10,6 @@ from healthfirstai_prototype.agents.toolkits.advice.utils import (
     search_internet,
 )
 
-
 def test_query_pinecone_index():
     """
     Test the query_pinecone_index returns a list of documents given a user's
