@@ -42,8 +42,8 @@ app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 @app.command()
 def get_diet_plan(
-        uid: int = 1,
-        include_ingredients: bool = True,
+    uid: int = 1,
+    include_ingredients: bool = True,
 ):
     """
     Get a meal plan from the database
@@ -69,10 +69,10 @@ def get_workout_schedule(
 
 @app.command()
 def get_cached_meal(
-        meal_choice: MealChoice = MealChoice.breakfast,
-        uid: int = 1,
-        include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
-        include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+    meal_choice: MealChoice = MealChoice.breakfast,
+    uid: int = 1,
+    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
 ):
     """
     Get meal from the Redis Cache given meal name
@@ -119,10 +119,10 @@ def get_cached_meal(
 
 @app.command()
 def get_meal(
-        meal_choice: MealChoice = MealChoice.breakfast,
-        uid: int = 1,
-        include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
-        include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
+    meal_choice: MealChoice = MealChoice.breakfast,
+    uid: int = 1,
+    include_ingredients: Annotated[bool, typer.Option("--ingredients", "-i")] = False,
+    include_nutrients: Annotated[bool, typer.Option("--nutrients", "-n")] = False,
 ):
     """
     Get meal from the SQL database given meal name
@@ -168,9 +168,9 @@ def get_meal(
 
 @app.command()
 def test_chat_agent(
-        input: str,
-        uid: int = 1,
-        session_id="my-session",
+    input: str,
+    uid: int = 1,
+    session_id="my-session",
 ):
     """
     Test ReAct Diet Plan Agent
@@ -229,8 +229,8 @@ def cache_workout_schedule(uid: int = 1):
 
 @app.command()
 def get_cached_plan(
-        uid: int = 1,
-        include_ingredients: bool = True,
+    uid: int = 1,
+    include_ingredients: bool = True,
 ):
     """
     Get diet plan from Redis
@@ -256,11 +256,11 @@ def get_cached_schedule(
 
 @app.command()
 def edit_cached_meal(
-        agent_input: str,
-        meal_choice: MealNames,
-        user_id: int = 1,
-        include_ingredients: bool = False,
-        store_in_cache: bool = False,
+    agent_input: str,
+    meal_choice: MealNames,
+    user_id: int = 1,
+    include_ingredients: bool = False,
+    store_in_cache: bool = False,
 ):
     """
     Get diet plan from Redis
