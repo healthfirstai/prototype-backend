@@ -23,7 +23,7 @@ from .agents.toolkits.exercise_plan.utils import (
 from .agents.chat_agent import (
     init_chat_agent,
 )
-from .agents.toolkits.advice.advice_agent import serp_api_search
+from .agents.toolkits.advice.advice_agent import kb_vector_search, serp_api_search
 from .enums.meal_enums import MealChoice, MealNames
 from .controller.nutrition_vector_operations import (
     delete_all_vectors,
@@ -318,9 +318,7 @@ def test_advice_agent():
     """
     typer.echo("Testing advice agent...")
     query = input("Enter a query: ")
-    kb_response = (
-        ""  # FIX: Yan, function faiss_vector_search(query) does not exist anymore
-    )
+    kb_response = kb_vector_search(query)
     google_response = serp_api_search(query)
     typer.echo("Finished search. Wait for the results below:")
     typer.echo(f"K-Base search response: {kb_response}")
