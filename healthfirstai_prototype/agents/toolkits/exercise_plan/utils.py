@@ -27,7 +27,16 @@ DB_NAME = os.getenv("POSTGRES_DATABASE") or ""
 DB_PORT = os.getenv("POSTGRES_PORT") or ""
 
 
-def get_workout_schedule_json(user_id):
+def get_workout_schedule_json(user_id: int) -> str:
+    """
+    Get the user's workout schedule in JSON format
+
+    Args:
+        user_id: The ID of the user
+
+    Returns:
+        The user's workout schedule in JSON format
+    """
     # change echo to see the SQL statements
     engine = create_engine(
         f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
@@ -122,11 +131,11 @@ def get_workout_schedule_json(user_id):
                 # Write the JSON data to a file
         with open("../user_schedule.json", "w") as json_file:
             json.dump(schedule_json, json_file, indent=4)
-
         print("Schedule JSON file generated successfully!")
+        return json.dumps(schedule_json, indent=4)
 
     except Exception as e:
-        print("Error occurred while generating schedule JSON file: ", e)
+        raise e
 
     finally:
         # Close the session when done
@@ -141,7 +150,11 @@ def cache_workout_schedule_redis(user_id: int) -> None:
         user_id: The ID of the user
     """
     r = connect_to_redis()
-    r.hset(f"my-workout-schedule:{user_id}", "workout_schedule", get_workout_schedule_json(user_id))
+    r.hset(
+        f"my-workout-schedule:{user_id}",
+        "workout_schedule",
+        get_workout_schedule_json(user_id),
+    )
 
 
 def store_new_workout_schedule_json(user_id: int, new_schedule: str) -> None:
@@ -156,7 +169,9 @@ def store_new_workout_schedule_json(user_id: int, new_schedule: str) -> None:
     r.hset(f"my-workout-schedule:{user_id}", "workout_schedule", new_schedule)
 
 
-def get_cached_schedule_json(user_id: int):
+def get_cached_schedule_json(
+    user_id: int,
+):
     """
     Get the cached workout schedule for the user
 
@@ -164,7 +179,9 @@ def get_cached_schedule_json(user_id: int):
         user_id: The ID of the user
     """
     r = connect_to_redis()
-    if not (cached_schedule := r.hget(f"my-workout-plan:{user_id}", "workout_schedule")):
+    if not (
+        cached_schedule := r.hget(f"my-workout-plan:{user_id}", "workout_schedule")
+    ):
         raise ValueError("No cached schedule found for this user.")
 
     cached_schedule_dict = json.loads(cached_schedule)
@@ -172,7 +189,11 @@ def get_cached_schedule_json(user_id: int):
     return json.dumps(cached_schedule_dict, indent=4)
 
 
-def edit_workout_schedule_json(agent_input: str, user_id: int, store_in_redis: bool = True) -> str:
+def edit_workout_schedule_json(
+    agent_input: str,
+    user_id: int,
+    store_in_redis: bool = True,
+) -> str:
     """
     Run the Edit JSON chain with the provided agent's input and the user's ID.
 
@@ -186,12 +207,15 @@ def edit_workout_schedule_json(agent_input: str, user_id: int, store_in_redis: b
     """
     new_schedule = init_edit_schedule_json_chain().predict(
         agent_input=agent_input,
-        user_exercise_schedule_json=get_cached_schedule_json(user_id)
+        user_exercise_schedule_json=get_cached_schedule_json(user_id),
     )
     if store_in_redis:
         store_new_workout_schedule_json(user_id, new_schedule)
 
-    return "Your workout schedule has been updated! Here is your new schedule:\n\n" + new_schedule
+    return (
+        "Your workout schedule has been updated! Here is your new schedule:\n\n"
+        + new_schedule
+    )
 
 
 if __name__ == "__main__":

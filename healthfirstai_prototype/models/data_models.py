@@ -1,8 +1,7 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, CheckConstraint, Date
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, CheckConstraint
 from typing import List
 from datetime import date
 from typing import Optional
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlmodel import SQLModel, Field, Relationship, Float
 from pgvector.sqlalchemy import Vector

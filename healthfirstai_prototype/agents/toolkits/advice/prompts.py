@@ -1,3 +1,12 @@
+"""Prompts for the advice toolkit to use
+
+Todo: 
+    * Develop this more and integrate this with other parts of the application
+
+Note:
+    * This is not used yet
+
+"""
 from langchain.prompts import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
@@ -8,13 +17,7 @@ from langchain.schema import BaseMessage
 from langchain.llms import Cohere
 from langchain.chains import LLMChain
 
-import os
 
-COHERE_API_KEY = os.getenv("COHERE_API_KEY") or ""
-SERPER_API_KEY = os.getenv("SERPER_API_KEY") or ""
-
-
-# NOTE: this function is not used yet
 def set_template(
     height: str,
     weight: str,
@@ -111,7 +114,6 @@ def run_assessment_chain(
         (str): The response from the LLM chain object
     """
     llm = Cohere(
-        cohere_api_key=COHERE_API_KEY,
         temperature=0,
         verbose=False,
         model="command-light",
@@ -120,14 +122,13 @@ def run_assessment_chain(
         llm=llm,
         prompt=prompt_template,
     )
-    response = llm_chain(
+    return llm_chain(
         {
             "input": input_from_the_user,
             "google_search_result": google_search_result,
             "kb_search_result": kb_search_result,
         }
     )
-    return response
 
 
 # testing the functions and putting them up together

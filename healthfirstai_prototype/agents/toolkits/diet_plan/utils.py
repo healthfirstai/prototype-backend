@@ -8,6 +8,7 @@ Todo:
 
 import json
 from typing import Any
+from datetime import date
 
 from langchain.agents.tools import BaseTool
 
@@ -124,8 +125,8 @@ def insert_into_personalized_daily_meal_plan(user_id: int) -> None:
     personalized_daily_meal_plan = PersonalizedDailyMealPlan(
         user_id=user_id,
         custom_daily_meal_plan=1,
-        start_date="2020-01-01",
-        end_date="2021-02-01",
+        start_date=date(2021, 1, 1),
+        end_date=date(2020, 1, 1),
         goal_id=1,
     )
     session.add(personalized_daily_meal_plan)
@@ -310,13 +311,21 @@ def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
     Todo:
         * Store the vector store somewhere else. Don't create it every time.
     """
-    vector_store = FAISS.from_documents(
-        [
-            Document(page_content=t.description, metadata={"index": i})
-            for i, t in enumerate(tools)
-        ],
-        get_embedding_model(ModelName.text_embedding_ada_002),
-    )
+    # TODO: Find a good place to store the vector store
+    try:
+        vector_store = FAISS.load_local(
+            ".faiss",
+            get_embedding_model(ModelName.text_embedding_ada_002),
+        )
+    except RuntimeError:
+        vector_store = FAISS.from_documents(
+            [
+                Document(page_content=t.description, metadata={"index": i})
+                for i, t in enumerate(tools)
+            ],
+            get_embedding_model(ModelName.text_embedding_ada_002),
+        )
+        vector_store.save_local(".faiss")
     docs = vector_store.similarity_search(user_input, k=k)
     return [tools[d.metadata["index"]] for d in docs]
 
@@ -436,7 +445,6 @@ def get_user_meal_info_json(
         meal_choice=meal_choice,
     )
     meal_dict = json.loads(meal_json)
-    print(meal_dict)
     if include_nutrients:
         nutrients = create_nutrient_dict()
         for ingredient in meal_dict["ingredients"]:
@@ -497,7 +505,7 @@ def edit_entire_diet_plan(agent_input: str, user_id: int):
     Takes a user diet plan and edits it based on the agent input
     """
     # TODO: In the future, decide whether I should or should not include the ingredients
-    edit_diet_plan_json(
+    return edit_diet_plan_json(
         agent_input,
         user_id,
         meal_choice=MealNames.all,

@@ -7,17 +7,14 @@ from langchain.memory import (
     RedisChatMessageHistory,
     ConversationTokenBufferMemory,
 )
-from langchain.agents import create_sql_agent
-from langchain.agents.agent_toolkits import SQLDatabaseToolkit
 from langchain.agents import AgentExecutor, OpenAIFunctionsAgent
-from langchain.agents.agent_types import AgentType
 
 from healthfirstai_prototype.utils import get_model
 from healthfirstai_prototype.enums.openai_enums import ModelName
-from healthfirstai_prototype.models.database import sql_agent_db
 from langchain.schema import SystemMessage
 from .toolkits.diet_plan.toolkit import DietPlanToolkit
 from .toolkits.user_info.toolkit import UserInfoToolkit
+from .toolkits.advice.toolkit import AdviceToolkit
 from .toolkits.diet_plan.utils import rank_tools
 
 # TODO: Make this a general template used by the chat_agent
@@ -46,7 +43,11 @@ def init_chat_agent(
         AgentExecutor: An instance of the conversation agent executor ready to handle user interactions.
     """
     # NOTE: Hook into callbacks in the future with callbacks=[HumanApprovalCallbackHandler()]
-    tools = DietPlanToolkit().get_tools() + UserInfoToolkit().get_tools()
+    tools = (
+        DietPlanToolkit().get_tools()
+        + UserInfoToolkit().get_tools()
+        + AdviceToolkit().get_tools()
+    )
     tools = rank_tools(user_input, tools)
     message_history = RedisChatMessageHistory(session_id=session_id)
 
@@ -76,30 +77,6 @@ def init_chat_agent(
         tools=tools,
         verbose=verbose,
         memory=memory,
-    )
-
-
-def init_sql_agent() -> AgentExecutor:
-    return create_sql_agent(
-        llm=get_model(ModelName.text_davinci_003),
-        toolkit=SQLDatabaseToolkit(
-            db=sql_agent_db,
-            llm=get_model(ModelName.text_davinci_003),
-        ),
-        verbose=True,
-        agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    )
-
-
-def init_openai_func_sql_agent() -> AgentExecutor:
-    return create_sql_agent(
-        llm=get_model(ModelName.gpt_3_5_turbo_0613),
-        toolkit=SQLDatabaseToolkit(
-            db=sql_agent_db,
-            llm=get_model(ModelName.text_davinci_003),
-        ),
-        verbose=True,
-        agent_type=AgentType.OPENAI_FUNCTIONS,
     )
 
 

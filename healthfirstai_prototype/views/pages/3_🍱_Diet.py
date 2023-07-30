@@ -1,6 +1,9 @@
 import streamlit as st
+
 # TODO: Refactor this so that these functions are in the controller folder
-from healthfirstai_prototype.agents.toolkits.diet_plan.utils import get_user_meal_plans_as_json
+from healthfirstai_prototype.agents.toolkits.diet_plan.utils import (
+    get_user_meal_plans_as_json,
+)
 import json
 
 st.set_page_config(

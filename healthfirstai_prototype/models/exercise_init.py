@@ -16,7 +16,7 @@ def insert_data(table, columns, values):
 # Open a cursor to perform database operations
 cursor = conn.cursor()
 
-csv_data = "megaGymDataset.csv"
+csv_data = "./resources/megaGymDataset.csv"
 df = pd.read_csv(csv_data)
 
 df["Equipment"].fillna("None", inplace=True)
