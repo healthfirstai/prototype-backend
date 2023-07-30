@@ -163,4 +163,4 @@ cython_debug/
 .langchain.db
 langflow.db
 .chroma/
-
+.faiss/
