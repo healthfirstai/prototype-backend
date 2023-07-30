@@ -91,6 +91,7 @@ def connect_to_redis() -> redis.Redis:
     """
     return redis.Redis(host="localhost", port=6379, db=0)
 
+
 def delete_chat_memory(
     session_id: str,
     key_prefix: str = "message_store:",

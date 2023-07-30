@@ -4,7 +4,6 @@ This module contains the CLI for the HealthFirstAI prototype
 
 """
 import os
-from langchain.callbacks import get_openai_callback
 from typing_extensions import Annotated
 from .agents.toolkits.user_info.utils import get_user_info_for_json_agent
 from .agents.toolkits.diet_plan.utils import (
