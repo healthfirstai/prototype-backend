@@ -17,13 +17,12 @@ def load_chain(chain_type: str = "stuff") -> BaseCombineDocumentsChain:
     Returns:
         The LLM chain object
     """
-    chain = load_qa_chain(
+    return load_qa_chain(
         Cohere(cohere_api_key=COHERE_API_KEY, verbose=False),  # type: ignore
         chain_type=chain_type,
         # Setting verbose to True will print out the internal state of the Chain object while it is running.
         verbose=True,
     )
-    return chain
 
 
 def query_based_similarity_search(query: str, chain: BaseCombineDocumentsChain) -> str:
@@ -38,5 +37,4 @@ def query_based_similarity_search(query: str, chain: BaseCombineDocumentsChain) 
         The response from the LLM chain object
     """
     docs = query_pinecone_index(query)
-    response = chain.run(input_documents=docs, question=query)
-    return response
+    return chain.run(input_documents=docs, question=query)
