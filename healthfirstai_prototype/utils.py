@@ -90,3 +90,13 @@ def connect_to_redis() -> redis.Redis:
         An instance of the corresponding redis client.
     """
     return redis.Redis(host="localhost", port=6379, db=0)
+
+def delete_chat_memory(
+    session_id: str,
+    key_prefix: str = "message_store:",
+):
+    """
+    Given a session ID, delete the chat memory from the database.
+    """
+    r = connect_to_redis()
+    return r.delete(f"{key_prefix}{session_id}")
