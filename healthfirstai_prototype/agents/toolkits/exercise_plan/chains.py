@@ -20,7 +20,7 @@ def init_edit_schedule_json_chain() -> LLMChain:
     return LLMChain(
         llm=get_model(ModelName.gpt_3_5_turbo_0613),
         prompt=PromptTemplate(
-            input_variables=["agent_input", "user_exercise_schedule_json", "exercise"],
+            input_variables=["agent_input", "user_exercise_schedule_json"],
             template=EDIT_SCHEDULE_JSON_TEMPLATE,
         ),
         verbose=True,

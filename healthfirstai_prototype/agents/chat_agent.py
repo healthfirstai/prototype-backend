@@ -15,6 +15,7 @@ from langchain.schema import SystemMessage
 from .toolkits.diet_plan.toolkit import DietPlanToolkit
 from .toolkits.user_info.toolkit import UserInfoToolkit
 from .toolkits.advice.toolkit import AdviceToolkit
+from .toolkits.exercise_plan.toolkit import ExerciseToolkit
 from .toolkits.diet_plan.utils import rank_tools
 
 # TODO: Make this a general template used by the chat_agent
@@ -47,9 +48,13 @@ def init_chat_agent(
         DietPlanToolkit().get_tools()
         + UserInfoToolkit().get_tools()
         + AdviceToolkit().get_tools()
+        + ExerciseToolkit().get_tools()
     )
     tools = rank_tools(user_input, tools)
-    message_history = RedisChatMessageHistory(session_id=session_id)
+    message_history = RedisChatMessageHistory(
+        key_prefix="message_store:",
+        session_id=session_id,
+    )
 
     memory = ConversationTokenBufferMemory(
         llm=get_model(ModelName.gpt_3_5_turbo_0613),

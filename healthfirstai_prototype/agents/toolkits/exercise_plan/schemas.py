@@ -10,6 +10,7 @@ class WorkoutScheduleInput(BaseModel):
     """
 
     user_id: int = Field(description="User ID of the user")
+    # TODO: Add more fields like include_descriptions, include_links, etc
 
 
 class EditWorkoutScheduleInput(BaseModel):
@@ -20,4 +21,5 @@ class EditWorkoutScheduleInput(BaseModel):
         user_id: User ID of the user
     """
 
+    agent_input: str = Field(description="The input from the user")
     user_id: int = Field(description="User ID of the user")
