@@ -276,14 +276,17 @@ def get_cached_plan_json(
     user_id: int,
     include_ingredients: bool = True,
     meal_choice: MealNames = MealNames.all,
-):
+) -> str:
     """
-    Get the cached diet plan for the user
+    This function is fetching the cached diet plan for the user from Redis DB
 
     Args:
-        user_id: The ID of the user
-        include_ingredients: Whether to include the ingredients in the response
+        user_id(int): The ID of the user
+        include_ingredients(bool): Flag indicating whether to include the ingredients in the response
         meal_choice: The meal to return (breakfast, lunch, dinner, snack, all)
+
+    Returns:
+        (str): JSON formatted string of the diet plan for the user
     """
     r = connect_to_redis()
     if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
@@ -301,6 +304,7 @@ def get_cached_plan_json(
         return json.dumps(cached_plan_dict[meal_choice], indent=2)
 
 
+# TODO: Find a good place to store the vector store
 def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
     """
     Rank the tools tools list based on the user's input.
@@ -312,7 +316,6 @@ def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
     Todo:
         * Store the vector store somewhere else. Don't create it every time.
     """
-    # TODO: Find a good place to store the vector store
     try:
         vector_store = FAISS.load_local(
             ".faiss",
@@ -333,13 +336,13 @@ def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
 
 def format_nutrients_with_units(nutrients: dict[str, int]) -> dict[str, str]:
     """
-    Format the nutrients by adding the units.
+    This function serves as a wrapper for the `nutrients` dictionary, which formats the nutrients by adding theie units.
 
     Args:
-        nutrients: A dictionary of the nutrients and their amounts.
+        nutrients(dict[str, int]): A dictionary of the nutrients and their amounts.
 
     Returns:
-        A dictionary of the nutrients with their units.
+        (dict[str, str]):A dictionary of the nutrients with their units.
     """
     return {
         "calories": str(nutrients["calories"]) + " kcal",
@@ -359,7 +362,7 @@ def format_nutrients_with_units(nutrients: dict[str, int]) -> dict[str, str]:
 
 def create_nutrient_dict() -> dict[str, int]:
     """
-    Create a dictionary of selected key nutrients and initialize their values to 0.
+    This function is creating a dictionary of selected key nutrients and initialize their values to 0.
 
     Returns:
         A dictionary of the nutrients and their values.
@@ -386,7 +389,7 @@ def update_nutrient_values(
     amount: int,  # multiple of the amount of a certain food item in 100-th of grams
 ) -> dict[str, int]:
     """
-    Update nutrient values based on the information in the food item.
+    This function is used to update nutrient values based on the information about the food fetched from the DB.
 
     Args:
         food: A dictionary representing a food item (aka row in the table) with nutrient information.
@@ -420,7 +423,16 @@ def update_nutrient_values(
 
 def meal_to_nutrition_mapping(
     meal_plan_json_string: str,
-):
+) -> dict[str, int]:
+    """
+    This function is used to estimate the nutritional value of the meal using nutritional composition of the ingredients
+
+    Params:
+        meal_plan_json_string: A json string representing the meal plan.
+
+    Returns:
+        A dictionary of the nutrients and their values.
+    """
     # conversion table of one unit in grams
     units_to_gramms = {
         "cups": 236.588,
