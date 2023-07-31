@@ -9,12 +9,42 @@ from langchain.tools import BaseTool
 
 from .utils import edit_workout_schedule_json, get_cached_schedule_json
 
-from .schemas import WorkoutScheduleInput, EditWorkoutScheduleInput
-from healthfirstai_prototype.enums.openai_enums import ModelName
+from .schemas import WorkoutScheduleInput, EditWorkoutScheduleInput, TodaysScheduleInput
+from healthfirstai_prototype.enums.exercise_enums import DaysOfTheWeek
 
-from healthfirstai_prototype.utils import get_model
 
-llm = get_model(ModelName.gpt_3_5_turbo)
+class TodaysScheduleTool(BaseTool):
+    """
+    Params:
+        user_id: User ID of the user
+
+    Returns:
+        The user's workout schedule
+    """
+
+    # TODO: Change these tool names project wide to remove underscores
+    name = "get_todays_workout_schedule"
+    description = """
+        Should be used whenever you need to get information about the user's workout schedule or exercise plan for today
+        You should pass the user id.
+        """
+    args_schema: Type[BaseModel] = TodaysScheduleInput
+
+    def _run(
+        self,
+        user_id: int,
+    ):
+        return get_cached_schedule_json(
+            user_id,
+            include_descriptions=False,
+            day_of_the_week=DaysOfTheWeek.today,
+        )
+
+    def _arun(
+        self,
+        user_id: int,
+    ):
+        raise NotImplementedError("get_user_workout_schedule does not support async")
 
 
 class WorkoutScheduleTool(BaseTool):
@@ -37,7 +67,11 @@ class WorkoutScheduleTool(BaseTool):
         self,
         user_id: int,
     ):
-        return get_cached_schedule_json(user_id)
+        return get_cached_schedule_json(
+            user_id,
+            include_descriptions=False,
+            day_of_the_week=None,
+        )
 
     def _arun(
         self,

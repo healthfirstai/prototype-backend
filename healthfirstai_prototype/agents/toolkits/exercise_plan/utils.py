@@ -1,4 +1,6 @@
 import json
+from typing import Optional
+from healthfirstai_prototype.enums.exercise_enums import DaysOfTheWeek
 
 from healthfirstai_prototype.models.exercise_data_models import (
     ExerciseType,
@@ -111,18 +113,17 @@ def extract_workout_data(session, user_id: int) -> str:
             exercise_dict[exercise_id] = exercise_info
 
             schedule_info = {
-                "schedule_day": schedule_day,
                 "schedule_time": str(schedule_time),
                 "workout_name": workout.workout_name,
                 "workout_description": workout.workout_description,
                 "exercises": list(exercise_dict.values()),
             }
 
-            schedule_json[schedule_id] = schedule_info
+            schedule_json[schedule_day] = schedule_info
     return json.dumps(schedule_json, indent=2)
 
 
-def cache_workout_schedule_redis(user_id: int) -> None:
+def cache_workout_schedule_redis(user_id: int) -> int:
     """
     Cache the user's diet plan in Redis
 
@@ -130,7 +131,7 @@ def cache_workout_schedule_redis(user_id: int) -> None:
         user_id: The ID of the user
     """
     r = connect_to_redis()
-    r.hset(
+    return r.hset(
         f"my-workout-schedule:{user_id}",
         "workout_schedule",
         get_workout_schedule_json(user_id),
@@ -149,8 +150,11 @@ def store_new_workout_schedule_json(user_id: int, new_schedule: str) -> None:
     r.hset(f"my-workout-schedule:{user_id}", "workout_schedule", new_schedule)
 
 
+# TODO: Refactor this file because I'm sure there is duplicated functionality
 def get_cached_schedule_json(
     user_id: int,
+    include_descriptions: bool = True,
+    day_of_the_week: Optional[DaysOfTheWeek] = None,
 ):
     """
     Get the cached workout schedule for the user
@@ -166,7 +170,13 @@ def get_cached_schedule_json(
 
     cached_schedule_dict = json.loads(cached_schedule)
 
-    return json.dumps(cached_schedule_dict, indent=2)
+    if not day_of_the_week:
+        return json.dumps(cached_schedule_dict, indent=2)
+    cached_day_schedule = cached_schedule_dict[day_of_the_week]
+    if not include_descriptions:
+        for exercise in cached_day_schedule["exercises"]:
+            exercise.pop("description")
+    return json.dumps(cached_day_schedule, indent=2)
 
 
 def edit_workout_schedule_json(
