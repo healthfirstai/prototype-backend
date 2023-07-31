@@ -64,8 +64,8 @@ def create_new_custom_daily_meal_plan() -> None:
 
 
 def insert_into_relationship_table(
-    custom_daily_meal_plan_id: int = 1,
-    base_daily_meal_plan_id: int = 1,
+        custom_daily_meal_plan_id: int = 1,
+        base_daily_meal_plan_id: int = 1,
 ) -> None:
     """
     Insert into many-to-many relationship table for custom_daily_meal_plan and meal
@@ -136,9 +136,9 @@ def insert_into_personalized_daily_meal_plan(user_id: int) -> None:
 
 # TODO: Refactor this function
 def get_user_meal_plans_as_json(
-    user_id: int,
-    include_ingredients: bool = True,
-    meal_choice: str = "",
+        user_id: int,
+        include_ingredients: bool = True,
+        meal_choice: str = "",
 ) -> str:
     """
     Given a user ID, query the database and return the user's meal plans in a JSON string
@@ -164,8 +164,8 @@ def get_user_meal_plans_as_json(
 
     meal_plan_dict = {}
     for (
-        personalized_daily_meal_plan,
-        custom_daily_meal_plan,
+            personalized_daily_meal_plan,
+            custom_daily_meal_plan,
     ) in personalized_daily_meal_plans:
         meal_ids = (
             session.query(CustomDailyMealPlanAndMeal.meal_id)
@@ -272,9 +272,9 @@ def store_meal(user_id: int, new_meal: str, meal_type: MealNames) -> None:
 
 
 def get_cached_plan_json(
-    user_id: int,
-    include_ingredients: bool = True,
-    meal_choice: MealNames = MealNames.all,
+        user_id: int,
+        include_ingredients: bool = True,
+        meal_choice: MealNames = MealNames.all,
 ):
     """
     Get the cached diet plan for the user
@@ -380,8 +380,8 @@ def create_nutrient_dict() -> dict[str, int]:
 
 
 def update_nutrient_values(
-    food: dict[str, Any],
-    nutrients: dict[str, int],
+        food: dict[str, Any],
+        nutrients: dict[str, int],
 ) -> dict[str, int]:
     """
     Update nutrient values based on the information in the food item.
@@ -416,11 +416,11 @@ def update_nutrient_values(
 
 # TODO: Create meal to meal + ingredient mapping
 def get_user_meal_info_json(
-    user_id: int,
-    include_ingredients: bool,
-    include_nutrients: bool,
-    meal_choice: MealNames,
-    cached: bool = False,
+        user_id: int,
+        include_ingredients: bool,
+        include_nutrients: bool,
+        meal_choice: MealNames,
+        cached: bool = False,
 ) -> str:
     """
     Given a user ID, query the database and return the user's diet plan.
@@ -482,11 +482,11 @@ def get_diet_plan(user_id: int, include_ingredients: bool):
 
 
 def get_meal(
-    user_id: int,
-    include_ingredients: bool,
-    include_nutrients: bool,
-    meal_choice: MealNames,
-    cached: bool,
+        user_id: int,
+        include_ingredients: bool,
+        include_nutrients: bool,
+        meal_choice: MealNames,
+        cached: bool,
 ):
     """
     Given a user ID, query the database and return the user's diet plan.
@@ -515,10 +515,10 @@ def edit_entire_diet_plan(agent_input: str, user_id: int):
 
 
 def edit_meal(
-    agent_input: str,
-    user_id: int,
-    meal_choice: MealNames,
-    edit_ingredients: bool,
+        agent_input: str,
+        user_id: int,
+        meal_choice: MealNames,
+        edit_ingredients: bool,
 ):
     """
     Takes a user diet plan and edits it based on the agent input
@@ -533,11 +533,11 @@ def edit_meal(
 
 
 def edit_diet_plan_json(
-    agent_input: str,
-    user_id: int,
-    meal_choice: MealNames = MealNames.all,
-    include_ingredients: bool = True,
-    store_in_redis: bool = True,
+        agent_input: str,
+        user_id: int,
+        meal_choice: MealNames = MealNames.all,
+        include_ingredients: bool = True,
+        store_in_redis: bool = True,
 ) -> str:
     """
     Run the Edit JSON chain with the provided agent's input and the user's ID.

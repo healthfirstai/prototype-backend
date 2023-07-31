@@ -18,6 +18,7 @@ class EditWorkoutScheduleInput(BaseModel):
     Inputs for edit_workout_schedule
 
     Attributes:
+        agent_input: The input from the user
         user_id: User ID of the user
     """
 
