@@ -31,7 +31,7 @@ class KnowledgeBaseSearchTool(BaseTool):
 
     name = "knowledge_base_search"
     description = """
-        Must be used when the user's query is related to topics related to sports and exercise nutrition
+        Useful when the user asks questions related to sports and exercise nutrition, specifically endurance training
         You should pass the user's query
         """
     args_schema: Type[BaseModel] = KnowledgeBaseSearchInput

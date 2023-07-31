@@ -4,7 +4,6 @@ This module contains the CLI for the HealthFirstAI prototype
 
 """
 import os
-from langchain.callbacks import get_openai_callback
 from typing_extensions import Annotated
 from .agents.toolkits.user_info.utils import get_user_info_for_json_agent
 from .agents.toolkits.diet_plan.utils import (
@@ -24,6 +23,7 @@ from .agents.toolkits.exercise_plan.utils import (
 from .agents.chat_agent import (
     init_chat_agent,
 )
+from .utils import delete_chat_memory
 from .agents.toolkits.advice.utils import search_internet, knowledge_base_search
 from .enums.meal_enums import MealChoice, MealNames
 from .controller.pg_vector_db import (
@@ -181,7 +181,20 @@ def get_meal(
 
 
 @app.command()
-def test_chat_agent(
+def del_mem(
+    session_id: str = "streamlit-session",
+):
+    """
+    Delete chat memory given session id
+    """
+    typer.echo("Deleting chat memory")
+    confirmation = delete_chat_memory(session_id)
+    typer.echo(confirmation)
+    typer.echo("Finished deletion")
+
+
+@app.command()
+def run_test_agent(
     input: str,
     uid: int = 1,
     session_id="my-session",
@@ -190,9 +203,7 @@ def test_chat_agent(
     Test ReAct Diet Plan Agent
     """
     diet_agent = init_chat_agent(input, uid, session_id)
-    with get_openai_callback() as cb:
-        diet_agent(input)
-        print(cb)
+    diet_agent(input)
 
 
 @app.command()
@@ -292,6 +303,18 @@ def edit_cached_meal(
 
 
 @app.command()
+def reset_toolkit():
+    """
+    Delete the vector index stored in .faiss/
+    """
+    typer.echo("Deleting vector index")
+    shell_exec = "rm -rf .faiss/"
+
+    os.system(shell_exec)
+    typer.echo("Finished deleting vector index")
+
+
+@app.command()
 def edit_cached_workout(
     agent_input: str,
     user_id: int = 1,
@@ -316,7 +339,7 @@ def build_docs():
     Runs a chain of functions to build the documentation
     """
     shell_exec = (
-        "mkdocs build && cp README.md docs/index.md && "
+        "mkdocs build &&"
         "typer healthfirstai_prototype/cli.py utils docs --output docs/cli.md && "
         "cp README.md docs/index.md &&"
         "leasot --reporter markdown healthfirstai_prototype/*.py > docs/todo.md | prettier --write docs/todo.md"
@@ -326,7 +349,7 @@ def build_docs():
 
 
 @app.command()
-def test_advice_agent():
+def run_advice_agent():
     """
     Test the core functionality of the advice agent
     """

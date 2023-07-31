@@ -14,7 +14,7 @@ SYSTEM_PROMPT = """
 
 EDIT_SCHEDULE_JSON_TEMPLATE = """
     Given the following workout schedule in JSON format:
-    {workout_schedule_json}
+    {user_exercise_schedule_json}
 
     Please edit the workout schedule according to the following instructions: {agent_input}
 
