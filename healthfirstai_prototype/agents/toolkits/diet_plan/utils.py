@@ -575,7 +575,7 @@ def edit_diet_plan_json(
                 include_ingredients=include_ingredients,
             ),
             # TODO: Adjust this function that it shows the meal_choice properly in the prompt
-            meal=meal_choice,
+            meal=meal_choice.value,
         )
         if store_in_redis:
             store_meal(user_id, new_meal, meal_choice)
