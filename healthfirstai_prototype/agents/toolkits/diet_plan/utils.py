@@ -135,6 +135,7 @@ def insert_into_personalized_daily_meal_plan(user_id: int) -> None:
 
 
 # TODO: Refactor this function
+# NOTE: Yan works on it
 def get_user_meal_plans_as_json(
     user_id: int,
     include_ingredients: bool = True,
@@ -381,13 +382,14 @@ def create_nutrient_dict() -> dict[str, int]:
 
 def update_nutrient_values(
     food: dict[str, Any],
-    nutrients: dict[str, int],
+    nutriotional_values: dict[str, int],
+    amount: int,  # multiple of the amount of a certain food item in 100-th of grams
 ) -> dict[str, int]:
     """
     Update nutrient values based on the information in the food item.
 
     Args:
-        food: A dictionary representing a food item with nutrient information.
+        food: A dictionary representing a food item (aka row in the table) with nutrient information.
         nutrients: The current nutrient values.
 
     Returns:
@@ -407,14 +409,74 @@ def update_nutrient_values(
         ("Calcium_mg", "calcium"),
         ("Iron_Fe_mg", "iron"),
     ]
-    for food_key, nutrient_key in nutrient_names:
-        nutrient_value = food.get(food_key)
-        nutrients[nutrient_key] += int(nutrient_value) if nutrient_value else 0
+    for proper_nutrient_name, nutrient_shortcut in nutrient_names:
+        nutrient_value = int(food.get(proper_nutrient_name)) * amount
+        nutriotional_values[nutrient_shortcut] += (
+            int(nutrient_value) if nutrient_value else 0
+        )
 
-    return nutrients
+    return nutriotional_values
 
 
-# TODO: Create meal to meal + ingredient mapping
+def meal_to_nutrition_mapping(
+    meal_plan_json_string: str,
+):
+    # conversion table of one unit in grams
+    units_to_gramms = {
+        "cups": 236.588,
+        "tbsp": 14.7868,
+        "oz": 28.3495,
+        "scoops": 30,
+        "bar": 70.5,
+        "slices": 14.17475,
+        "leaves": 5,
+        "units": 100,
+        # NOTE: leaves, slices, bars, scoops are the estimated values
+        # NOTE: in the future we need to work more on the conversion table, as the weight depends on the ingredient and its consistency
+    }
+
+    meal_plan_dict = json.loads(meal_plan_json_string)
+
+    # getting ingridients and the amount of them
+    ingridients = meal_plan_dict["ingredients"]
+
+    for ingredient in ingridients:
+        #  instantiate an dictionary of the nutrients and their values = 0
+        nutriotional_values = create_nutrient_dict()
+
+        unit_of_measurement = ingredient["unit_of_measurement"]
+        quantity = ingredient["quantity"]
+
+        # in gramms
+        nutrient_amount_in_gramms = quantity * units_to_gramms[unit_of_measurement]
+
+        # multiple per 100 gramms
+        amount = nutrient_amount_in_gramms / 100
+
+        # getting the detailed info about the ingredient
+        ingredient_id = ingredient["ingredient_id"]
+        # getting the nutrition information of the ingredient (per 100 gramms)
+        food_row = get_food_by_ingredient_id(ingredient_id)
+
+        nutrients = update_nutrient_values(food_row, nutriotional_values, amount)
+
+        # ingredient["ingredient_nutritional_value"] = format_nutrients_with_units(nutrients)
+        ingredient["ingredient_nutritional_composition"] = nutrients
+
+    meal_plan_dict["meal_nutritional_composition"] = create_nutrient_dict()
+    for ingredient in ingridients:
+        for nutrient in ingredient["ingredient_nutritional_composition"]:
+            meal_plan_dict["meal_nutritional_composition"][nutrient] += ingredient[
+                "ingredient_nutritional_composition"
+            ][nutrient]
+
+    meal_nutritional_value = format_nutrients_with_units(
+        meal_plan_dict["meal_nutritional_composition"]
+    )
+
+    return meal_nutritional_value
+
+
 def get_user_meal_info_json(
     user_id: int,
     include_ingredients: bool,
