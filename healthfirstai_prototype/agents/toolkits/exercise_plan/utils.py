@@ -138,7 +138,31 @@ def cache_workout_schedule_redis(user_id: int) -> int:
     )
 
 
-def store_new_workout_schedule_json(user_id: int, new_schedule: str) -> None:
+def store_new_workout(
+    user_id: int,
+    new_workout: str,
+    day_of_the_week: DaysOfTheWeek,
+) -> None:
+    """
+    Store the new workout schedule in Redis
+
+    Args:
+        user_id: The ID of the user
+        new_workout: The new workout schedule
+        day_of_the_week: The day of the week to store the workout schedule for
+    """
+    r = connect_to_redis()
+    if not (cached_workout := r.hget(f"my-workout-schedule:{user_id}", "workout_schedule")):
+        raise ValueError("No cached workout schedule found for this user.")
+    cached_workout_dict = json.loads(cached_workout)  # Throws error if not valid JSON
+    cached_workout_dict[day_of_the_week] = json.loads(new_workout)  # Throws error if not valid JSON
+    r.hset(f"my-diet-plan:{user_id}", "diet_plan", json.dumps(cached_workout_dict))
+
+
+def store_new_workout_schedule_json(
+    user_id: int,
+    new_schedule: str,
+) -> None:
     """
     Store the new workout schedule in Redis
 
@@ -205,4 +229,41 @@ def edit_workout_schedule_json(
     return (
         "Your workout schedule has been updated! Here is your new schedule:\n\n"
         + new_schedule
+    )
+
+
+def edit_workout(
+    agent_input: str,
+    user_id: int,
+    day_of_the_week: DaysOfTheWeek,
+    store_in_redis: bool = True,
+    edit_workout_description: bool = False,
+) -> str:
+    """
+    Run the Edit JSON chain with the provided agent's input and the user's ID.
+
+    Args:
+        agent_input: The agent's input text for the conversation.
+        user_id: The ID of the user.
+        day_of_the_week: The day of the week to edit the workout for.
+        store_in_redis: Whether to store the updated schedule in Redis
+        edit_workout_description: Whether to edit the workout description
+
+    Returns:
+        The updated workout schedule
+    """
+    new_workout = init_edit_schedule_json_chain().predict(
+        agent_input=agent_input,
+        user_exercise_schedule_json=get_cached_schedule_json(
+            user_id,
+            include_descriptions=edit_workout_description,
+            day_of_the_week=day_of_the_week,
+        ),
+    )
+    if store_in_redis:
+        store_new_workout(user_id, new_workout, day_of_the_week)
+
+    return (
+        "Your workout schedule has been updated! Here is your new schedule:\n\n"
+        + new_workout
     )

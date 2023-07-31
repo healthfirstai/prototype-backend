@@ -7,9 +7,14 @@ from typing import Type
 from pydantic import BaseModel
 from langchain.tools import BaseTool
 
-from .utils import edit_workout_schedule_json, get_cached_schedule_json
+from .utils import edit_workout_schedule_json, get_cached_schedule_json, edit_workout
 
-from .schemas import WorkoutScheduleInput, EditWorkoutScheduleInput, TodaysScheduleInput
+from .schemas import (
+    WorkoutScheduleInput,
+    EditWorkoutScheduleInput,
+    EditTodaysWorkoutInput,
+    TodaysScheduleInput,
+)
 from healthfirstai_prototype.enums.exercise_enums import DaysOfTheWeek
 
 
@@ -80,15 +85,14 @@ class WorkoutScheduleTool(BaseTool):
         raise NotImplementedError("get_user_workout_schedule does not support async")
 
 
-# NOTE: This tool is currently not being used because we cannot extract workouts yet
 class EditWorkoutScheduleTool(BaseTool):
     """
     Edit the user's workout schedule and update redis cache.
     """
 
-    name = "edit_workout_schedule"
+    name = "edit_weekly_workout_schedule"
     description = """
-        Useful when you need to make changes to the user's workout schedule
+        Useful when you need to make changes to the user's workout schedule for the week
         You should pass the user input
         You should also pass the user id.
         """
@@ -107,3 +111,31 @@ class EditWorkoutScheduleTool(BaseTool):
         user_id: int,
     ):
         raise NotImplementedError("edit_workout_schedule does not support async")
+
+
+class EditTodaysWorkoutTool(BaseTool):
+    """
+    Edit the user's workout
+    """
+
+    name = "edit_todays_workout"
+    description = """
+        Useful when you need to make changes to the user's workout for today
+        You should pass the user input
+        You should also pass the user id.
+        """
+    args_schema: Type[BaseModel] = EditTodaysWorkoutInput
+
+    def _run(
+        self,
+        agent_input: str,
+        user_id: int,
+    ):
+        return edit_workout(agent_input, user_id, DaysOfTheWeek.today)
+
+    def _arun(
+        self,
+        agent_input: str,
+        user_id: int,
+    ):
+        raise NotImplementedError("edit_workout does not support async")

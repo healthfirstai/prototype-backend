@@ -264,11 +264,11 @@ def store_meal(user_id: int, new_meal: str, meal_type: MealNames) -> None:
         meal_type: The type of meal (breakfast, lunch, dinner, snack)
     """
     r = connect_to_redis()
-    if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
+    if not (cached_meal := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
         raise ValueError("No cached plan found for this user.")
-    cached_plan_dict = json.loads(cached_plan)  # Throws error if not valid JSON
-    cached_plan_dict[meal_type] = json.loads(new_meal)  # Throws error if not valid JSON
-    r.hset(f"my-diet-plan:{user_id}", "diet_plan", json.dumps(cached_plan_dict))
+    cached_meal_dict = json.loads(cached_meal)  # Throws error if not valid JSON
+    cached_meal_dict[meal_type] = json.loads(new_meal)  # Throws error if not valid JSON
+    r.hset(f"my-diet-plan:{user_id}", "diet_plan", json.dumps(cached_meal_dict))
 
 
 def get_cached_plan_json(

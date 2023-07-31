@@ -12,6 +12,7 @@ from .tools import (
     TodaysScheduleTool,
     WorkoutScheduleTool,
     EditWorkoutScheduleTool,
+    EditTodaysWorkoutTool,
 )
 
 
@@ -33,5 +34,6 @@ class ExerciseToolkit(BaseToolkit):
         return [
             WorkoutScheduleTool(),
             EditWorkoutScheduleTool(),
+            EditTodaysWorkoutTool(),
             TodaysScheduleTool(),
         ]
