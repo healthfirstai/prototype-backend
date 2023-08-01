@@ -435,12 +435,12 @@ def meal_to_nutrition_mapping(
     """
     # conversion table of one unit in grams
     units_to_gramms = {
-        "cups": 236.588,
-        "tbsp": 14.7868,
+        "cups": 240,
+        "tbsp": 15,
         "oz": 28.3495,
-        "scoops": 30,
-        "bar": 70.5,
-        "slices": 14.17475,
+        "scoops": 37.5,
+        "bar": 110,
+        "slices": 14,
         "leaves": 5,
         "units": 100,
         # NOTE: leaves, slices, bars, scoops are the estimated values
