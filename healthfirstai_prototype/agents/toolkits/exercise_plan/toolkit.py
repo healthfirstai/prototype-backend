@@ -9,8 +9,10 @@ from langchain.tools import BaseTool
 
 from healthfirstai_prototype.models.data_models import User
 from .tools import (
+    TodaysScheduleTool,
     WorkoutScheduleTool,
     EditWorkoutScheduleTool,
+    EditTodaysWorkoutTool,
 )
 
 
@@ -32,4 +34,6 @@ class ExerciseToolkit(BaseToolkit):
         return [
             WorkoutScheduleTool(),
             EditWorkoutScheduleTool(),
+            EditTodaysWorkoutTool(),
+            TodaysScheduleTool(),
         ]

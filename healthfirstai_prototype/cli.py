@@ -26,6 +26,8 @@ from .agents.chat_agent import (
 from .utils import delete_chat_memory
 from .agents.toolkits.advice.utils import search_internet, knowledge_base_search
 from .enums.meal_enums import MealChoice, MealNames
+from typing import Optional
+from .enums.exercise_enums import DaysOfTheWeek
 from .controller.pg_vector_db import (
     delete_all_vectors,
     get_all_foods,
@@ -248,7 +250,8 @@ def cache_workout_schedule(uid: int = 1):
     Stores workout schedule as it is in the SQL database in Redis
     """
     typer.echo("Storing schedule")
-    cache_workout_schedule_redis(uid)
+    confirmation = cache_workout_schedule_redis(uid)
+    typer.echo(confirmation)
     typer.echo("Finished storing schedule")
 
 
@@ -269,12 +272,14 @@ def get_cached_plan(
 @app.command()
 def get_cached_schedule(
     uid: int = 1,
+    include_exercises: bool = True,
+    day_of_the_week: Optional[DaysOfTheWeek] = None,
 ):
     """
     Get workout schedule from Redis
     """
     typer.echo("Getting schedule")
-    schedule = get_cached_schedule_json(uid)
+    schedule = get_cached_schedule_json(uid, include_exercises, day_of_the_week)
     typer.echo(schedule)
     typer.echo("Finished getting schedule")
 

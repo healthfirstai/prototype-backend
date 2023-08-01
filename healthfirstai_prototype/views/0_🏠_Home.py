@@ -9,6 +9,4 @@ st.set_page_config(
 user_name = "Lawrence"
 st.write(f"# Good Afternoon {user_name}")
 
-# st.sidebar.success("Select a demo above.")
-
-st.markdown("HealthFirst AI is a web app that helps you make healthier food choices.")
+st.markdown("HealthFirst AI is here to help you level up your diet and exercise game.")

@@ -1,0 +1,62 @@
+{
+  "schedule_time": "09:00:00",
+  "workout_name": "Default Push Day",
+  "workout_description": "A comprehensive workout targeting chest, triceps, and shoulders.",
+  "exercises": [
+    {
+      "exercise_id": 943,
+      "name": "Bench press",
+      "description": "The bench press is a popular barbell exercise that builds strength and muscle in the chest, triceps, and shoulders. It is a popular way to measure overall upper-body strength, and is contested in the sport of powerlifting. When many people think of lifting, the bench press is often the first exercise that comes to mind. It can be performed for low reps for strength, higher reps for muscle, or for higher reps to build or measure strength endurance, like in the 225-pound bench press rep test in the NFL combine.",
+      "exercise_type": "Strength",
+      "equipment": "Barbell",
+      "difficulty": "Intermediate",
+      "body_part": "Chest",
+      "reps": 8,
+      "sets": 3
+    },
+    {
+      "exercise_id": 2546,
+      "name": "Side Lateral Raise",
+      "description": "The dumbbell lateral raise is an upper body isolation exercise for building shoulder strength and muscle. It's a staple strength training move and is a great option for accessory work on upper body training days. This exercise particularly focuses on the lateral or medial head of the deltoid, making them appear wider and more developed.",
+      "exercise_type": "Strength",
+      "equipment": "Dumbbell",
+      "difficulty": "Intermediate",
+      "body_part": "Shoulders",
+      "reps": 16,
+      "sets": 3
+    },
+    {
+      "exercise_id": 2535,
+      "name": "Seated dumbbell shoulder press",
+      "description": "The seated dumbbell shoulder press is a popular exercise for building muscle and strength in the shoulders. The triceps also work hard in this lift. Many lifters find using dumbbells to be more comfortable and shoulder-friendly for this press variation than a barbell. This can be the primary pressing movement on an upper-body or shoulder day, or an effective accessory movement later in a workout.",
+      "exercise_type": "Strength",
+      "equipment": "Dumbbell",
+      "difficulty": "Intermediate",
+      "body_part": "Shoulders",
+      "reps": 10,
+      "sets": 3
+    },
+    {
+      "exercise_id": 1060,
+      "name": "Machine chest fly",
+      "description": "The machine chest fly is a machine-based exercise targeting the chest. It approximates the motion of a dumbbell fly or cable fly, but is usually performed facing forward and seated upright. The motion is often compared to bear-hugging a tree trunk. The chest fly is usually performed for moderate to high reps, such as 8-12 reps per set or more, as part of a pre-exhaust or muscle-building upper-body workout.",
+      "exercise_type": "Strength",
+      "equipment": "Machine",
+      "difficulty": "Intermediate",
+      "body_part": "Chest",
+      "reps": 12,
+      "sets": 3
+    },
+    {
+      "exercise_id": 1473,
+      "name": "Straight-arm rope pull-down",
+      "description": "The straight-arm rope pull-down is a variation of the straight-arm lat pull-down performed using a cable stack machine and a rope grip. It can either be performed in an athletic upright stance, or slightly bent over. It both stretches and contracts the muscles of the lats (latissimus dorsi) as well as providing additional activation to the other upper back muscles and the core. Because the triceps are also isometrically involved in the movement, it is usually performed for higher reps, such as 8-15 reps or more.",
+      "exercise_type": "Strength",
+      "equipment": "Cable",
+      "difficulty": "Intermediate",
+      "body_part": "Lats",
+      "reps": 10,
+      "sets": 3
+    }
+  ]
+}

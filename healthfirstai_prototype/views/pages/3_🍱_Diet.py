@@ -2,7 +2,7 @@ import streamlit as st
 
 # TODO: Refactor this so that these functions are in the controller folder
 from healthfirstai_prototype.agents.toolkits.diet_plan.utils import (
-    get_user_meal_plans_as_json,
+    get_cached_plan_json,
 )
 import json
 
@@ -17,7 +17,7 @@ st.write("# Today's Diet Plan")
 
 
 # TODO: Paramaratize get_user_meal_plans_as_json call in the future
-user_meal_plan = json.loads(get_user_meal_plans_as_json(1, True))
+user_meal_plan = json.loads(get_cached_plan_json(1, True))
 
 meal_names = ["Breakfast", "Drink", "Lunch", "Snack", "Dinner"]
 markdown_string_to_display = ""
