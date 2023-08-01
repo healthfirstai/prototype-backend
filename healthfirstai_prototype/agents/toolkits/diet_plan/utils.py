@@ -276,14 +276,17 @@ def get_cached_plan_json(
     user_id: int,
     include_ingredients: bool = True,
     meal_choice: MealNames = MealNames.all,
-):
+) -> str:
     """
-    Get the cached diet plan for the user
+    This function is fetching the cached diet plan for the user from Redis DB
 
     Args:
-        user_id: The ID of the user
-        include_ingredients: Whether to include the ingredients in the response
+        user_id(int): The ID of the user
+        include_ingredients(bool): Flag indicating whether to include the ingredients in the response
         meal_choice: The meal to return (breakfast, lunch, dinner, snack, all)
+
+    Returns:
+        (str): JSON formatted string of the diet plan for the user
     """
     r = connect_to_redis()
     if not (cached_plan := r.hget(f"my-diet-plan:{user_id}", "diet_plan")):
@@ -301,6 +304,7 @@ def get_cached_plan_json(
         return json.dumps(cached_plan_dict[meal_choice], indent=2)
 
 
+# TODO: Find a good place to store the vector store
 def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
     """
     Rank the tools tools list based on the user's input.
@@ -312,7 +316,6 @@ def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
     Todo:
         * Store the vector store somewhere else. Don't create it every time.
     """
-    # TODO: Find a good place to store the vector store
     try:
         vector_store = FAISS.load_local(
             ".faiss",
@@ -333,13 +336,13 @@ def rank_tools(user_input: str, tools: list[BaseTool], k=3) -> list[BaseTool]:
 
 def format_nutrients_with_units(nutrients: dict[str, int]) -> dict[str, str]:
     """
-    Format the nutrients by adding the units.
+    This function serves as a wrapper for the `nutrients` dictionary, which formats the nutrients by adding theie units.
 
     Args:
-        nutrients: A dictionary of the nutrients and their amounts.
+        nutrients(dict[str, int]): A dictionary of the nutrients and their amounts.
 
     Returns:
-        A dictionary of the nutrients with their units.
+        (dict[str, str]):A dictionary of the nutrients with their units.
     """
     return {
         "calories": str(nutrients["calories"]) + " kcal",
@@ -359,7 +362,7 @@ def format_nutrients_with_units(nutrients: dict[str, int]) -> dict[str, str]:
 
 def create_nutrient_dict() -> dict[str, int]:
     """
-    Create a dictionary of selected key nutrients and initialize their values to 0.
+    This function is creating a dictionary of selected key nutrients and initialize their values to 0.
 
     Returns:
         A dictionary of the nutrients and their values.
@@ -386,7 +389,7 @@ def update_nutrient_values(
     amount: int,  # multiple of the amount of a certain food item in 100-th of grams
 ) -> dict[str, int]:
     """
-    Update nutrient values based on the information in the food item.
+    This function is used to update nutrient values based on the information about the food fetched from the DB.
 
     Args:
         food: A dictionary representing a food item (aka row in the table) with nutrient information.
@@ -410,7 +413,7 @@ def update_nutrient_values(
         ("Iron_Fe_mg", "iron"),
     ]
     for proper_nutrient_name, nutrient_shortcut in nutrient_names:
-        nutrient_value = int(food.get(proper_nutrient_name)) * amount
+        nutrient_value = int(food[proper_nutrient_name]) * amount
         nutriotional_values[nutrient_shortcut] += (
             int(nutrient_value) if nutrient_value else 0
         )
@@ -418,23 +421,41 @@ def update_nutrient_values(
     return nutriotional_values
 
 
-def meal_to_nutrition_mapping(
-    meal_plan_json_string: str,
-):
-    # conversion table of one unit in grams
-    units_to_gramms = {
-        "cups": 236.588,
-        "tbsp": 14.7868,
+def units_to_gramms_table() -> dict[str, float]:
+    """
+    This function is used to create a conversion table of units to grams.
+
+    Returns:
+        A dictionary of the units and their values in grams.
+    """
+    return {
+        "cups": 240,
+        "tbsp": 15,
         "oz": 28.3495,
-        "scoops": 30,
-        "bar": 70.5,
-        "slices": 14.17475,
+        "scoops": 37.5,
+        "bar": 110,
+        "slices": 14,
         "leaves": 5,
         "units": 100,
         # NOTE: leaves, slices, bars, scoops are the estimated values
         # NOTE: in the future we need to work more on the conversion table, as the weight depends on the ingredient and its consistency
     }
 
+
+def meal_to_nutrition_mapping(
+    meal_plan_json_string: str,
+) -> dict[str, str]:
+    """
+    This function is used to estimate the nutritional value of the meal using nutritional composition of the ingredients
+
+    Params:
+        meal_plan_json_string: A json string representing the meal plan.
+
+    Returns:
+        A dictionary of the nutrients and their values.
+    """
+    # conversion table of one unit in grams
+    units_to_gramms = units_to_gramms_table()
     meal_plan_dict = json.loads(meal_plan_json_string)
 
     # getting ingridients and the amount of them
@@ -444,14 +465,8 @@ def meal_to_nutrition_mapping(
         #  instantiate an dictionary of the nutrients and their values = 0
         nutriotional_values = create_nutrient_dict()
 
-        unit_of_measurement = ingredient["unit_of_measurement"]
-        quantity = ingredient["quantity"]
-
-        # in gramms
-        nutrient_amount_in_gramms = quantity * units_to_gramms[unit_of_measurement]
-
-        # multiple per 100 gramms
-        amount = nutrient_amount_in_gramms / 100
+        # getting the amount of the ingredient
+        amount = calc_nutrition_amount(ingredient)
 
         # getting the detailed info about the ingredient
         ingredient_id = ingredient["ingredient_id"]
@@ -475,6 +490,31 @@ def meal_to_nutrition_mapping(
     )
 
     return meal_nutritional_value
+
+
+def calc_nutrition_amount(ingredient):
+    """
+    takes an ingredient and calculates the nutritional returns the value in grams / 100 compatible
+    with the food table in the DB
+
+    Args:
+        ingredient: A dictionary representing an ingredient.
+
+    Returns:
+        The amount of the ingredient in grams divided by 100.
+    """
+    unit_of_measurement = ingredient["unit_of_measurement"]
+    quantity = ingredient["quantity"]
+
+    units_to_gramms = units_to_gramms_table()
+
+    # in gramms
+    nutrient_amount_in_gramms = quantity * units_to_gramms[unit_of_measurement]
+
+    # multiple per 100 gramms
+    amount = nutrient_amount_in_gramms / 100
+
+    return amount
 
 
 def get_user_meal_info_json(
@@ -511,7 +551,8 @@ def get_user_meal_info_json(
         nutrients = create_nutrient_dict()
         for ingredient in meal_dict["ingredients"]:
             food = get_food_by_ingredient_id(ingredient["ingredient_id"])
-            nutrients = update_nutrient_values(food, nutrients)
+            amount = calc_nutrition_amount(ingredient)
+            nutrients = update_nutrient_values(food, nutrients, amount)
         meal_dict["nutrients"] = format_nutrients_with_units(nutrients)
     if not include_ingredients:
         del meal_dict["ingredients"]
