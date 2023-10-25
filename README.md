@@ -1,5 +1,9 @@
 # HealthFirst AI Prototype
 
+## Video Demo
+
+[![Watch our Demo](https://img.youtube.com/vi/FFocBeiQ8dE/maxresdefault.jpg)](https://youtu.be/T-https://www.youtube.com/watch?v=FFocBeiQ8dE)
+
 ## About The Project
 
 Prototype for our HealthFirst AI web app.
